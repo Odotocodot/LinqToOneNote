@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Xml;
 
+
 namespace Odotocodot.OneNote.Linq.Parsers
 {
     using static Constants;
@@ -51,7 +52,7 @@ namespace Odotocodot.OneNote.Linq.Parsers
                     {
                         return ParseNotebooks(reader);
                     }
-
+    
                     return Array.Empty<OneNoteNotebook>();
                 }
             }

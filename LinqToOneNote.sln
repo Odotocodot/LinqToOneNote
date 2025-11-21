@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34018.315
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C5AB77E3-E19D-4043-ABD8-6A29BAA02CB4}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Odotocodot.OneNote.Linq", "src\Odotocodot.OneNote.Linq\Odotocodot.OneNote.Linq.csproj", "{CD2669C2-2AD2-71C7-A791-B9A4C7B0FCA2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Odotocodot.OneNote.Linq.Playground", "src\Odotocodot.OneNote.Linq.Playground\Odotocodot.OneNote.Linq.Playground.csproj", "{4E58127B-7154-9045-A607-9D33A6B5D199}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Odotocodot.OneNote.Linq.Tests", "src\Odotocodot.OneNote.Linq.Tests\Odotocodot.OneNote.Linq.Tests.csproj", "{B624FA14-15DC-F16B-9B6B-25A038E8F015}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CD2669C2-2AD2-71C7-A791-B9A4C7B0FCA2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD2669C2-2AD2-71C7-A791-B9A4C7B0FCA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CD2669C2-2AD2-71C7-A791-B9A4C7B0FCA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CD2669C2-2AD2-71C7-A791-B9A4C7B0FCA2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E58127B-7154-9045-A607-9D33A6B5D199}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E58127B-7154-9045-A607-9D33A6B5D199}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E58127B-7154-9045-A607-9D33A6B5D199}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E58127B-7154-9045-A607-9D33A6B5D199}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B624FA14-15DC-F16B-9B6B-25A038E8F015}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B624FA14-15DC-F16B-9B6B-25A038E8F015}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B624FA14-15DC-F16B-9B6B-25A038E8F015}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B624FA14-15DC-F16B-9B6B-25A038E8F015}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BDB792C5-E0E1-446B-8D83-A5E6A65C0184}
+	EndGlobalSection
+EndGlobal

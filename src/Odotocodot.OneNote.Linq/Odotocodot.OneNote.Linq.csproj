@@ -17,7 +17,7 @@
 		<PackageId>Odotocodot.OneNote.Linq</PackageId>
 		<RepositoryType>git</RepositoryType>
 		<Version>1.2.0</Version>
-		<PackageReleaseNotes>$([System.IO.File]::ReadAllText("$(MSBuildProjectDirectory)/../CHANGELOG.md"))</PackageReleaseNotes>
+		<!-- <PackageReleaseNotes>$([System.IO.File]::ReadAllText("$(MSBuildProjectDirectory)/../CHANGELOG.md"))</PackageReleaseNotes> -->
 
 	</PropertyGroup>
 
@@ -25,19 +25,19 @@
 		<DebugSymbols>false</DebugSymbols>
 		<DebugType>None</DebugType>
 	</PropertyGroup>
-	
+	<!-- 	
 	<ItemGroup>
 		<None Include="..\Documentation\images\logo.png" Pack="True" PackagePath="\" />
 		<None Include="..\LICENSE.txt" Pack="True" PackagePath="\" />
 		<None Include="..\Odotocodot.OneNote.Linq\NuGet.md" Pack="True" PackagePath="\" />
 		<None Include="..\CHANGELOG.md" Pack="True" PackagePath="\" />
-	</ItemGroup>
+	</ItemGroup> -->
 
 	<ItemGroup>
 		<InternalsVisibleTo Include="$(AssemblyName).Playground" />
 		<InternalsVisibleTo Include="$(AssemblyName).Tests" />
 	</ItemGroup>
-	
+
 	<ItemGroup>
 		<PackageReference Include="Interop.Microsoft.Office.Interop.OneNote" Version="1.1.0.2" />
 		<PackageReference Include="System.Collections.Immutable" Version="8.0.0" />
