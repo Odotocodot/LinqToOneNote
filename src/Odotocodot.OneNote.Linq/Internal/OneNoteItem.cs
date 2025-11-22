@@ -13,20 +13,44 @@ namespace Odotocodot.OneNote.Linq.Internal
         internal OneNoteItem() { }
 
         /// <inheritdoc/>
-        public string ID { get; internal set; }
+        public string Id { get; internal set; }
         /// <inheritdoc/>
         public string Name { get; internal set; }
         /// <inheritdoc/>
         public bool IsUnread { get; internal set; }
         /// <inheritdoc/>
         public DateTime LastModified { get; internal set; }
-        /// <inheritdoc/>
-        public IEnumerable<IOneNoteItem> Children { get; internal set; } = Enumerable.Empty<IOneNoteItem>();
-        /// <inheritdoc/>
-        public virtual IOneNoteItem Parent { get; internal set; }
-        /// <inheritdoc/>
-        public virtual string RelativePath { get; internal set; }
-        /// <inheritdoc/>
-        public virtual OneNoteNotebook Notebook { get; internal set; }
+        // /// <inheritdoc/>
+        // public IEnumerable<IOneNoteItem> Children { get; internal set; } = Enumerable.Empty<IOneNoteItem>();
+        // /// <inheritdoc/>
+        // public virtual IOneNoteItem Parent { get; internal set; }
+        // /// <inheritdoc/>
+        // public virtual string RelativePath { get; internal set; }
+        // /// <inheritdoc/>
+        // public virtual Notebook Notebook { get; internal set; }
+        
+        
+        
+        private sealed class IdEqualityComparer : IEqualityComparer<OneNoteItem>
+        {
+            public bool Equals(OneNoteItem x, OneNoteItem y)
+            {
+                if (ReferenceEquals(x, y))
+                    return true;
+                if (x is null)
+                    return false;
+                if (y is null)
+                    return false;
+                if (x.GetType() != y.GetType())
+                    return false;
+                return x.Id == y.Id;
+            }
+
+            public int GetHashCode(OneNoteItem obj)
+            {
+                return obj.Id.GetHashCode();
+            }
+        }
+
     }
 }

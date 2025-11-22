@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.0.0] -
+
+- Updated to .Net 9.0
+- Renamed ID to Id
+- Renamed classes - Removed OneNote from names OneNoteNotebook.
+- 
+
+
+
 ## [1.2.0] - 2025-07-05
 
 ### What’s Changed

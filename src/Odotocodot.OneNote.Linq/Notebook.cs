@@ -9,16 +9,16 @@ namespace Odotocodot.OneNote.Linq
     /// <summary>
     /// Represents a notebook in OneNote.
     /// </summary>
-    public class OneNoteNotebook : OneNoteItem, IOneNoteItem, IWritableHasPath, INotebookOrSectionGroup, IWritableHasColor
+    public class Notebook : OneNoteItem, IOneNoteItem, IWritablePath, INotebookOrSectionGroup, IWritableColor
     {
-        internal OneNoteNotebook() { }
+        internal Notebook() { }
 
         /// <inheritdoc/>
         public override IOneNoteItem Parent { get => null; internal set { } }
         /// <inheritdoc/>
         public override string RelativePath { get => Name; internal set { } }
-        /// <inheritdoc/>
-        public override OneNoteNotebook Notebook { get => this; internal set { } }
+        // /// <inheritdoc/>
+        // public override Notebook Notebook { get => this; internal set { } }
 
         /// <summary>
         /// The nickname of the notebook.
@@ -35,13 +35,19 @@ namespace Odotocodot.OneNote.Linq
         /// <summary>
         /// The sections that this notebook contains (direct children only). 
         /// </summary>
-        public IEnumerable<OneNoteSection> Sections => Children.OfType<OneNoteSection>();
+        public IEnumerable<Section> Sections => Children.OfType<Section>();
         /// <summary>
         /// The section groups that this notebook contains (direct children only).
         /// </summary>
-        public IEnumerable<OneNoteSectionGroup> SectionGroups => Children.OfType<OneNoteSectionGroup>();
+        public IEnumerable<SectionGroup> SectionGroups => Children.OfType<SectionGroup>();
 
-        Color? IWritableHasColor.Color { set => Color = value; }
-        string IWritableHasPath.Path { set => Path = value; }
+        Color? IWritableColor.Color { set => Color = value; }
+        string IWritablePath.Path { set => Path = value; }
+    }
+
+
+    public class NotebookFull : Notebook
+    {
+        
     }
 }

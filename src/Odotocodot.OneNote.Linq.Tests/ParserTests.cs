@@ -12,20 +12,20 @@ namespace Odotocodot.OneNote.Linq.Tests
     internal class ParserTests<TXmlParser> where TXmlParser : IXmlParser
     {
         private IXmlParser xmlParser;
-        private OneNoteNotebook notebookStub;
+        private Notebook notebookStub;
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
             xmlParser = Activator.CreateInstance<TXmlParser>();
-            notebookStub = new OneNoteNotebook { Name = "Test Notebook" };
+            notebookStub = new Notebook { Name = "Test Notebook" };
         }
 
         [Test]
-        [TestCase(typeof(OneNoteNotebook), 4)]
-        [TestCase(typeof(OneNoteSectionGroup), 7)]
-        [TestCase(typeof(OneNoteSection), 20)]
-        [TestCase(typeof(OneNotePage), 28)]
+        [TestCase(typeof(Notebook), 4)]
+        [TestCase(typeof(SectionGroup), 7)]
+        [TestCase(typeof(Section), 20)]
+        [TestCase(typeof(Page), 28)]
         public void ParseNotebooks_CorrectNumberOfItems(Type itemType, int expectedCount)
         {
             var xml = File.ReadAllText(@"Inputs\Notebooks.xml");
@@ -52,10 +52,10 @@ namespace Odotocodot.OneNote.Linq.Tests
             var xml = File.ReadAllText(@"Inputs\Notebook.xml");
             var item = xmlParser.ParseUnknown(xml, null);
             var expectedName = "Its A Notebook";
-            var expected = new OneNoteNotebook
+            var expected = new Notebook
             {
                 Name = expectedName,
-                ID = "{81B591F0-CB49-4F8C-BFB1-98DA213B93FC}{1}{B0}",
+                Id = "{81B591F0-CB49-4F8C-BFB1-98DA213B93FC}{1}{B0}",
                 IsUnread = false,
                 LastModified = new DateTime(2023, 10, 04, 15, 15, 45),
                 RelativePath = expectedName,
@@ -77,10 +77,10 @@ namespace Odotocodot.OneNote.Linq.Tests
             var xml = File.ReadAllText(@"Inputs\SectionGroup.xml");
             var item = xmlParser.ParseUnknown(xml, notebookStub);
             var expectedName = "Section Group 1";
-            var expected = new OneNoteSectionGroup
+            var expected = new SectionGroup
             {
                 Name = expectedName,
-                ID = "{C55815E0-8F65-4790-8408-2E2C1EC74AB2}{1}{B0}",
+                Id = "{C55815E0-8F65-4790-8408-2E2C1EC74AB2}{1}{B0}",
                 IsUnread = false,
                 LastModified = new DateTime(2023, 10, 04, 20, 48, 19),
                 RelativePath = $"{notebookStub.Name}{Constants.RelativePathSeparator}{expectedName}",
@@ -101,10 +101,10 @@ namespace Odotocodot.OneNote.Linq.Tests
             var xml = File.ReadAllText(@"Inputs\Section.xml");
             var item = xmlParser.ParseUnknown(xml, notebookStub);
             var expectedName = "Locked Section";
-            var expected = new OneNoteSection
+            var expected = new Section
             {
                 Name = expectedName,
-                ID = "{6BB816F6-D431-4430-B7A2-F9DEB7A28F67}{1}{B0}",
+                Id = "{6BB816F6-D431-4430-B7A2-F9DEB7A28F67}{1}{B0}",
                 IsUnread = false,
                 LastModified = new DateTime(2023, 06, 17, 11, 00, 52),
                 RelativePath = $"{notebookStub.Name}{Constants.RelativePathSeparator}{expectedName}",
@@ -127,17 +127,17 @@ namespace Odotocodot.OneNote.Linq.Tests
         public void ParsePage_CorrectProperties()
         {
             var xml = File.ReadAllText(@"Inputs\Page.xml");
-            var sectionStub = new OneNoteSection
+            var sectionStub = new Section
             {
                 RelativePath = $"{notebookStub.Name}{Constants.RelativePathSeparator}Test Section",
                 Notebook = notebookStub
             };
             var item = xmlParser.ParseUnknown(xml, sectionStub);
             var expectedName = "Important Info";
-            var expectedPage = new OneNotePage
+            var expectedPage = new Page
             {
                 Name = expectedName,
-                ID = "{1B9CDD3C-6836-4DC6-9C44-0EDC06A9B8CB}{1}{E19481616267573963101920151005250203326127411}",
+                Id = "{1B9CDD3C-6836-4DC6-9C44-0EDC06A9B8CB}{1}{E19481616267573963101920151005250203326127411}",
                 IsUnread = true,
                 LastModified = new DateTime(2022, 12, 01, 18, 10, 34),
                 RelativePath = $"{notebookStub.Name}{Constants.RelativePathSeparator}Test Section{Constants.RelativePathSeparator}{expectedName}",

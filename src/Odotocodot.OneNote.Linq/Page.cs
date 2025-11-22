@@ -6,14 +6,14 @@ namespace Odotocodot.OneNote.Linq
     /// <summary>
     /// Represents a page in OneNote.
     /// </summary>
-    public class OneNotePage : OneNoteItem, IOneNoteItem, IWritableHasIsInRecycleBin
+    public class Page : OneNoteItem, IOneNoteItem, IWritableIsInRecycleBin
     {
-        internal OneNotePage() { }
+        internal Page() { }
 
         /// <summary>
         /// The section that owns this page.
         /// </summary>
-        public OneNoteSection Section => (OneNoteSection)Parent;
+        public Section Section => (Section)Parent;
         /// <summary>
         /// The page level.
         /// </summary>
@@ -25,11 +25,11 @@ namespace Odotocodot.OneNote.Linq
         /// <summary>
         /// Indicates whether the page is in the recycle bin.
         /// </summary>
-        /// <seealso cref="OneNoteSectionGroup.IsRecycleBin"/>
-        /// <seealso cref="OneNoteSection.IsInRecycleBin"/>
-        /// <seealso cref="OneNoteSection.IsDeletedPages"/>
+        /// <seealso cref="SectionGroup.IsRecycleBin"/>
+        /// <seealso cref="Linq.Section.IsInRecycleBin"/>
+        /// <seealso cref="Linq.Section.IsDeletedPages"/>
         public bool IsInRecycleBin { get; internal set; }
 
-        bool IWritableHasIsInRecycleBin.IsInRecycleBin { set => IsInRecycleBin = value; }
+        bool IWritableIsInRecycleBin.IsInRecycleBin { set => IsInRecycleBin = value; }
     }
 }

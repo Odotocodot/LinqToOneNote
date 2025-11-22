@@ -71,30 +71,30 @@ namespace Odotocodot.OneNote.Linq
         /// <inheritdoc cref="OneNoteApplication.SyncItem(IOneNoteItem)"/>
         public static void Sync(this IOneNoteItem item) => OneNoteApplication.SyncItem(item);
 
-        /// <inheritdoc cref="OneNoteApplication.GetPageContent(OneNotePage)"/>
-        public static string GetPageContent(this OneNotePage page) => OneNoteApplication.GetPageContent(page);
+        /// <inheritdoc cref="OneNoteApplication.GetPageContent(Page)"/>
+        public static string GetPageContent(this Page page) => OneNoteApplication.GetPageContent(page);
 
         /// <summary>
         /// Returns a value that indicates whether the <paramref name="item"/> is in or is a recycle bin.
         /// </summary>
         /// <param name="item">The OneNote item to check.</param>
         /// <returns><see langword="true"/> if the <paramref name="item"/> is in or is a recycle bin; otherwise, <see langword="false"/>.</returns>
-        /// <remarks>Checks whether the <paramref name="item"/> is a recycle bin <see cref="OneNoteSectionGroup">section group</see>,
-        /// a deleted <see cref="OneNotePage">page</see>, a deleted <see cref="OneNoteSection">section</see>, or the deleted pages 
-        /// <see cref="OneNoteSection">section</see> within a recycle bin.</remarks>
-        /// <seealso cref="OneNoteSectionGroup.IsRecycleBin"/>
-        /// <seealso cref="OneNoteSection.IsInRecycleBin"/>
-        /// <seealso cref="OneNoteSection.IsDeletedPages"/>
-        /// <seealso cref="OneNotePage.IsInRecycleBin"/>
+        /// <remarks>Checks whether the <paramref name="item"/> is a recycle bin <see cref="SectionGroup">section group</see>,
+        /// a deleted <see cref="Page">page</see>, a deleted <see cref="Section">section</see>, or the deleted pages 
+        /// <see cref="Section">section</see> within a recycle bin.</remarks>
+        /// <seealso cref="SectionGroup.IsRecycleBin"/>
+        /// <seealso cref="Section.IsInRecycleBin"/>
+        /// <seealso cref="Section.IsDeletedPages"/>
+        /// <seealso cref="Page.IsInRecycleBin"/>
         public static bool IsInRecycleBin(this IOneNoteItem item)
         {
             switch (item)
             {
-                case OneNoteSectionGroup sectionGroup:
+                case SectionGroup sectionGroup:
                     return sectionGroup.IsRecycleBin;
-                case OneNoteSection section:
+                case Section section:
                     return section.IsInRecycleBin || section.IsDeletedPages; //If IsDeletedPages is true IsInRecycleBin is always true
-                case OneNotePage page:
+                case Page page:
                     return page.IsInRecycleBin;
                 default:
                     return false;
@@ -102,47 +102,47 @@ namespace Odotocodot.OneNote.Linq
         }
 
         /// <summary>
-        /// Get the recycle bin <see cref="OneNoteSectionGroup">section group</see> for the specified <paramref name="notebook"/> if it exists.
+        /// Get the recycle bin <see cref="SectionGroup">section group</see> for the specified <paramref name="notebook"/> if it exists.
         /// </summary>
         /// <param name="notebook">The notebook to get the recycle bin of.</param>
         /// <param name="sectionGroup">When this method returns, <paramref name="sectionGroup"/> contains the recycle bin of 
         /// the <paramref name="notebook"/> if it was found; 
         /// otherwise, <see langword="null"/>.</param>
         /// <returns><see langword="true"/> if the <paramref name="notebook"/> contains a recycle bin; otherwise, <see langword="false"/>.</returns>
-        public static bool GetRecycleBin(this OneNoteNotebook notebook, out OneNoteSectionGroup sectionGroup)
+        public static bool GetRecycleBin(this Notebook notebook, out SectionGroup sectionGroup)
         {
             sectionGroup = notebook.SectionGroups.FirstOrDefault(sg => sg.IsRecycleBin);
             return sectionGroup != null;
         }
 
         /// <summary>
-        /// Returns a flattened collection of all the <see cref="OneNotePage">pages</see> present in the <paramref name="source"/>.
+        /// Returns a flattened collection of all the <see cref="Page">pages</see> present in the <paramref name="source"/>.
         /// </summary>
         /// <param name="source"><inheritdoc cref="Traverse(IOneNoteItem)" path="/param[@name='source']"/></param>
-        /// <returns>An <see cref="IEnumerable{T}">IEnumerable</see>&lt;<see cref="OneNotePage"/>&gt; containing all the 
-        /// <see cref="OneNotePage">pages</see> present in the <paramref name="source"/>.</returns>
-        public static IEnumerable<OneNotePage> GetPages(this IOneNoteItem source)
-            => source.Traverse(i => i is OneNotePage).Cast<OneNotePage>();
+        /// <returns>An <see cref="IEnumerable{T}">IEnumerable</see>&lt;<see cref="Page"/>&gt; containing all the 
+        /// <see cref="Page">pages</see> present in the <paramref name="source"/>.</returns>
+        public static IEnumerable<Page> GetPages(this IOneNoteItem source)
+            => source.Traverse(i => i is Page).Cast<Page>();
 
         /// <inheritdoc cref="GetPages(IOneNoteItem)"/>
-        public static IEnumerable<OneNotePage> GetPages(this IEnumerable<IOneNoteItem> source)
-            => source.Traverse(i => i is OneNotePage).Cast<OneNotePage>();
+        public static IEnumerable<Page> GetPages(this IEnumerable<IOneNoteItem> source)
+            => source.Traverse(i => i is Page).Cast<Page>();
 
 
         /// <summary>
         /// Finds the <see cref="IOneNoteItem"/> with the corresponding <paramref name="id"/>.
         /// </summary>
-        /// <param name="id">The <see cref="IOneNoteItem.ID"/> of the OneNote hierarchy <see cref="IOneNoteItem">item</see> to find.</param>
+        /// <param name="id">The <see cref="IOneNoteItem.Id"/> of the OneNote hierarchy <see cref="IOneNoteItem">item</see> to find.</param>
         /// <returns>The <see cref="IOneNoteItem"></see> with the specified ID if found; otherwise, <see langword="null"/>.</returns>
         /// <remarks>
         /// This method currently uses <see cref="OneNoteApplication.GetNotebooks()"/> which returns the whole hierarchy to find the ID. So be weary of performance.
         /// </remarks>
         public static IOneNoteItem FindByID(string id) =>
-            OneNoteApplication.GetNotebooks().Traverse(i => i.ID == id).FirstOrDefault();
+            OneNoteApplication.GetNotebooks().Traverse(i => i.Id == id).FirstOrDefault();
 
         /// <summary>
         /// Checks if two <see cref="IOneNoteItem"/>s are equal in OneNote.<br/>
-        /// Shorthand for comparing the <see cref="IOneNoteItem.ID">ID</see> of OneNote hierarchy items. E.g.
+        /// Shorthand for comparing the <see cref="IOneNoteItem.Id">ID</see> of OneNote hierarchy items. E.g.
         /// <code lang="C#">
         /// if(left.ID == right.ID)
         /// {
@@ -156,7 +156,7 @@ namespace Odotocodot.OneNote.Linq
         /// <returns></returns>
         public static bool ItemEquals<T>(this T left, T right) where T : IOneNoteItem
         {
-            return left.ID == right.ID;
+            return left.Id == right.Id;
         }
     }
 }

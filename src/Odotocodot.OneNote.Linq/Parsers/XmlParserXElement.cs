@@ -19,14 +19,14 @@ namespace Odotocodot.OneNote.Linq.Parsers
         private static readonly Dictionary<XName, Func<XElement, IOneNoteItem, IOneNoteItem>> runtimeParser =
             new Dictionary<XName, Func<XElement, IOneNoteItem, IOneNoteItem>>
         {
-            { NotebookXName, (element, parent) => Parse(new OneNoteNotebook(), element, parent) },
-            { SectionGroupXName, (element, parent) => Parse(new OneNoteSectionGroup(), element, parent) },
-            { SectionXName, (element, parent) => Parse(new OneNoteSection(), element, parent) },
-            { PageXName, (element, parent) => Parse(new OneNotePage(), element, parent) }
+            { NotebookXName, (element, parent) => Parse(new Notebook(), element, parent) },
+            { SectionGroupXName, (element, parent) => Parse(new SectionGroup(), element, parent) },
+            { SectionXName, (element, parent) => Parse(new Section(), element, parent) },
+            { PageXName, (element, parent) => Parse(new Page(), element, parent) }
         };
 
-        public IEnumerable<OneNoteNotebook> ParseNotebooks(string xml) => XElement.Parse(xml).Elements()
-                                                                                             .Select(e => Parse(new OneNoteNotebook(), e, null));
+        public IEnumerable<Notebook> ParseNotebooks(string xml) => XElement.Parse(xml).Elements()
+                                                                                             .Select(e => Parse(new Notebook(), e, null));
 
         public IOneNoteItem ParseUnknown(string xml, IOneNoteItem parent)
         {
@@ -51,7 +51,7 @@ namespace Odotocodot.OneNote.Linq.Parsers
                 switch (attribute.Name.LocalName)
                 {
                     case Attributes.ID:
-                        item.ID = attribute.Value;
+                        item.Id = attribute.Value;
                         break;
                     case Attributes.Name:
                         item.Name = attribute.Value;
@@ -63,34 +63,34 @@ namespace Odotocodot.OneNote.Linq.Parsers
                         item.LastModified = (DateTime)attribute;
                         break;
                     case Attributes.Path:
-                        ((IWritableHasPath)item).Path = attribute.Value;
+                        ((IWritablePath)item).Path = attribute.Value;
                         break;
                     case Attributes.Color:
-                        ((IWritableHasColor)item).Color = GetColor(attribute.Value);
+                        ((IWritableColor)item).Color = GetColor(attribute.Value);
                         break;
                     case Attributes.IsInRecycleBin:
-                        ((IWritableHasIsInRecycleBin)item).IsInRecycleBin = (bool)attribute;
+                        ((IWritableIsInRecycleBin)item).IsInRecycleBin = (bool)attribute;
                         break;
                     case Attributes.NickName:
-                        ((OneNoteNotebook)item).NickName = attribute.Value;
+                        ((Notebook)item).NickName = attribute.Value;
                         break;
                     case Attributes.IsRecycleBin:
-                        ((OneNoteSectionGroup)item).IsRecycleBin = (bool)attribute;
+                        ((SectionGroup)item).IsRecycleBin = (bool)attribute;
                         break;
                     case Attributes.Encrypted:
-                        ((OneNoteSection)item).Encrypted = (bool)attribute;
+                        ((Section)item).Encrypted = (bool)attribute;
                         break;
                     case Attributes.Locked:
-                        ((OneNoteSection)item).Locked = (bool)attribute;
+                        ((Section)item).Locked = (bool)attribute;
                         break;
                     case Attributes.IsDeletedPages:
-                        ((OneNoteSection)item).IsDeletedPages = (bool)attribute;
+                        ((Section)item).IsDeletedPages = (bool)attribute;
                         break;
                     case Attributes.PageLevel:
-                        ((OneNotePage)item).Level = (int)attribute;
+                        ((Page)item).Level = (int)attribute;
                         break;
                     case Attributes.DateTime:
-                        ((OneNotePage)item).Created = (DateTime)attribute;
+                        ((Page)item).Created = (DateTime)attribute;
                         break;
                 }
             }

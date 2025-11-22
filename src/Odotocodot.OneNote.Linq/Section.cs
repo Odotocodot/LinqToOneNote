@@ -8,9 +8,9 @@ namespace Odotocodot.OneNote.Linq
     /// <summary>
     /// Represents a section in OneNote.
     /// </summary>
-    public class OneNoteSection : OneNoteItem, IOneNoteItem, IWritableHasPath, IWritableHasIsInRecycleBin, IWritableHasColor
+    public class Section : OneNoteItem, IOneNoteItem, IWritablePath, IWritableIsInRecycleBin, IWritableColor
     {
-        internal OneNoteSection() { }
+        internal Section() { }
 
         /// <summary>
         /// The full path to the section.
@@ -34,15 +34,15 @@ namespace Odotocodot.OneNote.Linq
         /// Indicates whether the section is in recycle bin.
         /// </summary>
         /// <seealso cref="IsDeletedPages"/>
-        /// <seealso cref="OneNoteSectionGroup.IsRecycleBin"/>
-        /// <seealso cref="OneNotePage.IsInRecycleBin"/>
+        /// <seealso cref="SectionGroup.IsRecycleBin"/>
+        /// <seealso cref="Page.IsInRecycleBin"/>
         public bool IsInRecycleBin { get; internal set; }
         /// <summary>
         /// Indicates whether this section is a special section that contains all the recently deleted pages in this section's notebook.
         /// </summary>
         /// <seealso cref="IsInRecycleBin"/>
-        /// <seealso cref="OneNoteSectionGroup.IsRecycleBin"/>
-        /// <seealso cref="OneNotePage.IsInRecycleBin"/>
+        /// <seealso cref="SectionGroup.IsRecycleBin"/>
+        /// <seealso cref="Page.IsInRecycleBin"/>
         public bool IsDeletedPages { get; internal set; }
         /// <summary>
         /// The color of the section.
@@ -51,10 +51,10 @@ namespace Odotocodot.OneNote.Linq
         /// <summary>
         /// The collection of pages within this section, equal to <see cref="IOneNoteItem.Children"/> for a section.
         /// </summary>
-        public IEnumerable<OneNotePage> Pages => Children.Cast<OneNotePage>();
+        public IEnumerable<Page> Pages => Children.Cast<Page>();
 
-        Color? IWritableHasColor.Color { set => Color = value; }
-        string IWritableHasPath.Path { set => Path = value; }
-        bool IWritableHasIsInRecycleBin.IsInRecycleBin { set => IsInRecycleBin = value; }
+        Color? IWritableColor.Color { set => Color = value; }
+        string IWritablePath.Path { set => Path = value; }
+        bool IWritableIsInRecycleBin.IsInRecycleBin { set => IsInRecycleBin = value; }
     }
 }

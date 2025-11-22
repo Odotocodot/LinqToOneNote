@@ -17,9 +17,9 @@ namespace Odotocodot.OneNote.Linq.Tests
 
         private static class Parents
         {
-            public static readonly OneNoteNotebook Notebook = OneNoteApplication.GetNotebooks().Single(n => n.Name == "Test Notebook");
-            public static readonly OneNoteSectionGroup SectionGroup = Notebook.SectionGroups.Single(sg => sg.Name == "Test Section Group");
-            public static readonly OneNoteSection Section = Notebook.Sections.Single(s => s.Name == "Test Section");
+            public static readonly Notebook Notebook = OneNoteApplication.GetNotebooks().Single(n => n.Name == "Test Notebook");
+            public static readonly SectionGroup SectionGroup = Notebook.SectionGroups.Single(sg => sg.Name == "Test Section Group");
+            public static readonly Section Section = Notebook.Sections.Single(s => s.Name == "Test Section");
         }
 
         [OneTimeSetUp]
@@ -34,15 +34,15 @@ namespace Odotocodot.OneNote.Linq.Tests
             OneNoteApplication.InitComObject();
             foreach (var item in itemsToDelete)
             {
-                if (item is OneNoteNotebook notebook)
+                if (item is Notebook notebook)
                 {
 
-                    OneNoteApplication.ComObject.CloseNotebook(notebook.ID, true);
+                    OneNoteApplication.ComObject.CloseNotebook(notebook.Id, true);
                     Directory.Delete(notebook.Path, true);
                 }
                 else
                 {
-                    OneNoteApplication.ComObject.DeleteHierarchy(item.ID, deletePermanently: true);
+                    OneNoteApplication.ComObject.DeleteHierarchy(item.Id, deletePermanently: true);
                 }
             }
             itemsToDelete.Clear();
@@ -83,9 +83,9 @@ namespace Odotocodot.OneNote.Linq.Tests
             {
                 IReadOnlyList<char> invalidChars = newItemType.Name switch
                 {
-                    nameof(OneNoteNotebook) => OneNoteApplication.InvalidNotebookChars,
-                    nameof(OneNoteSectionGroup) => OneNoteApplication.InvalidSectionGroupChars,
-                    nameof(OneNoteSection) => OneNoteApplication.InvalidSectionChars,
+                    nameof(Notebook) => OneNoteApplication.InvalidNotebookChars,
+                    nameof(SectionGroup) => OneNoteApplication.InvalidSectionGroupChars,
+                    nameof(Section) => OneNoteApplication.InvalidSectionChars,
                 };
 
                 newItemName = GenerateName(invalidChars);
@@ -109,13 +109,13 @@ namespace Odotocodot.OneNote.Linq.Tests
         {
             for (var i = 0; i < 2; i++)
             {
-                yield return CreateTestCaseData(typeof(OneNoteSection), Parents.Notebook, OneNoteApplication.CreateSection, i != 0);
-                yield return CreateTestCaseData(typeof(OneNoteSection), Parents.SectionGroup, OneNoteApplication.CreateSection, i != 0);
-                yield return CreateTestCaseData(typeof(OneNoteSectionGroup), Parents.Notebook, OneNoteApplication.CreateSectionGroup, i != 0);
-                yield return CreateTestCaseData(typeof(OneNoteSectionGroup), Parents.SectionGroup, OneNoteApplication.CreateSectionGroup, i != 0);
-                yield return CreateTestCaseData<OneNoteNotebook>(typeof(OneNoteNotebook), null, (_, name, _) => OneNoteApplication.CreateNotebook(name, false), i != 0);
+                yield return CreateTestCaseData(typeof(Section), Parents.Notebook, OneNoteApplication.CreateSection, i != 0);
+                yield return CreateTestCaseData(typeof(Section), Parents.SectionGroup, OneNoteApplication.CreateSection, i != 0);
+                yield return CreateTestCaseData(typeof(SectionGroup), Parents.Notebook, OneNoteApplication.CreateSectionGroup, i != 0);
+                yield return CreateTestCaseData(typeof(SectionGroup), Parents.SectionGroup, OneNoteApplication.CreateSectionGroup, i != 0);
+                yield return CreateTestCaseData<Notebook>(typeof(Notebook), null, (_, name, _) => OneNoteApplication.CreateNotebook(name, false), i != 0);
             }
-            yield return CreateTestCaseData(typeof(OneNotePage), Parents.Section, OneNoteApplication.CreatePage, true);
+            yield return CreateTestCaseData(typeof(Page), Parents.Section, OneNoteApplication.CreatePage, true);
         }
 
         [Test]

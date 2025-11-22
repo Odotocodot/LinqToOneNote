@@ -2,7 +2,7 @@ using Odotocodot.OneNote.Linq.Abstractions;
 
 namespace Odotocodot.OneNote.Linq.Internal
 {
-	internal interface IWritableHasIsInRecycleBin : IHasIsInRecycleBin
+	internal interface IWritableIsInRecycleBin : IHasIsInRecycleBin
 	{
 		new bool IsInRecycleBin { set; }
 	}

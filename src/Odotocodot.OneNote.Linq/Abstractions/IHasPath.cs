@@ -3,9 +3,9 @@ namespace Odotocodot.OneNote.Linq.Abstractions
 	/// <summary>
 	/// Represents an OneNote hierarchy item that has a file path.
 	/// </summary>
-	/// <seealso cref="OneNoteNotebook"/>
-	/// <seealso cref="OneNoteSectionGroup"/>
-	/// <seealso cref="OneNoteSection"/>
+	/// <seealso cref="Notebook"/>
+	/// <seealso cref="SectionGroup"/>
+	/// <seealso cref="Section"/>
 	public interface IHasPath : IOneNoteItem
 	{
 		/// <summary>
