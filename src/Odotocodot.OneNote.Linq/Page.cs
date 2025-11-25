@@ -1,5 +1,7 @@
 ﻿using Odotocodot.OneNote.Linq.Internal;
 using System;
+using System.Collections.Generic;
+using Odotocodot.OneNote.Linq.Abstractions;
 
 namespace Odotocodot.OneNote.Linq
 {
@@ -9,11 +11,6 @@ namespace Odotocodot.OneNote.Linq
     public class Page : OneNoteItem, IOneNoteItem, IWritableIsInRecycleBin
     {
         internal Page() { }
-
-        /// <summary>
-        /// The section that owns this page.
-        /// </summary>
-        public Section Section => (Section)Parent;
         /// <summary>
         /// The page level.
         /// </summary>
@@ -26,10 +23,23 @@ namespace Odotocodot.OneNote.Linq
         /// Indicates whether the page is in the recycle bin.
         /// </summary>
         /// <seealso cref="SectionGroup.IsRecycleBin"/>
-        /// <seealso cref="Linq.Section.IsInRecycleBin"/>
-        /// <seealso cref="Linq.Section.IsDeletedPages"/>
+        /// <seealso cref="Section.IsInRecycleBin"/>
+        /// <seealso cref="Section.IsDeletedPages"/>
         public bool IsInRecycleBin { get; internal set; }
 
         bool IWritableIsInRecycleBin.IsInRecycleBin { set => IsInRecycleBin = value; }
+    }
+
+    public class PageFull : Page, IOneNoteItemFull
+    {
+        /// <summary>
+        /// The section that owns this page.
+        /// </summary>
+        public SectionFull Section => (SectionFull)parent;
+
+        public NotebookFull Notebook => (NotebookFull)notebook;
+        public OneNoteItem Parent { get; }
+        IEnumerable<IOneNoteItemFull> IOneNoteItemFull.Children { get; } = [];
+        public string RelativePath { get; }
     }
 }

@@ -29,8 +29,14 @@ namespace Odotocodot.OneNote.Linq.Internal
         // /// <inheritdoc/>
         // public virtual Notebook Notebook { get; internal set; }
         
-        
-        
+        #nullable enable
+        internal OneNoteItem? parent;
+        internal Notebook? notebook;
+        #nullable restore
+        internal IEnumerable<OneNoteItem> children = [];
+
+        public static IEqualityComparer<OneNoteItem> IdComparer { get; } = new IdEqualityComparer();
+
         private sealed class IdEqualityComparer : IEqualityComparer<OneNoteItem>
         {
             public bool Equals(OneNoteItem x, OneNoteItem y)

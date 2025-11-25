@@ -1,7 +1,8 @@
-﻿using Odotocodot.OneNote.Linq.Internal;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using Odotocodot.OneNote.Linq.Abstractions;
+using Odotocodot.OneNote.Linq.Internal;
 
 namespace Odotocodot.OneNote.Linq
 {
@@ -48,13 +49,22 @@ namespace Odotocodot.OneNote.Linq
         /// The color of the section.
         /// </summary>
         public Color? Color { get; internal set; }
-        /// <summary>
-        /// The collection of pages within this section, equal to <see cref="IOneNoteItem.Children"/> for a section.
-        /// </summary>
-        public IEnumerable<Page> Pages => Children.Cast<Page>();
 
         Color? IWritableColor.Color { set => Color = value; }
         string IWritablePath.Path { set => Path = value; }
         bool IWritableIsInRecycleBin.IsInRecycleBin { set => IsInRecycleBin = value; }
+    }
+
+    public class SectionFull : Section, IOneNoteItemFull
+    {
+        /// <summary>
+        /// The collection of pages within this section, equal to <see cref="IOneNoteItem.Children"/> for a section.
+        /// </summary>
+        public IEnumerable<PageFull> Pages => children.Cast<PageFull>();
+
+        public NotebookFull Notebook => (NotebookFull)notebook;
+        public OneNoteItem Parent => parent;
+        public IEnumerable<IOneNoteItemFull> Children => children.Cast<IOneNoteItemFull>();
+        public string RelativePath { get; }
     }
 }

@@ -8,7 +8,7 @@ namespace Odotocodot.OneNote.Linq
     /// <summary>
     /// Represents a section group in OneNote.
     /// </summary>
-    public class SectionGroup : OneNoteItem, IOneNoteItem, INotebookOrSectionGroup, IWritablePath
+    public class SectionGroup : OneNoteItem, IOneNoteItem, IWritablePath
     {
         internal SectionGroup() { }
 
@@ -25,15 +25,25 @@ namespace Odotocodot.OneNote.Linq
         /// <seealso cref="Page.IsInRecycleBin"/>
         public bool IsRecycleBin { get; internal set; }
 
+
+
+        string IWritablePath.Path { set => Path = value; }
+    }
+
+    public class SectionGroupFull : SectionGroup, IOneNoteItemFull
+    {
         /// <summary>
         /// The sections that this section group contains (direct children only). 
         /// </summary>
-        public IEnumerable<Section> Sections => Children.OfType<Section>();
+        public IEnumerable<SectionFull> Sections => Children.OfType<SectionFull>();
         /// <summary>
         /// The section groups that this section group contains (direct children only).
         /// </summary>
-        public IEnumerable<SectionGroup> SectionGroups => Children.OfType<SectionGroup>();
+        public IEnumerable<SectionGroupFull> SectionGroups => Children.OfType<SectionGroupFull>();
 
-        string IWritablePath.Path { set => Path = value; }
+        public NotebookFull Notebook => (NotebookFull)notebook;
+        public OneNoteItem Parent => parent;
+        public IEnumerable<IOneNoteItemFull> Children => children.Cast<IOneNoteItemFull>();
+        public string RelativePath { get; }
     }
 }
