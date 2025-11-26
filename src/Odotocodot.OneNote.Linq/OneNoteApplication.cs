@@ -1,14 +1,13 @@
-﻿using Microsoft.Office.Interop.OneNote;
-using Odotocodot.OneNote.Linq.Abstractions;
-using Odotocodot.OneNote.Linq.Internal;
-using Odotocodot.OneNote.Linq.Parsers;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Xml.Linq;
+using Microsoft.Office.Interop.OneNote;
+using Odotocodot.OneNote.Linq.Abstractions;
+using Odotocodot.OneNote.Linq.Internal;
+using Odotocodot.OneNote.Linq.Parsers;
 
 namespace Odotocodot.OneNote.Linq
 {
@@ -43,36 +42,6 @@ namespace Odotocodot.OneNote.Linq
         public static bool HasComObject => lazyOneNote.IsValueCreated;
         #endregion
 
-        #region Name Validator Members
-
-        /// <summary>
-        /// An array containing the characters that are not allowed in a <see cref="Notebook">notebook</see> name.<br/>
-        /// These are:&#009;<b>\ / * ? " | &lt; &gt; : % # .</b>
-        /// </summary>
-        /// <seealso cref="IsNotebookNameValid(string)"/>
-        /// <seealso cref="InvalidSectionChars"/>
-        /// <seealso cref="InvalidSectionGroupChars"/>
-        public static readonly ImmutableArray<char> InvalidNotebookChars = @"\/*?""|<>:%#.".ToImmutableArray();
-
-        /// <summary>
-        /// An array containing the characters that are not allowed in a <see cref="Section">section</see> name.<br/>
-        /// These are:&#009;<b>\ / * ? " | &lt; &gt; : % # &amp;</b>
-        /// </summary>
-        /// <seealso cref="IsSectionNameValid(string)"/>
-        /// <seealso cref="InvalidNotebookChars"/>
-        /// <seealso cref="InvalidSectionGroupChars"/>
-        public static readonly ImmutableArray<char> InvalidSectionChars = @"\/*?""|<>:%#&".ToImmutableArray();
-
-        /// <summary>
-        /// An array containing the characters that are not allowed in a <see cref="SectionGroup">section group</see> name.<br/>
-        /// These are:&#009;<b>\ / * ? " | &lt; &gt; : % # &amp;</b>
-        /// </summary>
-        /// <seealso cref="IsSectionGroupNameValid(string)"/>
-        /// <seealso cref="InvalidNotebookChars"/>
-        /// <seealso cref="InvalidSectionChars"/>
-        public static readonly ImmutableArray<char> InvalidSectionGroupChars = InvalidSectionChars;
-        #endregion
-
         /// <summary>
         /// The directory separator used in <see cref="IOneNoteItem.RelativePath"/>.
         /// </summary>
@@ -83,7 +52,7 @@ namespace Odotocodot.OneNote.Linq
         // NOTE: We recommend specifying a version of OneNote (such as xs2013) instead of using xsCurrent or leaving it blank, because this will allow your add-in to work with future versions of OneNote.
         private const XMLSchema xmlSchema = XMLSchema.xs2013;
 
-        private static readonly XmlParserXElement xmlParser = new XmlParserXElement();
+        private static readonly XmlParserXmlReader xmlParser = new XmlParserXmlReader();
 
         #region COM Object Methods
 
@@ -342,18 +311,15 @@ namespace Odotocodot.OneNote.Linq
         /// <returns>The <see cref="OneNoteItem.Id"/> of the newly created quick note page.</returns>
         public static string CreateQuickNote(string name, bool open) => CreatePage(null, name, open);
 
-        private static string CreateItem(
+        private static string CreateItem<T>(
             IOneNoteItem parent,
             string name,
             bool open,
             string path,
-            CreateFileType createFileType,
-            Func<string, bool> nameValidator,
-            string type,
-            in ImmutableArray<char> invalidChars)
+            CreateFileType createFileType) where T : INameInvalidCharacters
         {
-            if (!nameValidator(name))
-                throw new ArgumentException($"Invalid {type.ToLower()} name provided: \"{name}\". {type} names cannot empty, only whitespace or contain the symbols: \t {string.Join(" ", invalidChars)}");
+            if (!IsValidName<T>(name))
+                throw new ArgumentException($"Invalid {nameof(T).ToLower()} name provided: \"{name}\". {nameof(T)} names cannot empty, only whitespace or contain the symbols: \t {string.Join(" ", T.InvalidCharacters)}");
 
             OneNote.OpenHierarchy(path, parent?.Id, out string newItemID, createFileType);
             if (open)
@@ -370,10 +336,10 @@ namespace Odotocodot.OneNote.Linq
         /// <param name="open">Whether to open the newly created section in OneNote immediately.</param>
         /// <typeparam name="TNotebookOrSectionGroup">Represents a <see cref="Notebook">notebook</see> or a <see cref="SectionGroup">section group</see>.</typeparam>
         /// <exception cref="ArgumentException">Thrown if the <paramref name="name"/> is not a valid section name.</exception>
-        /// <seealso cref="IsSectionNameValid(string)"/>
+        /// <seealso cref="IsValidName(string)"/>
         /// <returns>The <see cref="OneNoteItem.Id"/> of the newly created section.</returns>
         public static string CreateSection<TNotebookOrSectionGroup>(TNotebookOrSectionGroup parent, string name, bool open) where TNotebookOrSectionGroup : INotebookOrSectionGroup
-            => CreateItem(parent, name, open, $"{name}.one", CreateFileType.cftSection, IsSectionNameValid, Constants.Elements.Section, in InvalidSectionChars);
+            => CreateItem<Section>(parent, name, open, $"{name}.one", CreateFileType.cftSection);
 
         /// <summary>
         /// Creates a <see cref="SectionGroup">section group</see> with a title equal to <paramref name="name"/> located in the specified <paramref name="parent"/>.
@@ -383,10 +349,10 @@ namespace Odotocodot.OneNote.Linq
         /// <param name="open">Whether to open the newly created section group in OneNote immediately.</param>
         /// <typeparam name="TNotebookOrSectionGroup">Represents a <see cref="Notebook">notebook</see> or a <see cref="SectionGroup">section group</see>.</typeparam>
         /// <exception cref="ArgumentException">Thrown if the <paramref name="name"/> is not a valid section group name.</exception>
-        /// <seealso cref="IsSectionGroupNameValid(string)"/>
+        /// <seealso cref="IsValidName(string)"/>
         /// <returns>The <see cref="OneNoteItem.Id"/> of the newly created section group.</returns>
         public static string CreateSectionGroup<TNotebookOrSectionGroup>(TNotebookOrSectionGroup parent, string name, bool open) where TNotebookOrSectionGroup : INotebookOrSectionGroup
-            => CreateItem(parent, name, open, name, CreateFileType.cftFolder, IsSectionGroupNameValid, Constants.Elements.SectionGroup, in InvalidSectionGroupChars);
+            => CreateItem<SectionGroup>(parent, name, open, name, CreateFileType.cftFolder);
 
         /// <summary>
         /// Creates a <see cref="Notebook">notebook</see> with a title equal to <paramref name="name"/> located in the <see cref="GetDefaultNotebookLocation()">default notebook location</see>.
@@ -394,10 +360,10 @@ namespace Odotocodot.OneNote.Linq
         /// <param name="name">The name of the new notebook.</param>
         /// <param name="open">Whether to open the newly created notebook in OneNote immediately.</param>
         /// <exception cref="ArgumentException">Thrown if the <paramref name="name"/> is not a valid notebook name.</exception>
-        /// <seealso cref="IsNotebookNameValid(string)"/>
+        /// <seealso cref="IsValidName(string)"/>
         /// <returns>The <see cref="OneNoteItem.Id"/> of the newly created notebook.</returns>
         public static string CreateNotebook(string name, bool open)
-            => CreateItem(null, name, open, System.IO.Path.Combine(GetDefaultNotebookLocation(), name), CreateFileType.cftNotebook, IsNotebookNameValid, Constants.Elements.Notebook, in InvalidNotebookChars);
+            => CreateItem<Notebook>(null, name, open, System.IO.Path.Combine(GetDefaultNotebookLocation(), name), CreateFileType.cftNotebook);
 
         #endregion
 
@@ -435,35 +401,17 @@ namespace Odotocodot.OneNote.Linq
 
         #endregion
 
-        #region Name Validator Methods 
 
         /// <summary>
-        /// Returns a value that indicates whether the supplied <paramref name="name"/> is a valid for a notebook.
+        /// Returns a value that indicates whether the supplied <paramref name="name"/> is a valid for the <typeparamref name="THierarchyItem"/>.
         /// </summary>
-        /// <param name="name"></param>
-        /// <returns><see langword="true"/> if the specified <paramref name="name"/> is not null, empty, whitespace or contains any characters from <see cref="InvalidNotebookChars"/>; otherwise, <see langword="false"/>.</returns>
-        /// <seealso cref="InvalidNotebookChars"/>
-        public static bool IsNotebookNameValid(string name)
-            => !string.IsNullOrWhiteSpace(name) && !InvalidNotebookChars.Any(name.Contains);
-
-        /// <summary>
-        /// Returns a value that indicates whether the supplied <paramref name="name"/> is a valid for a section.
-        /// </summary>
-        /// <param name="name"></param>
-        /// <returns><see langword="true"/> if the specified <paramref name="name"/> is not null, empty, whitespace or contains any characters from <see cref="InvalidSectionChars"/>; otherwise, <see langword="false"/>.</returns>
-        /// <seealso cref="InvalidSectionChars"/>
-        public static bool IsSectionNameValid(string name)
-            => !string.IsNullOrWhiteSpace(name) && !InvalidSectionChars.Any(name.Contains);
-
-        /// <summary>
-        /// Returns a value that indicates whether the supplied <paramref name="name"/> is a valid for a section group.
-        /// </summary>
-        /// <returns><see langword="true"/> if the specified <paramref name="name"/> is not null, empty, whitespace or contains any characters from <see cref="InvalidSectionGroupChars"/>; otherwise, <see langword="false"/>.</returns>
-        /// <param name="name"></param>
-        /// <seealso cref="InvalidSectionGroupChars"/>
-        public static bool IsSectionGroupNameValid(string name)
-            => !string.IsNullOrWhiteSpace(name) && !InvalidSectionGroupChars.Any(name.Contains);
-
-        #endregion
+        /// <param name="name">The potential new name/title of the <typeparamref name="THierarchyItem"/></param>
+        /// <typeparam name="THierarchyItem">The type of hierarchy element to check the name of i.e. a <see cref="Notebook"/>, a <see cref="SectionGroup"/> or a <see cref="Section"/></typeparam>
+        /// <returns><see langword="true"/> if the specified <paramref name="name"/> is not null, empty, whitespace or contains any characters from the <typeparamref name="THierarchyItem"/> implementation of <see cref="INameInvalidCharacters.InvalidCharacters"/>; otherwise, <see langword="false"/>.</returns>
+        /// <seealso cref="Notebook.InvalidCharacters"/>
+        /// <seealso cref="SectionGroup.InvalidCharacters"/>
+        /// <seealso cref="Section.InvalidCharacters"/>
+        public static bool IsValidName<THierarchyItem>(string name) where THierarchyItem : INameInvalidCharacters
+            => !string.IsNullOrWhiteSpace(name) && !THierarchyItem.InvalidCharacters.Any(name.Contains);
     }
 }

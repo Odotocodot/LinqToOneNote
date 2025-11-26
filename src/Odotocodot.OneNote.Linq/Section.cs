@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using Odotocodot.OneNote.Linq.Abstractions;
 using Odotocodot.OneNote.Linq.Internal;
 
@@ -9,9 +9,16 @@ namespace Odotocodot.OneNote.Linq
     /// <summary>
     /// Represents a section in OneNote.
     /// </summary>
-    public class Section : OneNoteItem, IOneNoteItem, IWritablePath, IWritableIsInRecycleBin, IWritableColor
+    public class Section : OneNoteItem, IOneNoteItem, INameInvalidCharacters, IWritablePath, IWritableIsInRecycleBin, IWritableColor
     {
         internal Section() { }
+
+        /// <summary>
+        /// An array containing the characters that are not allowed in a <see cref="Section">section</see> name.<br/>
+        /// These are:&#009;<b>\ / * ? " | &lt; &gt; : % # &amp;</b>
+        /// </summary>
+        /// <seealso cref="OneNoteApplication.IsValidName{T}(string)"/>
+        public static IReadOnlyList<char> InvalidCharacters { get; } = Array.AsReadOnly(['\\', '/', '*', '?', '"', '|', '<', '>', ':', '%', '#', '&']);
 
         /// <summary>
         /// The full path to the section.
