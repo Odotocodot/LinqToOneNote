@@ -1,7 +1,7 @@
-﻿using Odotocodot.OneNote.Linq.Abstractions;
-using Odotocodot.OneNote.Linq.Internal;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using Odotocodot.OneNote.Linq.Abstractions;
+using Odotocodot.OneNote.Linq.Internal;
 
 namespace Odotocodot.OneNote.Linq
 {
@@ -26,24 +26,16 @@ namespace Odotocodot.OneNote.Linq
         public bool IsRecycleBin { get; internal set; }
 
 
-
-        string IWritablePath.Path { set => Path = value; }
-    }
-
-    public class SectionGroupFull : SectionGroup, IOneNoteItemFull
-    {
         /// <summary>
         /// The sections that this section group contains (direct children only). 
         /// </summary>
-        public IEnumerable<SectionFull> Sections => Children.OfType<SectionFull>();
+        public IReadOnlyList<Section> Sections { get; internal set; }
         /// <summary>
         /// The section groups that this section group contains (direct children only).
         /// </summary>
-        public IEnumerable<SectionGroupFull> SectionGroups => Children.OfType<SectionGroupFull>();
+        public IReadOnlyList<SectionGroup> SectionGroups { get; internal set; }
+        public IOneNoteItem Parent { get; internal set; }
 
-        public NotebookFull Notebook => (NotebookFull)notebook;
-        public OneNoteItem Parent => parent;
-        public IEnumerable<IOneNoteItemFull> Children => children.Cast<IOneNoteItemFull>();
-        public string RelativePath { get; }
+        string IWritablePath.Path { set => Path = value; }
     }
 }

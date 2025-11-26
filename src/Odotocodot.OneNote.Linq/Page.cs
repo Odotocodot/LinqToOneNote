@@ -1,7 +1,7 @@
-﻿using Odotocodot.OneNote.Linq.Internal;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Odotocodot.OneNote.Linq.Abstractions;
+using Odotocodot.OneNote.Linq.Internal;
 
 namespace Odotocodot.OneNote.Linq
 {
@@ -27,19 +27,7 @@ namespace Odotocodot.OneNote.Linq
         /// <seealso cref="Section.IsDeletedPages"/>
         public bool IsInRecycleBin { get; internal set; }
 
+        public IOneNoteItem Parent { get; internal set; }
         bool IWritableIsInRecycleBin.IsInRecycleBin { set => IsInRecycleBin = value; }
-    }
-
-    public class PageFull : Page, IOneNoteItemFull
-    {
-        /// <summary>
-        /// The section that owns this page.
-        /// </summary>
-        public SectionFull Section => (SectionFull)parent;
-
-        public NotebookFull Notebook => (NotebookFull)notebook;
-        public OneNoteItem Parent { get; }
-        IEnumerable<IOneNoteItemFull> IOneNoteItemFull.Children { get; } = [];
-        public string RelativePath { get; }
     }
 }

@@ -50,21 +50,16 @@ namespace Odotocodot.OneNote.Linq
         /// </summary>
         public Color? Color { get; internal set; }
 
-        Color? IWritableColor.Color { set => Color = value; }
-        string IWritablePath.Path { set => Path = value; }
-        bool IWritableIsInRecycleBin.IsInRecycleBin { set => IsInRecycleBin = value; }
-    }
-
-    public class SectionFull : Section, IOneNoteItemFull
-    {
         /// <summary>
         /// The collection of pages within this section, equal to <see cref="IOneNoteItem.Children"/> for a section.
         /// </summary>
-        public IEnumerable<PageFull> Pages => children.Cast<PageFull>();
+        public IReadOnlyList<Page> Pages { get; internal set; }
 
-        public NotebookFull Notebook => (NotebookFull)notebook;
-        public OneNoteItem Parent => parent;
-        public IEnumerable<IOneNoteItemFull> Children => children.Cast<IOneNoteItemFull>();
-        public string RelativePath { get; }
+        public IOneNoteItem Parent { get; internal set; }
+
+        Color? IWritableColor.Color { set => Color = value; }
+        string IWritablePath.Path { set => Path = value; }
+        bool IWritableIsInRecycleBin.IsInRecycleBin { set => IsInRecycleBin = value; }
+
     }
 }
