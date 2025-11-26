@@ -8,7 +8,7 @@ namespace Odotocodot.OneNote.Linq.Internal
     /// Use <see cref="IOneNoteItem"/> instead.
     /// </summary>
     /// <seealso cref="IOneNoteItem"/>
-    public abstract class OneNoteItem : IOneNoteItem
+    public abstract class OneNoteItem// : IOneNoteItem
     {
         internal OneNoteItem() { }
 
@@ -28,12 +28,12 @@ namespace Odotocodot.OneNote.Linq.Internal
         // public virtual string RelativePath { get; internal set; }
         // /// <inheritdoc/>
         // public virtual Notebook Notebook { get; internal set; }
-        
-        #nullable enable
-        internal OneNoteItem? parent;
-        internal Notebook? notebook;
-        #nullable restore
-        internal IEnumerable<OneNoteItem> children = [];
+
+        // #nullable enable
+        // internal OneNoteItem? parent;
+        // internal Notebook? notebook;
+        // #nullable restore
+        // internal IEnumerable<OneNoteItem> children = [];
 
         public static IEqualityComparer<OneNoteItem> IdComparer { get; } = new IdEqualityComparer();
 

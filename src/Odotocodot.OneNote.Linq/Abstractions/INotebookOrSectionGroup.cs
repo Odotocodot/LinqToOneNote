@@ -13,11 +13,11 @@ namespace Odotocodot.OneNote.Linq.Abstractions
 		/// <summary>
 		/// The sections that this item contains (direct children only). 
 		/// </summary>
-		IEnumerable<Section> Sections { get; }
+		IReadOnlyList<Section> Sections { get; }
 
 		/// <summary>
 		/// The section groups that this item contains (direct children only).
 		/// </summary>
-		IEnumerable<SectionGroup> SectionGroups { get; }
+		IReadOnlyList<SectionGroup> SectionGroups { get; }
 	}
 }

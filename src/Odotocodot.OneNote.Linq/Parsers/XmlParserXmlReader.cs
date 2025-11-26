@@ -3,72 +3,61 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Xml;
+using Odotocodot.OneNote.Linq.Abstractions;
+using Odotocodot.OneNote.Linq.Internal;
 
 
 namespace Odotocodot.OneNote.Linq.Parsers
 {
     using static Constants;
 
-    /// Faster than XElement parser, that is if you use don't care about lazy IEnumerables
     internal class XmlParserXmlReader : IXmlParser
     {
-        public IOneNoteItem ParseUnknown(string xml, IOneNoteItem parent)
+        public Root ParseFullHierarchy(string xml)
         {
-            using (var stringReader = new StringReader(xml))
+            var root = new Root();
+            using var stringReader = new StringReader(xml);
+            using var reader = XmlReader.Create(stringReader);
+            reader.MoveToContent();
+            if (reader.NodeType == XmlNodeType.Element && reader.LocalName == Elements.NotebookList)
             {
-                using (var reader = XmlReader.Create(stringReader))
+                root.Notebooks = ParseNotebooks(reader);
+            }
+
+            return root;
+        }
+
+        public IOneNoteItem Parse(string xml, IOneNoteItem parent)
+        {
+            using var stringReader = new StringReader(xml);
+            using var reader = XmlReader.Create(stringReader);
+            reader.MoveToContent();
+            if (reader.NodeType == XmlNodeType.Element)
+            {
+                return reader.LocalName switch
                 {
-                    reader.MoveToContent();
-                    if (reader.NodeType == XmlNodeType.Element)
-                    {
-                        switch (reader.LocalName)
-                        {
-                            case Elements.Notebook:
-                                return ParseNotebook(reader);
-                            case Elements.Section:
-                                return ParseSection(reader, parent);
-                            case Elements.SectionGroup:
-                                return ParseSectionGroup(reader, parent);
-                            case Elements.Page:
-                                return ParsePage(reader, (Section)parent);
-                            default:
-                                return null;
-                        }
-                    }
-                }
+                    Elements.Notebook => ParseNotebook(reader),
+                    Elements.Section => ParseSection(reader, (INotebookOrSectionGroup)parent),
+                    Elements.SectionGroup => ParseSectionGroup(reader, (INotebookOrSectionGroup)parent),
+                    Elements.Page => ParsePage(reader, (Section)parent),
+                    _ => null,
+                };
             }
             return null;
         }
 
-        public IEnumerable<Notebook> ParseNotebooks(string xml)
+        private static List<Notebook> ParseNotebooks(XmlReader reader)
         {
-            using (var stringReader = new StringReader(xml))
-            {
-                using (var reader = XmlReader.Create(stringReader))
-                {
-                    reader.MoveToContent();
-                    if (reader.NodeType == XmlNodeType.Element && reader.LocalName == Elements.NotebookList)
-                    {
-                        return ParseNotebooks(reader);
-                    }
-    
-                    return Array.Empty<Notebook>();
-                }
-            }
-        }
-
-        private List<Notebook> ParseNotebooks(XmlReader reader)
-        {
-            var notebooks = new List<Notebook>();
-
             reader.MoveToElement();
             if (reader.IsEmptyElement)
             {
                 reader.Skip();
-                return notebooks;
+                return [];
             }
 
+            var notebooks = new List<Notebook>();
             reader.ReadStartElement();
             reader.MoveToContent();
             while (reader.NodeType != XmlNodeType.EndElement && reader.NodeType != XmlNodeType.None)
@@ -86,132 +75,48 @@ namespace Odotocodot.OneNote.Linq.Parsers
             reader.ReadEndElement();
             return notebooks;
         }
-        private Notebook ParseNotebook(XmlReader reader)
+
+        private static Notebook ParseNotebook(XmlReader reader)
         {
             var notebook = new Notebook();
             // reader.MoveToContent();
-            while (reader.MoveToNextAttribute())
-            {
-                switch (reader.LocalName)
-                {
-                    case Attributes.ID:
-                        notebook.Id = reader.Value;
-                        break;
-                    case Attributes.Name:
-                        notebook.Name = reader.Value;
-                        break;
-                    case Attributes.NickName:
-                        notebook.NickName = reader.Value;
-                        break;
-                    case Attributes.Path:
-                        notebook.Path = reader.Value;
-                        break;
-                    case Attributes.Color:
-                        notebook.Color = GetColor(reader.Value);
-                        break;
-                    case Attributes.IsUnread:
-                        notebook.IsUnread = bool.Parse(reader.Value);
-                        break;
-                    case Attributes.LastModifiedTime:
-                        notebook.LastModified = DateTime.Parse(reader.Value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
-                        break;
-                }
-            }
+            SetAttributes(notebook, reader);
 
             reader.MoveToElement();
             if (reader.IsEmptyElement)
             {
                 reader.Skip();
-                notebook.Children = Array.Empty<IOneNoteItem>();
+                notebook.Children = [];
+                notebook.Sections = [];
+                notebook.SectionGroups = [];
                 return notebook;
             }
 
-            var children = new List<IOneNoteItem>();
             reader.ReadStartElement();
             reader.MoveToContent();
-            while (reader.NodeType != XmlNodeType.EndElement && reader.NodeType != XmlNodeType.None)
-            {
-                if (reader.NodeType == XmlNodeType.Element)
-                {
-                    if (reader.LocalName == Elements.Section)
-                    {
-                        children.Add(ParseSection(reader, notebook));
-                    }
-                    else if (reader.LocalName == Elements.SectionGroup)
-                    {
-                        children.Add(ParseSectionGroup(reader, notebook));
-                    }
-                    else
-                    {
-                        reader.Read();
-                    }
-                }
-                else
-                {
-                    reader.Read();
-                }
-                reader.MoveToContent();
-            }
-
+            ParseChildren(reader, notebook, out List<Section> sections, out List<SectionGroup> sectionGroups, out List<IOneNoteItem> children);
+            notebook.Sections = sections;
+            notebook.SectionGroups = sectionGroups;
             notebook.Children = children;
             reader.ReadEndElement();
             return notebook;
         }
 
-        private SectionGroup ParseSectionGroup(XmlReader reader, IOneNoteItem parent)
+        private static void ParseChildren(XmlReader reader, INotebookOrSectionGroup parent, out List<Section> sections, out List<SectionGroup> sectionGroups, out List<IOneNoteItem> children)
         {
-            var sectionGroup = new SectionGroup();
-            sectionGroup.Parent = parent;
-            sectionGroup.Notebook = parent.Notebook;
-            while (reader.MoveToNextAttribute())
-            {
-                switch (reader.LocalName)
-                {
-                    case Attributes.ID:
-                        sectionGroup.Id = reader.Value;
-                        break;
-                    case Attributes.Name:
-                        sectionGroup.Name = reader.Value;
-                        break;
-                    case Attributes.LastModifiedTime:
-                        sectionGroup.LastModified = DateTime.Parse(reader.Value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
-                        break;
-                    case Attributes.IsUnread:
-                        sectionGroup.IsUnread = bool.Parse(reader.Value);
-                        break;
-                    case Attributes.Path:
-                        sectionGroup.Path = reader.Value;
-                        break;
-                    case Attributes.IsRecycleBin:
-                        sectionGroup.IsRecycleBin = bool.Parse(reader.Value);
-                        break;
-                }
-            }
-
-            sectionGroup.RelativePath = $"{parent.RelativePath}{RelativePathSeparatorString}{sectionGroup.Name}";
-
-            reader.MoveToElement();
-            if (reader.IsEmptyElement)
-            {
-                reader.Skip();
-                sectionGroup.Children = Array.Empty<IOneNoteItem>();
-                return sectionGroup;
-            }
-
-            var children = new List<IOneNoteItem>();
-            reader.ReadStartElement();
-            reader.MoveToContent();
+            sections = [];
+            sectionGroups = [];
             while (reader.NodeType != XmlNodeType.EndElement && reader.NodeType != XmlNodeType.None)
             {
                 if (reader.NodeType == XmlNodeType.Element)
                 {
                     if (reader.LocalName == Elements.Section)
                     {
-                        children.Add(ParseSection(reader, sectionGroup));
+                        sections.Add(ParseSection(reader, parent));
                     }
                     else if (reader.LocalName == Elements.SectionGroup)
                     {
-                        children.Add(ParseSectionGroup(reader, sectionGroup));
+                        sectionGroups.Add(ParseSectionGroup(reader, parent));
                     }
                     else
                     {
@@ -225,61 +130,52 @@ namespace Odotocodot.OneNote.Linq.Parsers
                 reader.MoveToContent();
             }
 
-            sectionGroup.Children = children;
-            reader.ReadEndElement();
-            return sectionGroup;
+            children = [.. sections, .. sectionGroups];
         }
 
-
-        private Section ParseSection(XmlReader reader, IOneNoteItem parent)
+        private static SectionGroup ParseSectionGroup(XmlReader reader, INotebookOrSectionGroup parent)
         {
-            var section = new Section();
-            section.Parent = parent;
-            section.Notebook = parent.Notebook;
-            while (reader.MoveToNextAttribute())
-            {
-                switch (reader.LocalName)
-                {
-                    case Attributes.ID:
-                        section.Id = reader.Value;
-                        break;
-                    case Attributes.Name:
-                        section.Name = reader.Value;
-                        break;
-                    case Attributes.LastModifiedTime:
-                        section.LastModified = DateTime.Parse(reader.Value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
-                        break;
-                    case Attributes.IsUnread:
-                        section.IsUnread = bool.Parse(reader.Value);
-                        break;
-                    case Attributes.Path:
-                        section.Path = reader.Value;
-                        break;
-                    case Attributes.Color:
-                        section.Color = ColorTranslator.FromHtml(reader.Value);
-                        break;
-                    case Attributes.Encrypted:
-                        section.Encrypted = bool.Parse(reader.Value);
-                        break;
-                    case Attributes.Locked:
-                        section.Locked = bool.Parse(reader.Value);
-                        break;
-                    case Attributes.IsInRecycleBin:
-                        section.IsInRecycleBin = bool.Parse(reader.Value);
-                        break;
-                    case Attributes.IsDeletedPages:
-                        section.IsDeletedPages = bool.Parse(reader.Value);
-                        break;
-                }
-            }
+            var sectionGroup = new SectionGroup();
+            sectionGroup.Parent = parent;
+            //sectionGroup.Notebook = parent.Notebook;
+            SetAttributes(sectionGroup, reader);
 
-            section.RelativePath = $"{parent.RelativePath}{RelativePathSeparatorString}{section.Name}";
+            //sectionGroup.RelativePath = $"{parent.RelativePath}{RelativePathSeparatorString}{sectionGroup.Name}";
 
             reader.MoveToElement();
             if (reader.IsEmptyElement)
             {
                 reader.Skip();
-                section.Children = Array.Empty<IOneNoteItem>();
+                sectionGroup.Children = [];
+                sectionGroup.Sections = [];
+                sectionGroup.SectionGroups = [];
+                return sectionGroup;
+            }
+
+            reader.ReadStartElement();
+            reader.MoveToContent();
+            ParseChildren(reader, sectionGroup, out List<Section> sections, out List<SectionGroup> sectionGroups, out List<IOneNoteItem> children);
+            sectionGroup.Sections = sections;
+            sectionGroup.SectionGroups = sectionGroups;
+            sectionGroup.Children = children;
+            reader.ReadEndElement();
+            return sectionGroup;
+        }
+
+        private static Section ParseSection(XmlReader reader, INotebookOrSectionGroup parent)
+        {
+            var section = new Section();
+            section.Parent = parent;
+            //section.Notebook = parent.Notebook;
+            SetAttributes(section, reader);
+
+            //section.RelativePath = $"{parent.RelativePath}{RelativePathSeparatorString}{section.Name}";
+
+            reader.MoveToElement();
+            if (reader.IsEmptyElement)
+            {
+                reader.Skip();
+                section.Pages = [];
                 return section;
             }
 
@@ -305,49 +201,85 @@ namespace Odotocodot.OneNote.Linq.Parsers
                 }
                 reader.MoveToContent();
             }
-            section.Children = pages;
+            section.Pages = pages;
             reader.ReadEndElement();
             return section;
         }
 
-        private Page ParsePage(XmlReader reader, Section parent)
+        private static Page ParsePage(XmlReader reader, Section parent)
         {
             var page = new Page();
-            page.Parent = parent;
-            page.Notebook = parent.Notebook;
+            page.Section = parent;
+            //page.Notebook = parent.Notebook;
+            SetAttributes(page, reader);
 
+            //page.RelativePath = $"{parent.RelativePath}{RelativePathSeparatorString}{page.Name}";
+
+            reader.Skip();
+            return page;
+        }
+
+        private static void SetAttributes<T>(T item, XmlReader reader) where T : OneNoteItem
+        {
             while (reader.MoveToNextAttribute())
             {
                 switch (reader.LocalName)
                 {
                     case Attributes.ID:
-                        page.Id = reader.Value;
+                        item.Id = reader.Value;
                         break;
                     case Attributes.Name:
-                        page.Name = reader.Value;
+                        item.Name = reader.Value;
                         break;
                     case Attributes.LastModifiedTime:
-                        page.LastModified = DateTime.Parse(reader.Value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
+                        item.LastModified = DateTime.Parse(reader.Value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
                         break;
                     case Attributes.IsUnread:
-                        page.IsUnread = bool.Parse(reader.Value);
+                        item.IsUnread = bool.Parse(reader.Value);
                         break;
-                    case Attributes.DateTime:
-                        page.Created = DateTime.Parse(reader.Value);
+                    case Attributes.Path:
+                        Unsafe.As<IWritablePath>(item).Path = reader.Value;
                         break;
-                    case Attributes.PageLevel:
-                        page.Level = int.Parse(reader.Value);
+                    case Attributes.Color:
+                        Unsafe.As<IWritableColor>(item).Color = GetColor(reader.Value);
                         break;
                     case Attributes.IsInRecycleBin:
-                        page.IsInRecycleBin = bool.Parse(reader.Value);
+                        Unsafe.As<IWritableIsInRecycleBin>(item).IsInRecycleBin = bool.Parse(reader.Value);
+                        break;
+                    case Attributes.NickName:
+                        Unsafe.As<Notebook>(item).NickName = reader.Value;
+                        break;
+                    case Attributes.IsRecycleBin:
+                        Unsafe.As<SectionGroup>(item).IsRecycleBin = bool.Parse(reader.Value);
+                        break;
+                    case Attributes.Encrypted:
+                        Unsafe.As<Section>(item).Encrypted = bool.Parse(reader.Value);
+                        break;
+                    case Attributes.Locked:
+                        Unsafe.As<Section>(item).Locked = bool.Parse(reader.Value);
+                        break;
+                    case Attributes.IsDeletedPages:
+                        Unsafe.As<Section>(item).IsDeletedPages = bool.Parse(reader.Value);
+                        break;
+                    case Attributes.PageLevel:
+                        Unsafe.As<Page>(item).Level = int.Parse(reader.Value);
+                        break;
+                    case Attributes.DateTime:
+                        Unsafe.As<Page>(item).Created = DateTime.Parse(reader.Value);
                         break;
                 }
+
             }
+        }
 
-            page.RelativePath = $"{parent.RelativePath}{RelativePathSeparatorString}{page.Name}";
+        public IEnumerable<Notebook> ParseNotebooks(string xml)
+        {
+            throw new NotImplementedException();
+        }
 
-            reader.Skip();
-            return page;
+        public IOneNoteItem ParseUnknown(string xml, IOneNoteItem parent)
+        {
+            throw new NotImplementedException();
         }
     }
 }

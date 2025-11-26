@@ -54,12 +54,11 @@ namespace Odotocodot.OneNote.Linq
         /// The collection of pages within this section, equal to <see cref="IOneNoteItem.Children"/> for a section.
         /// </summary>
         public IReadOnlyList<Page> Pages { get; internal set; }
-
-        public IOneNoteItem Parent { get; internal set; }
-
+        public IReadOnlyList<IOneNoteItem> Children => Pages;
+        public INotebookOrSectionGroup Parent { get; internal set; }
+        IOneNoteItem IOneNoteItem.Parent => Parent;
         Color? IWritableColor.Color { set => Color = value; }
         string IWritablePath.Path { set => Path = value; }
         bool IWritableIsInRecycleBin.IsInRecycleBin { set => IsInRecycleBin = value; }
-
     }
 }

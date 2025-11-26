@@ -5,7 +5,7 @@
 - Updated to .Net 9.0
 - Renamed ID to Id
 - Renamed classes - Removed OneNote from names OneNoteNotebook.
-- 
+- (Temporarily?) Removed RelativePath and Notebook Properties
 
 
 

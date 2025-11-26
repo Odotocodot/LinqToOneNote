@@ -27,7 +27,10 @@ namespace Odotocodot.OneNote.Linq
         /// <seealso cref="Section.IsDeletedPages"/>
         public bool IsInRecycleBin { get; internal set; }
 
-        public IOneNoteItem Parent { get; internal set; }
+        public Section Section { get; internal set; }
+
+        public IOneNoteItem Parent => Section;
+        IReadOnlyList<IOneNoteItem> IOneNoteItem.Children { get; } = [];
         bool IWritableIsInRecycleBin.IsInRecycleBin { set => IsInRecycleBin = value; }
     }
 }

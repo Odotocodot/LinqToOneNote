@@ -9,7 +9,7 @@ namespace Odotocodot.OneNote.Linq
     /// <summary>
     /// Represents a notebook in OneNote.
     /// </summary>
-    public class Notebook : OneNoteItem, IOneNoteItem, IWritablePath, IWritableColor
+    public class Notebook : OneNoteItem, IOneNoteItem, INotebookOrSectionGroup, IWritablePath, IWritableColor
     {
         internal Notebook() { }
         /// <summary>
@@ -35,12 +35,10 @@ namespace Odotocodot.OneNote.Linq
         /// </summary>
         public IReadOnlyList<SectionGroup> SectionGroups { get; internal set; }
 
-        // TODO: make Children an extension method 
-        // /// <summary>
-        // /// The direct children of the OneNote hierarchy <see cref="IOneNoteItem">item</see>, e.g. for a <see cref="Notebook">notebook</see> it could contain <see cref="Section">sections</see> and/or <see cref="SectionGroup">section groups</see>. <br/>
-        // /// If the <see cref="IOneNoteItem">item</see> has no children an empty <see cref="IEnumerable{T}">IEnumerable</see>&lt;<see cref="IOneNoteItem"/>&gt; is returned. For instance, this property is an empty enumerable for a <see cref="Page">page</see>.
-        // /// </summary>
-        // public IReadOnlyList<IOneNoteItem> Children => children.Cast<IOneNoteItemFull>();
+        // TODO: Could make Children an extension method 
+        public IReadOnlyList<IOneNoteItem> Children { get; internal set; }
+
+        IOneNoteItem IOneNoteItem.Parent { get; } = null;
 
         Color? IWritableColor.Color { set => Color = value; }
         string IWritablePath.Path { set => Path = value; }
