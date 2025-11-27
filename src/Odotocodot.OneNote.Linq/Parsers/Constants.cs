@@ -10,7 +10,9 @@ namespace Odotocodot.OneNote.Linq.Parsers
 			internal const string SectionGroup = "SectionGroup";
 			internal const string Section = "Section";
 			internal const string Page = "Page";
-			internal const string NotebookList = "Notebooks";
+			internal const string OpenSections = "OpenSections";
+			internal const string UnfiledNotes = "UnfiledNotes";
+			internal const string Root = "Notebooks";
 		}
 
 		internal static class Attributes

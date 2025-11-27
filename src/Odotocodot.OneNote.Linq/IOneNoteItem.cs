@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Odotocodot.OneNote.Linq.Internal;
+using Odotocodot.OneNote.Linq.Abstractions;
 
 namespace Odotocodot.OneNote.Linq
 {
@@ -11,12 +11,8 @@ namespace Odotocodot.OneNote.Linq
     /// <seealso cref="SectionGroup"/>
     /// <seealso cref="Section"/>
     /// <seealso cref="Page"/>
-    public interface IOneNoteItem
+    public interface IOneNoteItem : INavigable
     {
-        /// <summary>
-        /// The ID of the OneNote hierarchy item.
-        /// </summary>
-        string Id { get; }
         /// <summary>
         /// The name of the OneNote hierarchy item.
         /// </summary>

@@ -6,7 +6,8 @@
 - Renamed ID to Id
 - Renamed classes - Removed OneNote from names OneNoteNotebook.
 - (Temporarily?) Removed RelativePath and Notebook Properties
-
+- Refactor Name Validation
+- Added support for OpenSections and UnfiledNotes 
 
 
 ## [1.2.0] - 2025-07-05

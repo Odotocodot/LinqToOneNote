@@ -163,8 +163,8 @@ namespace Odotocodot.OneNote.Linq
         /// <summary>
         /// Opens the <paramref name="item"/> in OneNote (creates a new OneNote window if one is not currently open).
         /// </summary>       
-        /// <param name="item">The OneNote hierarchy item.</param>
-        public static void OpenInOneNote(IOneNoteItem item) => OneNote.NavigateTo(item.Id);
+        /// <param name="item">The item to open</param>
+        public static void OpenInOneNote(INavigable item) => OneNote.NavigateTo(item.Id);
 
         /// <summary>
         /// Forces OneNote to sync the <paramref name="item"/>.
