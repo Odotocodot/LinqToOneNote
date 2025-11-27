@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Odotocodot.OneNote.Linq.Internal
 {
+    //TODO: maybe remove 
     /// <summary>
     /// Use <see cref="IOneNoteItem"/> instead.
     /// </summary>
     /// <seealso cref="IOneNoteItem"/>
-    public abstract class OneNoteItem// : IOneNoteItem
+    public abstract class OneNoteItem// : IOneNoteItem 
     {
         internal OneNoteItem() { }
 
@@ -35,11 +35,11 @@ namespace Odotocodot.OneNote.Linq.Internal
         // #nullable restore
         // internal IEnumerable<OneNoteItem> children = [];
 
-        public static IEqualityComparer<OneNoteItem> IdComparer { get; } = new IdEqualityComparer();
+        public static IEqualityComparer<IOneNoteItem> IdComparer { get; } = new IdEqualityComparer();
 
-        private sealed class IdEqualityComparer : IEqualityComparer<OneNoteItem>
+        private sealed class IdEqualityComparer : IEqualityComparer<IOneNoteItem>
         {
-            public bool Equals(OneNoteItem x, OneNoteItem y)
+            public bool Equals(IOneNoteItem x, IOneNoteItem y)
             {
                 if (ReferenceEquals(x, y))
                     return true;
@@ -52,11 +52,10 @@ namespace Odotocodot.OneNote.Linq.Internal
                 return x.Id == y.Id;
             }
 
-            public int GetHashCode(OneNoteItem obj)
+            public int GetHashCode(IOneNoteItem obj)
             {
                 return obj.Id.GetHashCode();
             }
         }
-
     }
 }

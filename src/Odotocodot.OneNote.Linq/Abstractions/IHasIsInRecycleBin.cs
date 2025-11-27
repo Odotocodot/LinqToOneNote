@@ -1,3 +1,5 @@
+using Odotocodot.OneNote.Linq.Extensions;
+
 namespace Odotocodot.OneNote.Linq.Abstractions
 {
 	/// <summary>

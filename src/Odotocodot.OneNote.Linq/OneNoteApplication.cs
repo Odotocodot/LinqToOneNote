@@ -6,6 +6,7 @@ using System.Threading;
 using System.Xml.Linq;
 using Microsoft.Office.Interop.OneNote;
 using Odotocodot.OneNote.Linq.Abstractions;
+using Odotocodot.OneNote.Linq.Extensions;
 using Odotocodot.OneNote.Linq.Internal;
 using Odotocodot.OneNote.Linq.Parsers;
 
@@ -170,7 +171,7 @@ namespace Odotocodot.OneNote.Linq
         /// Forces OneNote to sync the <paramref name="item"/>.
         /// </summary>       
         /// <param name="item"><inheritdoc cref="OpenInOneNote" path="/param[@name='item']"/></param>
-        public static void SyncItem(IOneNoteItem item) => OneNote.SyncHierarchy(item.Id);
+        public static void SyncItem(INavigable item) => OneNote.SyncHierarchy(item.Id);
 
         /// <summary>
         /// Gets the content of the specified <paramref name="page"/>.
