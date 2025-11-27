@@ -97,13 +97,13 @@ namespace Odotocodot.OneNote.Linq
         #region OneNote API Methods
 
         /// <summary>
-        /// Get all notebooks down to all children.
+        /// Get the full OneNote hierarchy.
         /// </summary>
-        /// <returns>The full hierarchy node structure with <see cref="IEnumerable{T}">IEnumerable</see>&lt;<see cref="Notebook"/>&gt; as the root.</returns>
-        public static IEnumerable<Notebook> GetNotebooks()
+        /// <returns>Returns a <see cref="Root"/> object which contains the OneNote hierarchy.</returns>
+        public static Root GetFullHierarchy()
         {
             OneNote.GetHierarchy(null, HierarchyScope.hsPages, out string xml, xmlSchema);
-            return xmlParser.ParseNotebooks(xml);
+            return xmlParser.ParseRoot(xml);
         }
 
         /// <summary>
@@ -118,7 +118,7 @@ namespace Odotocodot.OneNote.Linq
             ValidateSearch(search);
 
             OneNote.FindPages(null, search, out string xml, xsSchema: xmlSchema);
-            return xmlParser.ParseNotebooks(xml).GetPages();
+            return xmlParser.ParseRoot(xml).GetPages();
         }
 
         /// <summary>
@@ -139,7 +139,7 @@ namespace Odotocodot.OneNote.Linq
 
             OneNote.FindPages(scope.Id, search, out string xml, xsSchema: xmlSchema);
 
-            return xmlParser.ParseUnknown(xml, scope).GetPages();
+            return xmlParser.Parse(xml, scope).GetPages();
         }
 
         /// <summary>
@@ -169,7 +169,7 @@ namespace Odotocodot.OneNote.Linq
         /// <summary>
         /// Forces OneNote to sync the <paramref name="item"/>.
         /// </summary>       
-        /// <param name="item"><inheritdoc cref="OpenInOneNote(IOneNoteItem)" path="/param[@name='item']"/></param>
+        /// <param name="item"><inheritdoc cref="OpenInOneNote" path="/param[@name='item']"/></param>
         public static void SyncItem(IOneNoteItem item) => OneNote.SyncHierarchy(item.Id);
 
         /// <summary>

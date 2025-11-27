@@ -14,7 +14,7 @@ namespace Odotocodot.OneNote.Linq.Parsers
 
     internal class XmlParserXmlReader : IXmlParser
     {
-        public Root ParseFullHierarchy(string xml)
+        public Root ParseRoot(string xml)
         {
             using var stringReader = new StringReader(xml);
             using var reader = XmlReader.Create(stringReader);
@@ -347,16 +347,6 @@ namespace Odotocodot.OneNote.Linq.Parsers
                 }
 
             }
-        }
-
-        public IEnumerable<Notebook> ParseNotebooks(string xml)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IOneNoteItem ParseUnknown(string xml, IOneNoteItem parent)
-        {
-            throw new NotImplementedException();
         }
     }
 }
