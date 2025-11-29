@@ -4,5 +4,6 @@ namespace Odotocodot.OneNote.Linq.Parsers
     {
         Root ParseRoot(string xml);
         IOneNoteItem Parse(string xml, IOneNoteItem parent);
+        void ParseExisting(string xml, IOneNoteItem item);
     }
 }

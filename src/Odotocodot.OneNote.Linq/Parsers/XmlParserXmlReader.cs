@@ -6,12 +6,11 @@ using System.Runtime.CompilerServices;
 using System.Xml;
 using Odotocodot.OneNote.Linq.Abstractions;
 using Odotocodot.OneNote.Linq.Internal;
+using static Odotocodot.OneNote.Linq.Parsers.Constants;
 
 
 namespace Odotocodot.OneNote.Linq.Parsers
 {
-    using static Constants;
-
     internal class XmlParserXmlReader : IXmlParser
     {
         public Root ParseRoot(string xml)
@@ -31,14 +30,85 @@ namespace Odotocodot.OneNote.Linq.Parsers
             {
                 return reader.LocalName switch
                 {
-                    Elements.Notebook => ParseNotebook(reader),
-                    Elements.Section => ParseSection(reader, (INotebookOrSectionGroup)parent),
-                    Elements.SectionGroup => ParseSectionGroup(reader, (INotebookOrSectionGroup)parent),
-                    Elements.Page => ParsePage(reader, (Section)parent),
-                    _ => null,
+                    Elements.Notebook => ParseNotebook(reader, new Notebook()),
+                    Elements.Section => ParseSection(reader, new Section(), (INotebookOrSectionGroup)parent),
+                    Elements.SectionGroup => ParseSectionGroup(reader, new SectionGroup(), (INotebookOrSectionGroup)parent),
+                    Elements.Page => ParsePage(reader, new Page(), (Section)parent),
+                    _ => throw new InvalidOperationException($"XML element '{reader.LocalName}' is not supported."),
                 };
             }
-            return null;
+            throw new InvalidOperationException($"XML node type '{reader.NodeType}' is not supported.");
+        }
+
+        public void ParseExisting(string xml, IOneNoteItem item)
+        {
+            using var stringReader = new StringReader(xml);
+            using var reader = XmlReader.Create(stringReader);
+            reader.MoveToContent();
+            if (reader.NodeType == XmlNodeType.Element)
+            {
+                switch (item)
+                {
+                    case Notebook notebook:
+                        ParseNotebook(reader, notebook);
+                        break;
+                    case Section section:
+                        ParseSection(reader, section, section.Parent);
+                        break;
+                    case SectionGroup sectionGroup:
+                        ParseSectionGroup(reader, sectionGroup, sectionGroup.Parent);
+                        break;
+                    case Page page:
+                        ParsePage(reader, page, page.Parent);
+                        break;
+                    default:
+                        throw new InvalidOperationException($"'{item.GetType().Name}' is not a valid OneNote item type.");
+                }
+            }
+        }
+
+        private static Root ParseRoot(XmlReader reader)
+        {
+            var root = new Root();
+            reader.MoveToElement();
+            if (reader.IsEmptyElement)
+            {
+                reader.Skip();
+                return root;
+            }
+
+            var notebooks = new List<Notebook>();
+            reader.ReadStartElement();
+            reader.MoveToContent();
+            while (reader.NodeType != XmlNodeType.EndElement && reader.NodeType != XmlNodeType.None)
+            {
+                if (reader.NodeType == XmlNodeType.Element)
+                {
+                    switch (reader.LocalName)
+                    {
+                        case Elements.Notebook:
+                            notebooks.Add(ParseNotebook(reader, new Notebook()));
+                            break;
+                        case Elements.UnfiledNotes:
+                            root.UnfiledNotes = ParseUnfiledNotes(reader);
+                            break;
+                        case Elements.OpenSections:
+                            root.OpenSections = ParseOpenSections(reader);
+                            break;
+                        default:
+                            reader.Read();
+                            break;
+                    }
+                }
+                else
+                {
+                    reader.Read();
+                }
+            }
+
+            reader.ReadEndElement();
+            root.Notebooks = notebooks;
+            return root;
         }
 
         private static UnfiledNotes ParseUnfiledNotes(XmlReader reader)
@@ -63,7 +133,7 @@ namespace Odotocodot.OneNote.Linq.Parsers
             reader.MoveToContent();
             if (reader.NodeType == XmlNodeType.Element && reader.LocalName == Elements.Section)
             {
-                unfiledNotes.Section = ParseSection(reader, null);
+                unfiledNotes.Section = ParseSection(reader, new Section(), null);
             }
             reader.ReadEndElement();
             return unfiledNotes;
@@ -95,7 +165,7 @@ namespace Odotocodot.OneNote.Linq.Parsers
             {
                 if (reader.NodeType == XmlNodeType.Element && reader.LocalName == Elements.Section)
                 {
-                    sections.Add(ParseSection(reader, null));
+                    sections.Add(ParseSection(reader, new Section(), null));
                 }
                 else
                 {
@@ -109,53 +179,8 @@ namespace Odotocodot.OneNote.Linq.Parsers
             return openSections;
         }
 
-        private static Root ParseRoot(XmlReader reader)
+        private static Notebook ParseNotebook(XmlReader reader, Notebook notebook)
         {
-            var root = new Root();
-            reader.MoveToElement();
-            if (reader.IsEmptyElement)
-            {
-                reader.Skip();
-                return root;
-            }
-
-            var notebooks = new List<Notebook>();
-            reader.ReadStartElement();
-            reader.MoveToContent();
-            while (reader.NodeType != XmlNodeType.EndElement && reader.NodeType != XmlNodeType.None)
-            {
-                if (reader.NodeType == XmlNodeType.Element)
-                {
-                    switch (reader.LocalName)
-                    {
-                        case Elements.Notebook:
-                            notebooks.Add(ParseNotebook(reader));
-                            break;
-                        case Elements.UnfiledNotes:
-                            root.UnfiledNotes = ParseUnfiledNotes(reader);
-                            break;
-                        case Elements.OpenSections:
-                            root.OpenSections = ParseOpenSections(reader);
-                            break;
-                        default:
-                            reader.Read();
-                            break;
-                    }
-                }
-                else
-                {
-                    reader.Read();
-                }
-            }
-
-            reader.ReadEndElement();
-            root.Notebooks = notebooks;
-            return root;
-        }
-
-        private static Notebook ParseNotebook(XmlReader reader)
-        {
-            var notebook = new Notebook();
             // reader.MoveToContent();
             SetAttributes(notebook, reader);
 
@@ -190,10 +215,10 @@ namespace Odotocodot.OneNote.Linq.Parsers
                     switch (reader.LocalName)
                     {
                         case Elements.Section:
-                            sections.Add(ParseSection(reader, parent));
+                            sections.Add(ParseSection(reader, new Section(), parent));
                             break;
                         case Elements.SectionGroup:
-                            sectionGroups.Add(ParseSectionGroup(reader, parent));
+                            sectionGroups.Add(ParseSectionGroup(reader, new SectionGroup(), parent));
                             break;
                         default:
                             reader.Read();
@@ -210,9 +235,8 @@ namespace Odotocodot.OneNote.Linq.Parsers
             children = [.. sections, .. sectionGroups];
         }
 
-        private static SectionGroup ParseSectionGroup(XmlReader reader, INotebookOrSectionGroup parent)
+        private static SectionGroup ParseSectionGroup(XmlReader reader, SectionGroup sectionGroup, INotebookOrSectionGroup parent)
         {
-            var sectionGroup = new SectionGroup();
             sectionGroup.Parent = parent;
             //sectionGroup.Notebook = parent.Notebook;
             SetAttributes(sectionGroup, reader);
@@ -239,9 +263,8 @@ namespace Odotocodot.OneNote.Linq.Parsers
             return sectionGroup;
         }
 
-        private static Section ParseSection(XmlReader reader, INotebookOrSectionGroup parent)
+        private static Section ParseSection(XmlReader reader, Section section, INotebookOrSectionGroup parent)
         {
-            var section = new Section();
             section.Parent = parent;
             //section.Notebook = parent.Notebook;
             SetAttributes(section, reader);
@@ -261,16 +284,9 @@ namespace Odotocodot.OneNote.Linq.Parsers
             reader.MoveToContent();
             while (reader.NodeType != XmlNodeType.EndElement && reader.NodeType != XmlNodeType.None)
             {
-                if (reader.NodeType == XmlNodeType.Element)
+                if (reader.NodeType == XmlNodeType.Element && reader.LocalName == Elements.Page)
                 {
-                    if (reader.LocalName == Elements.Page)
-                    {
-                        pages.Add(ParsePage(reader, section));
-                    }
-                    else
-                    {
-                        reader.Read();
-                    }
+                    pages.Add(ParsePage(reader, new Page(), section));
                 }
                 else
                 {
@@ -283,10 +299,9 @@ namespace Odotocodot.OneNote.Linq.Parsers
             return section;
         }
 
-        private static Page ParsePage(XmlReader reader, Section parent)
+        private static Page ParsePage(XmlReader reader, Page page, Section parent)
         {
-            var page = new Page();
-            page.Section = parent;
+            page.Parent = parent;
             //page.Notebook = parent.Notebook;
             SetAttributes(page, reader);
 

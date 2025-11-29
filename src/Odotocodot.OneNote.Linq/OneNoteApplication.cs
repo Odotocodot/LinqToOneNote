@@ -414,5 +414,104 @@ namespace Odotocodot.OneNote.Linq
         /// <seealso cref="Section.InvalidCharacters"/>
         public static bool IsValidName<THierarchyItem>(string name) where THierarchyItem : INameInvalidCharacters
             => !string.IsNullOrWhiteSpace(name) && !THierarchyItem.InvalidCharacters.Any(name.Contains);
+
+
+        public static class Partial
+        {
+            //TODO: document side effects, like updating the values
+            public enum HierarchyScope
+            {
+                Self = Microsoft.Office.Interop.OneNote.HierarchyScope.hsSelf,
+                Children = Microsoft.Office.Interop.OneNote.HierarchyScope.hsChildren,
+                Notebooks = Microsoft.Office.Interop.OneNote.HierarchyScope.hsNotebooks,
+                Sections = Microsoft.Office.Interop.OneNote.HierarchyScope.hsSections,
+                Pages = Microsoft.Office.Interop.OneNote.HierarchyScope.hsPages,
+            }
+            public static Root GetHierarchy(HierarchyScope scope)
+            {
+                OneNote.GetHierarchy(null, scope.Cast(), out string xml, xmlSchema);
+                return xmlParser.ParseRoot(xml);
+            }
+
+            public static IReadOnlyList<IOneNoteItem> GetChildren(IOneNoteItem item)
+            {
+                ArgumentNullException.ThrowIfNull(item);
+
+                if (item is Page)
+                {
+                    return [];
+                }
+
+                OneNote.GetHierarchy(item.Id, HierarchyScope.Children.Cast(), out string xml, xmlSchema);
+                return xmlParser.Parse(xml, item).Children;
+            }
+
+            public static IReadOnlyList<IOneNoteItem> GetChildrenAndUpdate(IOneNoteItem item, bool force = false) //HierarchyScope scope?
+            {
+                ArgumentNullException.ThrowIfNull(item);
+                if (item is Page)
+                {
+                    return [];
+                }
+
+                if (!force && item.Children.Count != 0)
+                {
+                    return item.Children;
+                }
+
+                OneNote.GetHierarchy(item.Id, HierarchyScope.Children.Cast(), out string xml, xmlSchema);
+                xmlParser.ParseExisting(xml, item);
+                return item.Children;
+            }
+
+            public static IOneNoteItem GetParent(IOneNoteItem item)
+            {
+                ArgumentNullException.ThrowIfNull(item);
+
+                if (item is Notebook)
+                {
+                    return null;
+                }
+
+                OneNote.GetHierarchyParent(item.Id, out string parentId);
+                OneNote.GetHierarchy(parentId, HierarchyScope.Self.Cast(), out string xml, xmlSchema);
+                return xmlParser.Parse(xml, null);
+            }
+
+            public static IOneNoteItem GetParentAndUpdate(IOneNoteItem item, bool force)
+            {
+                ArgumentNullException.ThrowIfNull(item);
+
+                if (item is Notebook)
+                {
+                    return null;
+                }
+
+                if (!force && item.Parent != null)
+                {
+                    return item.Parent;
+                }
+
+                OneNote.GetHierarchyParent(item.Id, out string parentId);
+                OneNote.GetHierarchy(parentId, HierarchyScope.Self.Cast(), out string xml, xmlSchema);
+                var parent = xmlParser.Parse(xml, null);
+                switch (item)
+                {
+                    case Section section:
+                        section.Parent = (INotebookOrSectionGroup)parent;
+                        break;
+                    case SectionGroup sectionGroup:
+                        sectionGroup.Parent = (INotebookOrSectionGroup)parent;
+                        break;
+                    case Page page:
+                        page.Parent = (Section)parent;
+                        break;
+                }
+                return parent;
+            }
+        }
+
+        private static HierarchyScope Cast(this Partial.HierarchyScope scope) => (HierarchyScope)scope;
+
     }
 }

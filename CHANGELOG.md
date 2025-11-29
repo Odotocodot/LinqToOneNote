@@ -8,6 +8,8 @@
 - (Temporarily?) Removed RelativePath and Notebook Properties
 - Refactor Name Validation
 - Added support for OpenSections and UnfiledNotes 
+- Add support for get a partial hierarchy
+- Rename Section property to Parent on page
 
 
 ## [1.2.0] - 2025-07-05
