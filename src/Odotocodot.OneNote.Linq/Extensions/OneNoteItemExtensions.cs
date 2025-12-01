@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Odotocodot.OneNote.Linq.Abstractions;
 using Odotocodot.OneNote.Linq.Internal;
+using Odotocodot.OneNote.Linq.Parsers;
 
 namespace Odotocodot.OneNote.Linq.Extensions
 {
@@ -48,7 +50,7 @@ namespace Odotocodot.OneNote.Linq.Extensions
         /// </summary>
         /// <param name="notebook">The notebook to get the recycle bin of.</param>
         /// <param name="sectionGroup">When this method returns, <paramref name="sectionGroup"/> contains the recycle bin of 
-        /// the <paramref name="notebook"/> if it was found; 
+        /// the <paramref name="notebook"/> if it was found;
         /// otherwise, <see langword="null"/>.</param>
         /// <returns><see langword="true"/> if the <paramref name="notebook"/> contains a recycle bin; otherwise, <see langword="false"/>.</returns>
         public static bool GetRecycleBin(this Notebook notebook, out SectionGroup sectionGroup)
@@ -56,6 +58,25 @@ namespace Odotocodot.OneNote.Linq.Extensions
             sectionGroup = notebook.SectionGroups.FirstOrDefault(sg => sg.IsRecycleBin);
             return sectionGroup != null;
         }
+
+
+        public static string GetRelativePath(this IOneNoteItem item)
+        {
+            StringBuilder sb = new();
+            IOneNoteItem current = item;
+            while (true)
+            {
+                sb.Insert(0, current.Name);
+                current = current.Parent;
+                if (current == null)
+                {
+                    break;
+                }
+                sb.Insert(0, Constants.RelativePathSeparator);
+            }
+            return sb.ToString();
+        }
+
         /// <summary>
         /// Checks if two <see cref="IOneNoteItem"/>s represent the same item in OneNote.<br/>
         /// Shorthand for comparing the <see cref="IOneNoteItem.Id">ID</see> of OneNote hierarchy items. E.g.
