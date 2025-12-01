@@ -10,6 +10,7 @@
 - Added support for OpenSections and UnfiledNotes 
 - Add support for get a partial hierarchy
 - Rename Section property to Parent on page
+- Traverse to Descendants
 
 
 ## [1.2.0] - 2025-07-05

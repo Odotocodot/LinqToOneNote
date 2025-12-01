@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace Odotocodot.OneNote.Linq.Extensions
 {
@@ -86,5 +88,310 @@ namespace Odotocodot.OneNote.Linq.Extensions
         // /// </remarks>
         // public static IOneNoteItem FindByID(this IEnumerable<INavigable> source, string id) =>
         //     source.Traverse(i => i.Id == id).FirstOrDefault();
+
+        private static class StackPool
+        {
+            private static readonly ConcurrentBag<Stack2> pool = [];
+            private static readonly int max = 5;
+            private static int count = 0;
+
+            public static Stack2 Rent()
+            {
+                if (pool.TryTake(out var stack))
+                {
+                    Interlocked.Decrement(ref count);
+                    return stack;
+                }
+                return new Stack2();
+            }
+
+            private static void Return(Stack2 stack)
+            {
+                if (Interlocked.Increment(ref count) <= max)
+                {
+                    pool.Add(stack);
+                }
+                else
+                {
+                    Interlocked.Decrement(ref count);
+                }
+            }
+
+            internal class Stack2 : Stack<IOneNoteItem>, IDisposable
+            {
+                public void Dispose() => Return(this);
+            }
+        }
+
+        public static IEnumerable<IOneNoteItem> Descendants(this IOneNoteItem source)
+        {
+            ArgumentNullException.ThrowIfNull(source);
+
+            using var stack = StackPool.Rent();
+            stack.Push(source);
+            while (stack.Count > 0)
+            {
+                var current = stack.Pop();
+                yield return current;
+                var children = current.Children;
+                for (int i = 0; i < children.Count; i++)
+                {
+                    stack.Push(children[i]);
+                }
+            }
+        }
+
+        public static IEnumerable<IOneNoteItem> Descendants(this IOneNoteItem source, Func<IOneNoteItem, bool> predicate)
+        {
+            ArgumentNullException.ThrowIfNull(source);
+            ArgumentNullException.ThrowIfNull(predicate);
+
+            using var stack = StackPool.Rent();
+            stack.Push(source);
+            while (stack.Count > 0)
+            {
+                var current = stack.Pop();
+                if (predicate(current))
+                    yield return current;
+                var children = current.Children;
+                for (int i = 0; i < children.Count; i++)
+                {
+                    stack.Push(children[i]);
+                }
+            }
+        }
+
+        public static IEnumerable<IOneNoteItem> Descendants(this IEnumerable<IOneNoteItem> source)
+        {
+            ArgumentNullException.ThrowIfNull(source);
+
+            using var stack = StackPool.Rent();
+            if (source is IList<IOneNoteItem> list)
+            {
+                for (int j = 0; j < list.Count; j++)
+                {
+                    stack.Push(list[j]);
+                    while (stack.Count > 0)
+                    {
+                        var current = stack.Pop();
+                        yield return current;
+                        var children = current.Children;
+                        for (int i = 0; i < children.Count; i++)
+                        {
+                            stack.Push(children[i]);
+                        }
+                    }
+                }
+            }
+            else if (source is IReadOnlyList<IOneNoteItem> list2)
+            {
+                for (int j = 0; j < list2.Count; j++)
+                {
+                    stack.Push(list2[j]);
+                    while (stack.Count > 0)
+                    {
+                        var current = stack.Pop();
+                        yield return current;
+                        var children = current.Children;
+                        for (int i = 0; i < children.Count; i++)
+                        {
+                            stack.Push(children[i]);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                foreach (var item in source)
+                {
+                    stack.Push(item);
+                    while (stack.Count > 0)
+                    {
+                        var current = stack.Pop();
+                        yield return current;
+                        var children = current.Children;
+                        for (int i = 0; i < children.Count; i++)
+                        {
+                            stack.Push(children[i]);
+                        }
+                    }
+                }
+            }
+        }
+
+        public static IEnumerable<IOneNoteItem> Descendants(this IEnumerable<IOneNoteItem> source, Func<IOneNoteItem, bool> predicate)
+        {
+            ArgumentNullException.ThrowIfNull(source);
+            ArgumentNullException.ThrowIfNull(predicate);
+
+            using var stack = StackPool.Rent();
+            if (source is IList<IOneNoteItem> list)
+            {
+                for (int j = 0; j < list.Count; j++)
+                {
+                    stack.Push(list[j]);
+                    while (stack.Count > 0)
+                    {
+                        var current = stack.Pop();
+                        if (predicate(current))
+                            yield return current;
+                        var children = current.Children;
+                        for (int i = 0; i < children.Count; i++)
+                        {
+                            stack.Push(children[i]);
+                        }
+                    }
+                }
+            }
+            else if (source is IReadOnlyList<IOneNoteItem> list2)
+            {
+                for (int j = 0; j < list2.Count; j++)
+                {
+                    stack.Push(list2[j]);
+                    while (stack.Count > 0)
+                    {
+                        var current = stack.Pop();
+                        if (predicate(current))
+                            yield return current;
+                        var children = current.Children;
+                        for (int i = 0; i < children.Count; i++)
+                        {
+                            stack.Push(children[i]);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                foreach (var item in source)
+                {
+                    stack.Push(item);
+                    while (stack.Count > 0)
+                    {
+                        var current = stack.Pop();
+                        if (predicate(current))
+                            yield return current;
+                        var children = current.Children;
+                        for (int i = 0; i < children.Count; i++)
+                        {
+                            stack.Push(children[i]);
+                        }
+                    }
+                }
+            }
+        }
+
+        public static IEnumerable<Page> GetAllPages(this IOneNoteItem source)
+        {
+            ArgumentNullException.ThrowIfNull(source);
+
+            using var stack = StackPool.Rent();
+            stack.Push(source);
+            while (stack.Count > 0)
+            {
+                var current = stack.Pop();
+                if (current is Section section)
+                {
+                    for (int i = 0; i < section.Pages.Count; i++)
+                    {
+                        yield return section.Pages[i];
+                    }
+                }
+                else
+                {
+                    var children = current.Children;
+                    for (int i = 0; i < children.Count; i++)
+                    {
+                        stack.Push(children[i]);
+                    }
+                }
+            }
+        }
+
+        public static IEnumerable<Page> GetAllPages(this IEnumerable<IOneNoteItem> source)
+        {
+            ArgumentNullException.ThrowIfNull(source);
+
+            using var stack = StackPool.Rent();
+            if (source is IList<IOneNoteItem> list)
+            {
+                for (int j = 0; j < list.Count; j++)
+                {
+                    stack.Push(list[j]);
+                    while (stack.Count > 0)
+                    {
+                        var current = stack.Pop();
+                        if (current is Section section)
+                        {
+                            for (int i = 0; i < section.Pages.Count; i++)
+                            {
+                                yield return section.Pages[i];
+                            }
+                        }
+                        else
+                        {
+                            var children = current.Children;
+                            for (int i = 0; i < children.Count; i++)
+                            {
+                                stack.Push(children[i]);
+                            }
+                        }
+                    }
+                }
+            }
+            else if (source is IReadOnlyList<IOneNoteItem> list2)
+            {
+                for (int j = 0; j < list2.Count; j++)
+                {
+                    stack.Push(list2[j]);
+                    while (stack.Count > 0)
+                    {
+                        var current = stack.Pop();
+                        if (current is Section section)
+                        {
+                            for (int i = 0; i < section.Pages.Count; i++)
+                            {
+                                yield return section.Pages[i];
+                            }
+                        }
+                        else
+                        {
+                            var children = current.Children;
+                            for (int i = 0; i < children.Count; i++)
+                            {
+                                stack.Push(children[i]);
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                foreach (var item in source)
+                {
+                    stack.Push(item);
+                    while (stack.Count > 0)
+                    {
+                        var current = stack.Pop();
+                        if (current is Section section)
+                        {
+                            for (int i = 0; i < section.Pages.Count; i++)
+                            {
+                                yield return section.Pages[i];
+                            }
+                        }
+                        else
+                        {
+                            var children = current.Children;
+                            for (int i = 0; i < children.Count; i++)
+                            {
+                                stack.Push(children[i]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
     }
 }
