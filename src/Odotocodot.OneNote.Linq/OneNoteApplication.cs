@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -20,29 +21,6 @@ namespace Odotocodot.OneNote.Linq
     /// <remarks>A <see cref="Application">OneNote COM object</see> is required to access any of the OneNote API.</remarks>
     public static class OneNoteApplication
     {
-        #region COM Object Members
-
-        private static Lazy<Application> lazyOneNote = GetLazyOneNote();
-        private static Application OneNote => lazyOneNote.Value;
-
-        /// <summary>
-        /// Use this only if you know what you are doing.
-        /// The COM Object instance of the OneNote application.
-        /// </summary>
-        /// <seealso cref="HasComObject"/>
-        /// <seealso cref="InitComObject"/>
-        /// <seealso cref="ReleaseComObject"/>
-        public static Application ComObject => OneNote;
-
-        /// <summary>
-        /// Indicates whether the class has a usable <see cref="Application">COM Object instance</see>.
-        /// </summary>
-        /// <remarks>When <see langword="true"/> a "Microsoft OneNote" process should be visible in the Task Manager.</remarks>
-        /// <seealso cref="InitComObject"/>
-        /// <seealso cref="ReleaseComObject"/>
-        public static bool HasComObject => lazyOneNote.IsValueCreated;
-        #endregion
-
         /// <summary>
         /// The directory separator used in <see cref="IOneNoteItem.RelativePath"/>.
         /// </summary>
@@ -53,11 +31,68 @@ namespace Odotocodot.OneNote.Linq
         // NOTE: We recommend specifying a version of OneNote (such as xs2013) instead of using xsCurrent or leaving it blank, because this will allow your add-in to work with future versions of OneNote.
         private const XMLSchema xmlSchema = XMLSchema.xs2013;
 
-        private static readonly XmlParserXmlReader xmlParser = new XmlParserXmlReader();
+        private static readonly XmlParserXmlReader xmlParser = new();
 
-        #region COM Object Methods
+        #region COM Object Management
+        public static ComObjectMode ComObjectMode { get; private set; } = ComObjectMode.Lazy;
+        private static Application app;
+        // Used to make releasing and getting the COM object easier depending on the ComObjectSetting.
+        // Similar to Lock.EnterScope
+        private readonly ref struct OneNoteHandle
+        {
+            public OneNoteHandle()
+            {
+                if (ComObjectMode == ComObjectMode.Wrap || ComObjectMode == ComObjectMode.Lazy)
+                {
+                    InitComObject();
+                }
+            }
 
-        private static Lazy<Application> GetLazyOneNote() => new Lazy<Application>(() => new Application(), LazyThreadSafetyMode.ExecutionAndPublication);
+            // For better error checking
+            // public void Run(Action<Application> action)
+            // {
+            //     try
+            //     {
+            //         action(app);
+            //     }
+            //     catch
+            //     {
+            //         //https://learn.microsoft.com/en-us/office/client-developer/onenote/error-codes-onenote
+            //     }
+            // }
+
+#pragma warning disable CA1822 // Mark members as static
+            public Application OneNote => app;
+            public void Dispose()
+#pragma warning restore CA1822 // Mark members as static
+            {
+                if (ComObjectMode == ComObjectMode.Wrap)
+                {
+                    ReleaseComObject();
+                }
+            }
+        }
+
+        private static readonly Lock comLock = new();
+
+        /// <summary>
+        /// Use this only if you know what you are doing.
+        /// The COM Object instance of the OneNote application.
+        /// </summary>
+        /// <seealso cref="HasComObject"/>
+        /// <seealso cref="InitComObject"/>
+        /// <seealso cref="ReleaseComObject"/>
+        public static Application ComObject => app;
+
+        /// <summary>
+        /// Indicates whether the class has a usable <see cref="Application">COM Object instance</see>.
+        /// </summary>
+        /// <remarks>When <see langword="true"/> a "Microsoft OneNote" process should be visible in the Task Manager.</remarks>
+        /// <seealso cref="InitComObject"/>
+        /// <seealso cref="ReleaseComObject"/>
+        public static bool HasComObject => app != null;
+
+        public static void SetComObjectMode(ComObjectMode mode) => ComObjectMode = mode;
 
         /// <summary>
         /// Forcible initialises the static class by acquiring a <see cref="Application">OneNote COM object</see>. Does nothing if a COM object is already accessible.
@@ -68,14 +103,12 @@ namespace Odotocodot.OneNote.Linq
         /// <seealso cref="ReleaseComObject"/>
         public static void InitComObject()
         {
-            if (!lazyOneNote.IsValueCreated)
+            lock (comLock)
             {
-                _ = OneNote;
+                app ??= new Application();
             }
         }
 
-
-        private static readonly object lockObj = new object();
         /// <summary>
         /// Releases the <see cref="Application">OneNote COM object</see> freeing memory.
         /// </summary>
@@ -83,12 +116,13 @@ namespace Odotocodot.OneNote.Linq
         /// <seealso cref="HasComObject"/>
         public static void ReleaseComObject()
         {
-            lock (lockObj)
+            lock (comLock)
             {
-                if (HasComObject)
+                if (app != null)
                 {
-                    Marshal.ReleaseComObject(OneNote);
-                    lazyOneNote = GetLazyOneNote();
+                    var count = Marshal.ReleaseComObject(app);
+                    Debug.Assert(count == 0, "COM Object reference count should be zero after release.");
+                    app = null;
                 }
             }
         }
@@ -103,7 +137,8 @@ namespace Odotocodot.OneNote.Linq
         /// <returns>Returns a <see cref="Root"/> object which contains the OneNote hierarchy.</returns>
         public static Root GetFullHierarchy()
         {
-            OneNote.GetHierarchy(null, HierarchyScope.hsPages, out string xml, xmlSchema);
+            using var handle = new OneNoteHandle();
+            handle.OneNote.GetHierarchy(null, HierarchyScope.hsPages, out string xml, xmlSchema);
             return xmlParser.ParseRoot(xml);
         }
 
@@ -117,9 +152,9 @@ namespace Odotocodot.OneNote.Linq
         public static IEnumerable<Page> FindPages(string search)
         {
             ValidateSearch(search);
-
-            OneNote.FindPages(null, search, out string xml, xsSchema: xmlSchema);
-            return xmlParser.ParseRoot(xml).GetPages();
+            using var handle = new OneNoteHandle();
+            handle.OneNote.FindPages(null, search, out string xml, xsSchema: xmlSchema);
+            return xmlParser.ParseRoot(xml).GetAllPages();
         }
 
         /// <summary>
@@ -133,45 +168,56 @@ namespace Odotocodot.OneNote.Linq
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="search"/> or <paramref name="scope"/> is <see langword="null"/>.</exception>
         public static IEnumerable<Page> FindPages(string search, IOneNoteItem scope)
         {
-            if (scope is null)
-                throw new ArgumentNullException(nameof(scope));
+            ArgumentNullException.ThrowIfNull(scope);
 
             ValidateSearch(search);
 
-            OneNote.FindPages(scope.Id, search, out string xml, xsSchema: xmlSchema);
+            using var handle = new OneNoteHandle();
 
-            return xmlParser.Parse(xml, scope).GetPages();
+            handle.OneNote.FindPages(scope.Id, search, out string xml, xsSchema: xmlSchema);
+            return xmlParser.Parse(xml, scope).GetAllPages();
         }
 
         /// <summary>
-        /// 
+        /// _
         /// </summary>
         /// <param name="search"></param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="search"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException">Thrown if <paramref name="search"/> is empty or only whitespace, or if the first character of <paramref name="search"/> is NOT a letter or a digit.</exception>
         private static void ValidateSearch(string search)
         {
-            if (search is null)
-                throw new ArgumentNullException(nameof(search));
+            ArgumentNullException.ThrowIfNull(search);
 
             if (string.IsNullOrWhiteSpace(search))
+            {
                 throw new ArgumentException("Search string cannot be empty or only whitespace", nameof(search));
+            }
 
             if (!char.IsLetterOrDigit(search[0]))
+            {
                 throw new ArgumentException("The first character of the search must be a letter or a digit", nameof(search));
+            }
         }
 
         /// <summary>
         /// Opens the <paramref name="item"/> in OneNote (creates a new OneNote window if one is not currently open).
         /// </summary>       
         /// <param name="item">The item to open</param>
-        public static void OpenInOneNote(INavigable item) => OneNote.NavigateTo(item.Id);
+        public static void OpenInOneNote(INavigable item)
+        {
+            using var handle = new OneNoteHandle();
+            handle.OneNote.NavigateTo(item.Id);
+        }
 
         /// <summary>
         /// Forces OneNote to sync the <paramref name="item"/>.
         /// </summary>       
         /// <param name="item"><inheritdoc cref="OpenInOneNote" path="/param[@name='item']"/></param>
-        public static void SyncItem(INavigable item) => OneNote.SyncHierarchy(item.Id);
+        public static void SyncItem(INavigable item)
+        {
+            using var handle = new OneNoteHandle();
+            handle.OneNote.SyncHierarchy(item.Id);
+        }
 
         /// <summary>
         /// Gets the content of the specified <paramref name="page"/>.
@@ -180,7 +226,8 @@ namespace Odotocodot.OneNote.Linq
         /// <returns>An <see langword="string"/> in the OneNote XML format.</returns>
         public static string GetPageContent(Page page)
         {
-            OneNote.GetPageContent(page.Id, out string xml, xsSchema: xmlSchema);
+            using var handle = new OneNoteHandle();
+            handle.OneNote.GetPageContent(page.Id, out string xml, xsSchema: xmlSchema);
             return xml;
         }
 
@@ -192,7 +239,11 @@ namespace Odotocodot.OneNote.Linq
         /// <remarks>The <paramref name="xml"/> must match the OneNote XML format, the schema can be
         /// found <a href="https://github.com/idvorkin/onom/blob/eb9ce52764e9ad639b2c9b4bca0622ee6221106f/OneNoteObjectModel/onenote.xsd">here</a>.</remarks>
         /// <param name="xml">An <see langword="string"/> in the OneNote XML format. </param>
-        public static void UpdatePageContent(string xml) => OneNote.UpdatePageContent(xml, xsSchema: xmlSchema);
+        public static void UpdatePageContent(string xml)
+        {
+            using var handle = new OneNoteHandle();
+            handle.OneNote.UpdatePageContent(xml, xsSchema: xmlSchema);
+        }
 
         #region Experimental API Methods
 
@@ -200,13 +251,21 @@ namespace Odotocodot.OneNote.Linq
         /// Deletes the hierarchy <paramref name="item"/> from the OneNote notebook hierarchy.
         /// </summary>
         /// <param name="item"><inheritdoc cref="OpenInOneNote(IOneNoteItem)" path="/param[@name='item']"/></param>
-        internal static void DeleteItem(IOneNoteItem item) => OneNote.DeleteHierarchy(item.Id);
+        internal static void DeleteItem(IOneNoteItem item)
+        {
+            using var handle = new OneNoteHandle();
+            handle.OneNote.DeleteHierarchy(item.Id);
+        }
 
         /// <summary>
         /// Closes the <paramref name="notebook"/>.
         /// </summary>
         /// <param name="notebook">The specified OneNote notebook.</param>
-        internal static void CloseNotebook(Notebook notebook) => OneNote.CloseNotebook(notebook.Id);
+        internal static void CloseNotebook(Notebook notebook)
+        {
+            using var handle = new OneNoteHandle();
+            handle.OneNote.CloseNotebook(notebook.Id);
+        }
 
         //TODO: Works but UpdateHierarchy takes A LONG TIME!
         internal static void RenameItem(IOneNoteItem item, string newName)
@@ -215,7 +274,8 @@ namespace Odotocodot.OneNote.Linq
             {
                 throw new ArgumentException("Cannot rename unique items, such as recycle bin.");
             }
-            OneNote.GetHierarchy(null, HierarchyScope.hsPages, out string xml);
+            using var handle = new OneNoteHandle();
+            handle.OneNote.GetHierarchy(null, HierarchyScope.hsPages, out string xml);
             var doc = XDocument.Parse(xml);
             var element = doc.Descendants()
                              .FirstOrDefault(e => (string)e.Attribute("ID") == item.Id);
@@ -224,7 +284,7 @@ namespace Odotocodot.OneNote.Linq
                 return;
 
             element.Attribute("name").SetValue(newName);
-            OneNote.UpdateHierarchy(doc.ToString());
+            handle.OneNote.UpdateHierarchy(doc.ToString());
             switch (item)
             {
                 case Notebook nb:
@@ -255,20 +315,21 @@ namespace Odotocodot.OneNote.Linq
         /// <returns>The <see cref="OneNoteItem.Id"/> of the newly created page.</returns>
         public static string CreatePage(Section section, string name, bool open)
         {
-            string sectionID;
+            string sectionId;
+            using var handle = new OneNoteHandle();
             if (section != null)
             {
-                sectionID = section.Id;
+                sectionId = section.Id;
             }
             else
             {
                 var path = GetUnfiledNotesSection();
-                OneNote.OpenHierarchy(path, null, out sectionID, CreateFileType.cftNone);
+                handle.OneNote.OpenHierarchy(path, null, out sectionId, CreateFileType.cftNone);
             }
 
-            OneNote.SyncHierarchy(sectionID);
-            OneNote.CreateNewPage(sectionID, out string pageID, NewPageStyle.npsBlankPageWithTitle);
-            OneNote.GetPageContent(pageID, out string xml, PageInfo.piBasic, xmlSchema);
+            handle.OneNote.SyncHierarchy(sectionId);
+            handle.OneNote.CreateNewPage(sectionId, out string pageId, NewPageStyle.npsBlankPageWithTitle);
+            handle.OneNote.GetPageContent(pageId, out string xml, PageInfo.piBasic, xmlSchema);
             XDocument doc = XDocument.Parse(xml);
 
             XNamespace one = XNamespace.Get(Constants.NamespaceUri);
@@ -276,12 +337,12 @@ namespace Odotocodot.OneNote.Linq
             XElement xTitle = doc.Descendants(one + "T").First();
             xTitle.Value = name;
 
-            OneNote.UpdatePageContent(doc.ToString());
+            handle.OneNote.UpdatePageContent(doc.ToString());
 
             if (open)
-                OneNote.NavigateTo(pageID);
+                handle.OneNote.NavigateTo(pageId);
 
-            return pageID;
+            return pageId;
         }
 
         /// <summary>
@@ -292,14 +353,15 @@ namespace Odotocodot.OneNote.Linq
         public static string CreateQuickNote(bool open)
         {
             var path = GetUnfiledNotesSection();
-            OneNote.OpenHierarchy(path, null, out string sectionID, CreateFileType.cftNone);
-            OneNote.SyncHierarchy(sectionID);
-            OneNote.CreateNewPage(sectionID, out string pageID, NewPageStyle.npsDefault);
+            using var handle = new OneNoteHandle();
+            handle.OneNote.OpenHierarchy(path, null, out string sectionId, CreateFileType.cftNone);
+            handle.OneNote.SyncHierarchy(sectionId);
+            handle.OneNote.CreateNewPage(sectionId, out string pageId, NewPageStyle.npsDefault);
 
             if (open)
-                OneNote.NavigateTo(pageID);
+                handle.OneNote.NavigateTo(pageId);
 
-            return pageID;
+            return pageId;
         }
 
         /// <summary>
@@ -322,11 +384,12 @@ namespace Odotocodot.OneNote.Linq
             if (!IsValidName<T>(name))
                 throw new ArgumentException($"Invalid {nameof(T).ToLower()} name provided: \"{name}\". {nameof(T)} names cannot empty, only whitespace or contain the symbols: \t {string.Join(" ", T.InvalidCharacters)}");
 
-            OneNote.OpenHierarchy(path, parent?.Id, out string newItemID, createFileType);
+            using var handle = new OneNoteHandle();
+            handle.OneNote.OpenHierarchy(path, parent?.Id, out string newItemId, createFileType);
             if (open)
-                OneNote.NavigateTo(newItemID);
+                handle.OneNote.NavigateTo(newItemId);
 
-            return newItemID;
+            return newItemId;
         }
 
         /// <summary>
@@ -376,7 +439,8 @@ namespace Odotocodot.OneNote.Linq
         /// <returns>The path to the default notebook folder location.</returns>
         public static string GetDefaultNotebookLocation()
         {
-            OneNote.GetSpecialLocation(SpecialLocation.slDefaultNotebookFolder, out string path);
+            using var handle = new OneNoteHandle();
+            handle.OneNote.GetSpecialLocation(SpecialLocation.slDefaultNotebookFolder, out string path);
             return path;
         }
         /// <summary>
@@ -385,7 +449,8 @@ namespace Odotocodot.OneNote.Linq
         /// <returns>The path on disk to the backup folder location.</returns>
         public static string GetBackUpLocation()
         {
-            OneNote.GetSpecialLocation(SpecialLocation.slBackUpFolder, out string path);
+            using var handle = new OneNoteHandle();
+            handle.OneNote.GetSpecialLocation(SpecialLocation.slBackUpFolder, out string path);
             return path;
         }
         /// <summary>
@@ -394,7 +459,8 @@ namespace Odotocodot.OneNote.Linq
         /// <returns>The folder path on disk to the unfiled notes section.</returns>
         public static string GetUnfiledNotesSection()
         {
-            OneNote.GetSpecialLocation(SpecialLocation.slUnfiledNotesSection, out string path);
+            using var handle = new OneNoteHandle();
+            handle.OneNote.GetSpecialLocation(SpecialLocation.slUnfiledNotesSection, out string path);
             return path;
         }
 
@@ -429,7 +495,8 @@ namespace Odotocodot.OneNote.Linq
             }
             public static Root GetHierarchy(HierarchyScope scope)
             {
-                OneNote.GetHierarchy(null, scope.Cast(), out string xml, xmlSchema);
+                using var handle = new OneNoteHandle();
+                handle.OneNote.GetHierarchy(null, scope.Cast(), out string xml, xmlSchema);
                 return xmlParser.ParseRoot(xml);
             }
 
@@ -442,7 +509,8 @@ namespace Odotocodot.OneNote.Linq
                     return [];
                 }
 
-                OneNote.GetHierarchy(item.Id, HierarchyScope.Children.Cast(), out string xml, xmlSchema);
+                using var handle = new OneNoteHandle();
+                handle.OneNote.GetHierarchy(item.Id, HierarchyScope.Children.Cast(), out string xml, xmlSchema);
                 return xmlParser.Parse(xml, item).Children;
             }
 
@@ -459,7 +527,8 @@ namespace Odotocodot.OneNote.Linq
                     return item.Children;
                 }
 
-                OneNote.GetHierarchy(item.Id, HierarchyScope.Children.Cast(), out string xml, xmlSchema);
+                using var handle = new OneNoteHandle();
+                handle.OneNote.GetHierarchy(item.Id, HierarchyScope.Children.Cast(), out string xml, xmlSchema);
                 xmlParser.ParseExisting(xml, item);
                 return item.Children;
             }
@@ -473,8 +542,9 @@ namespace Odotocodot.OneNote.Linq
                     return null;
                 }
 
-                OneNote.GetHierarchyParent(item.Id, out string parentId);
-                OneNote.GetHierarchy(parentId, HierarchyScope.Self.Cast(), out string xml, xmlSchema);
+                using var handle = new OneNoteHandle();
+                handle.OneNote.GetHierarchyParent(item.Id, out string parentId);
+                handle.OneNote.GetHierarchy(parentId, HierarchyScope.Self.Cast(), out string xml, xmlSchema);
                 return xmlParser.Parse(xml, null);
             }
 
@@ -492,8 +562,9 @@ namespace Odotocodot.OneNote.Linq
                     return item.Parent;
                 }
 
-                OneNote.GetHierarchyParent(item.Id, out string parentId);
-                OneNote.GetHierarchy(parentId, HierarchyScope.Self.Cast(), out string xml, xmlSchema);
+                using var handle = new OneNoteHandle();
+                handle.OneNote.GetHierarchyParent(item.Id, out string parentId);
+                handle.OneNote.GetHierarchy(parentId, HierarchyScope.Self.Cast(), out string xml, xmlSchema);
                 var parent = xmlParser.Parse(xml, null);
                 switch (item)
                 {
