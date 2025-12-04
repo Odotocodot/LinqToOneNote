@@ -330,13 +330,24 @@ namespace Odotocodot.OneNote.Linq.Parsers
                         item.IsUnread = bool.Parse(reader.Value);
                         break;
                     case Attributes.Path:
-                        Unsafe.As<IWritablePath>(item).Path = reader.Value;
+                        if (typeof(T) == typeof(Section))
+                            Unsafe.As<Section>(item).Path = reader.Value;
+                        else if (typeof(T) == typeof(SectionGroup))
+                            Unsafe.As<SectionGroup>(item).Path = reader.Value;
+                        else if (typeof(T) == typeof(Notebook))
+                            Unsafe.As<Notebook>(item).Path = reader.Value;
                         break;
                     case Attributes.Color:
-                        Unsafe.As<IWritableColor>(item).Color = GetColor(reader.Value);
+                        if (typeof(T) == typeof(Section))
+                            Unsafe.As<Section>(item).Color = GetColor(reader.Value);
+                        else if (typeof(T) == typeof(Notebook))
+                            Unsafe.As<Notebook>(item).Color = GetColor(reader.Value);
                         break;
                     case Attributes.IsInRecycleBin:
-                        Unsafe.As<IWritableIsInRecycleBin>(item).IsInRecycleBin = bool.Parse(reader.Value);
+                        if (typeof(T) == typeof(Page))
+                            Unsafe.As<Page>(item).IsInRecycleBin = bool.Parse(reader.Value);
+                        else if (typeof(T) == typeof(Section))
+                            Unsafe.As<Section>(item).IsInRecycleBin = bool.Parse(reader.Value);
                         break;
                     case Attributes.NickName:
                         Unsafe.As<Notebook>(item).NickName = reader.Value;

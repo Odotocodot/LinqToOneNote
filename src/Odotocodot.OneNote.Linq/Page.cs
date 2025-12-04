@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Odotocodot.OneNote.Linq.Abstractions;
 using Odotocodot.OneNote.Linq.Internal;
 
 namespace Odotocodot.OneNote.Linq
@@ -7,7 +8,7 @@ namespace Odotocodot.OneNote.Linq
     /// <summary>
     /// Represents a page in OneNote.
     /// </summary>
-    public class Page : OneNoteItem, IOneNoteItem, IWritableIsInRecycleBin
+    public class Page : OneNoteItem, IOneNoteItem, IHasIsInRecycleBin
     {
         internal Page() { }
         /// <summary>
@@ -30,6 +31,5 @@ namespace Odotocodot.OneNote.Linq
 
         IOneNoteItem IOneNoteItem.Parent => Parent;
         IReadOnlyList<IOneNoteItem> IOneNoteItem.Children { get; } = [];
-        bool IWritableIsInRecycleBin.IsInRecycleBin { set => IsInRecycleBin = value; }
     }
 }

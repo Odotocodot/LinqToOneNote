@@ -9,7 +9,7 @@ namespace Odotocodot.OneNote.Linq
     /// <summary>
     /// Represents a section in OneNote.
     /// </summary>
-    public class Section : OneNoteItem, IOneNoteItem, INameInvalidCharacters, IWritablePath, IWritableIsInRecycleBin, IWritableColor
+    public class Section : OneNoteItem, IOneNoteItem, INameInvalidCharacters, IHasIsInRecycleBin, IHasPath, IHasColor
     {
         internal Section() { }
 
@@ -64,8 +64,5 @@ namespace Odotocodot.OneNote.Linq
         public IReadOnlyList<IOneNoteItem> Children => Pages;
         public INotebookOrSectionGroup Parent { get; internal set; }
         IOneNoteItem IOneNoteItem.Parent => Parent;
-        Color? IWritableColor.Color { set => Color = value; }
-        string IWritablePath.Path { set => Path = value; }
-        bool IWritableIsInRecycleBin.IsInRecycleBin { set => IsInRecycleBin = value; }
     }
 }

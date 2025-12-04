@@ -9,7 +9,7 @@ namespace Odotocodot.OneNote.Linq
     /// <summary>
     /// Represents a notebook in OneNote.
     /// </summary>
-    public class Notebook : OneNoteItem, IOneNoteItem, INotebookOrSectionGroup, INameInvalidCharacters, IWritablePath, IWritableColor
+    public class Notebook : OneNoteItem, IOneNoteItem, INotebookOrSectionGroup, INameInvalidCharacters, IHasPath, IHasColor
     {
         internal Notebook() { }
 
@@ -47,8 +47,5 @@ namespace Odotocodot.OneNote.Linq
         public IReadOnlyList<IOneNoteItem> Children { get; internal set; }
 
         IOneNoteItem IOneNoteItem.Parent { get; } = null;
-
-        Color? IWritableColor.Color { set => Color = value; }
-        string IWritablePath.Path { set => Path = value; }
     }
 }
