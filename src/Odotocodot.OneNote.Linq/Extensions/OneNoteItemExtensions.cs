@@ -13,8 +13,8 @@ namespace Odotocodot.OneNote.Linq.Extensions
     /// </summary>
     public static class OneNoteItemExtensions
     {
-        /// <inheritdoc cref="OneNote.OpenInOneNote(INavigable)"/>
-        public static void OpenInOneNote(this INavigable item) => OneNote.OpenInOneNote(item);
+        /// <inheritdoc cref="OneNote.Open"/>
+        public static void Open(this INavigable item) => OneNote.Open(item);
 
         /// <inheritdoc cref="OneNote.SyncItem(INavigable)"/>
         public static void Sync(this INavigable item) => OneNote.SyncItem(item);

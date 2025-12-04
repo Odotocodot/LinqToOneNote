@@ -173,7 +173,6 @@ namespace Odotocodot.OneNote.Linq
             ValidateSearch(search);
 
             using var handle = new OneNoteHandle();
-
             handle.OneNote.FindPages(scope.Id, search, out string xml, xsSchema: xmlSchema);
             return xmlParser.Parse(xml, scope).GetAllPages();
         }
@@ -200,19 +199,21 @@ namespace Odotocodot.OneNote.Linq
         }
 
         /// <summary>
-        /// Opens the <paramref name="item"/> in OneNote (creates a new OneNote window if one is not currently open).
-        /// </summary>       
+        /// Opens the <paramref name="item"/> in OneNote. If there is no OneNote window a new one is created, else whether a new window is created is
+        /// defined by <paramref name="newWindow"/>.
+        /// </summary>
         /// <param name="item">The item to open</param>
-        public static void OpenInOneNote(INavigable item)
+        /// <param name="newWindow">Whether to create a new OneNote window or add to an existing one. Does nothing if there are no windows of OneNote.</param>
+        public static void Open(INavigable item, bool newWindow = false)
         {
             using var handle = new OneNoteHandle();
-            handle.OneNote.NavigateTo(item.Id);
+            handle.OneNote.NavigateTo(item.Id, fNewWindow: newWindow);
         }
 
         /// <summary>
         /// Forces OneNote to sync the <paramref name="item"/>.
-        /// </summary>       
-        /// <param name="item"><inheritdoc cref="OpenInOneNote" path="/param[@name='item']"/></param>
+        /// </summary>
+        /// <param name="item"><inheritdoc cref="Open" path="/param[@name='item']"/></param>
         public static void SyncItem(INavigable item)
         {
             using var handle = new OneNoteHandle();
@@ -250,7 +251,7 @@ namespace Odotocodot.OneNote.Linq
         /// <summary>
         /// Deletes the hierarchy <paramref name="item"/> from the OneNote notebook hierarchy.
         /// </summary>
-        /// <param name="item"><inheritdoc cref="OpenInOneNote(IOneNoteItem)" path="/param[@name='item']"/></param>
+        /// <param name="item"><inheritdoc cref="Open" path="/param[@name='item']"/></param>
         internal static void DeleteItem(IOneNoteItem item)
         {
             using var handle = new OneNoteHandle();

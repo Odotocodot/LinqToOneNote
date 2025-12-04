@@ -3,7 +3,7 @@ namespace Odotocodot.OneNote.Linq.Abstractions
     /// <summary>
     /// Represents an object that can be opened in OneNote.
     /// </summary>
-    /// <seealso cref="OneNote.OpenInOneNote(INavigable)"/>
+    /// <seealso cref="OneNote.Open"/>
     public interface INavigable
     {
         /// <summary>
