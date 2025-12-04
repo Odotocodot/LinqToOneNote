@@ -15,7 +15,7 @@ namespace Odotocodot.OneNote.Linq
         /// An array containing the characters that are not allowed in a <see cref="SectionGroup">section group</see> name.<br/>
         /// These are:&#009;<b>\ / * ? " | &lt; &gt; : % # &amp;</b>
         /// </summary>
-        /// <seealso cref="OneNoteApplication.IsValidName{T}(string)"/>
+        /// <seealso cref="OneNote.IsValidName{T}(string)"/>
         public static IReadOnlyList<char> InvalidCharacters { get; } = Section.InvalidCharacters;
 
         /// <summary>

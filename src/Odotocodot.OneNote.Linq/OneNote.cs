@@ -19,7 +19,7 @@ namespace Odotocodot.OneNote.Linq
     /// <a href="https://learn.microsoft.com/en-us/office/client-developer/onenote/application-interface-onenote"> OneNote's API</a>
     /// </summary>
     /// <remarks>A <see cref="Application">OneNote COM object</see> is required to access any of the OneNote API.</remarks>
-    public static class OneNoteApplication
+    public static class OneNote
     {
         /// <summary>
         /// The directory separator used in <see cref="IOneNoteItem.RelativePath"/>.

@@ -17,7 +17,7 @@ namespace Odotocodot.OneNote.Linq
         /// A collection containing the characters that are not allowed in a <see cref="Notebook">notebook</see> name.<br/>
         /// These are:&#009;<b>\ / * ? " | &lt; &gt; : % # .</b>
         /// </summary>
-        /// <seealso cref="OneNoteApplication.IsValidName{T}(string)"/>
+        /// <seealso cref="OneNote.IsValidName{T}(string)"/>
         public static IReadOnlyList<char> InvalidCharacters { get; } = Array.AsReadOnly(['\\', '/', '*', '?', '"', '|', '<', '>', ':', '%', '#', '.']);
 
         /// <summary>

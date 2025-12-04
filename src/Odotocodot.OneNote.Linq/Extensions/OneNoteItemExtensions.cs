@@ -13,14 +13,14 @@ namespace Odotocodot.OneNote.Linq.Extensions
     /// </summary>
     public static class OneNoteItemExtensions
     {
-        /// <inheritdoc cref="OneNoteApplication.OpenInOneNote(INavigable)"/>
-        public static void OpenInOneNote(this INavigable item) => OneNoteApplication.OpenInOneNote(item);
+        /// <inheritdoc cref="OneNote.OpenInOneNote(INavigable)"/>
+        public static void OpenInOneNote(this INavigable item) => OneNote.OpenInOneNote(item);
 
-        /// <inheritdoc cref="OneNoteApplication.SyncItem(INavigable)"/>
-        public static void Sync(this INavigable item) => OneNoteApplication.SyncItem(item);
+        /// <inheritdoc cref="OneNote.SyncItem(INavigable)"/>
+        public static void Sync(this INavigable item) => OneNote.SyncItem(item);
 
-        /// <inheritdoc cref="OneNoteApplication.GetPageContent(Page)"/>
-        public static string GetPageContent(this Page page) => OneNoteApplication.GetPageContent(page);
+        /// <inheritdoc cref="OneNote.GetPageContent(Page)"/>
+        public static string GetPageContent(this Page page) => OneNote.GetPageContent(page);
 
         /// <summary>
         /// Returns a value that indicates whether the <paramref name="item"/> is in or is a recycle bin.

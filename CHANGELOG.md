@@ -12,6 +12,7 @@
 - Rename Section property to Parent on page
 - Rename Traverse to Descendants
 - Add alternative methods for getting a com object
+- Rename OneNoteApplication to OneNote
 
 
 ## [1.2.0] - 2025-07-05
