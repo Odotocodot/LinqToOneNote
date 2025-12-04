@@ -67,11 +67,16 @@ namespace Odotocodot.OneNote.Linq.Extensions
             while (true)
             {
                 sb.Insert(0, current.Name);
-                current = current.Parent;
-                if (current == null)
+                if (current.Parent == null)
                 {
+                    if (current is not Notebook)
+                    {
+                        sb.Insert(0, Constants.RelativePathSeparator);
+                        sb.Insert(0, "..");
+                    }
                     break;
                 }
+                current = current.Parent;
                 sb.Insert(0, Constants.RelativePathSeparator);
             }
             return sb.ToString();
