@@ -127,16 +127,20 @@ namespace Odotocodot.OneNote.Linq.Extensions
         {
             ArgumentNullException.ThrowIfNull(source);
 
-            using var stack = StackPool.Rent();
-            stack.Push(source);
-            while (stack.Count > 0)
+            return Descendants();
+
+            IEnumerable<IOneNoteItem> Descendants()
             {
-                var current = stack.Pop();
-                yield return current;
-                var children = current.Children;
-                for (int i = 0; i < children.Count; i++)
+                using var stack = StackPool.Rent();
+                stack.Push(source);
+                while (stack.Count > 0)
                 {
-                    stack.Push(children[i]);
+                    var current = stack.Pop();
+                    yield return current;
+                    foreach (var child in current.Children)
+                    {
+                        stack.Push(child);
+                    }
                 }
             }
         }
@@ -146,17 +150,21 @@ namespace Odotocodot.OneNote.Linq.Extensions
             ArgumentNullException.ThrowIfNull(source);
             ArgumentNullException.ThrowIfNull(predicate);
 
-            using var stack = StackPool.Rent();
-            stack.Push(source);
-            while (stack.Count > 0)
+            return Descendants();
+
+            IEnumerable<IOneNoteItem> Descendants()
             {
-                var current = stack.Pop();
-                if (predicate(current))
-                    yield return current;
-                var children = current.Children;
-                for (int i = 0; i < children.Count; i++)
+                using var stack = StackPool.Rent();
+                stack.Push(source);
+                while (stack.Count > 0)
                 {
-                    stack.Push(children[i]);
+                    var current = stack.Pop();
+                    if (predicate(current))
+                        yield return current;
+                    foreach (var child in current.Children)
+                    {
+                        stack.Push(child);
+                    }
                 }
             }
         }
@@ -165,43 +173,11 @@ namespace Odotocodot.OneNote.Linq.Extensions
         {
             ArgumentNullException.ThrowIfNull(source);
 
-            using var stack = StackPool.Rent();
-            if (source is IList<IOneNoteItem> list)
+            return Descendants();
+
+            IEnumerable<IOneNoteItem> Descendants()
             {
-                for (int j = 0; j < list.Count; j++)
-                {
-                    stack.Push(list[j]);
-                    while (stack.Count > 0)
-                    {
-                        var current = stack.Pop();
-                        yield return current;
-                        var children = current.Children;
-                        for (int i = 0; i < children.Count; i++)
-                        {
-                            stack.Push(children[i]);
-                        }
-                    }
-                }
-            }
-            else if (source is IReadOnlyList<IOneNoteItem> list2)
-            {
-                for (int j = 0; j < list2.Count; j++)
-                {
-                    stack.Push(list2[j]);
-                    while (stack.Count > 0)
-                    {
-                        var current = stack.Pop();
-                        yield return current;
-                        var children = current.Children;
-                        for (int i = 0; i < children.Count; i++)
-                        {
-                            stack.Push(children[i]);
-                        }
-                    }
-                }
-            }
-            else
-            {
+                using var stack = StackPool.Rent();
                 foreach (var item in source)
                 {
                     stack.Push(item);
@@ -209,10 +185,9 @@ namespace Odotocodot.OneNote.Linq.Extensions
                     {
                         var current = stack.Pop();
                         yield return current;
-                        var children = current.Children;
-                        for (int i = 0; i < children.Count; i++)
+                        foreach (var child in current.Children)
                         {
-                            stack.Push(children[i]);
+                            stack.Push(child);
                         }
                     }
                 }
@@ -224,45 +199,11 @@ namespace Odotocodot.OneNote.Linq.Extensions
             ArgumentNullException.ThrowIfNull(source);
             ArgumentNullException.ThrowIfNull(predicate);
 
-            using var stack = StackPool.Rent();
-            if (source is IList<IOneNoteItem> list)
+            return Descendants();
+
+            IEnumerable<IOneNoteItem> Descendants()
             {
-                for (int j = 0; j < list.Count; j++)
-                {
-                    stack.Push(list[j]);
-                    while (stack.Count > 0)
-                    {
-                        var current = stack.Pop();
-                        if (predicate(current))
-                            yield return current;
-                        var children = current.Children;
-                        for (int i = 0; i < children.Count; i++)
-                        {
-                            stack.Push(children[i]);
-                        }
-                    }
-                }
-            }
-            else if (source is IReadOnlyList<IOneNoteItem> list2)
-            {
-                for (int j = 0; j < list2.Count; j++)
-                {
-                    stack.Push(list2[j]);
-                    while (stack.Count > 0)
-                    {
-                        var current = stack.Pop();
-                        if (predicate(current))
-                            yield return current;
-                        var children = current.Children;
-                        for (int i = 0; i < children.Count; i++)
-                        {
-                            stack.Push(children[i]);
-                        }
-                    }
-                }
-            }
-            else
-            {
+                using var stack = StackPool.Rent();
                 foreach (var item in source)
                 {
                     stack.Push(item);
@@ -271,10 +212,9 @@ namespace Odotocodot.OneNote.Linq.Extensions
                         var current = stack.Pop();
                         if (predicate(current))
                             yield return current;
-                        var children = current.Children;
-                        for (int i = 0; i < children.Count; i++)
+                        foreach (var child in current.Children)
                         {
-                            stack.Push(children[i]);
+                            stack.Push(child);
                         }
                     }
                 }
@@ -285,24 +225,28 @@ namespace Odotocodot.OneNote.Linq.Extensions
         {
             ArgumentNullException.ThrowIfNull(source);
 
-            using var stack = StackPool.Rent();
-            stack.Push(source);
-            while (stack.Count > 0)
+            return GetAllPages();
+
+            IEnumerable<Page> GetAllPages()
             {
-                var current = stack.Pop();
-                if (current is Section section)
+                using var stack = StackPool.Rent();
+                stack.Push(source);
+                while (stack.Count > 0)
                 {
-                    for (int i = 0; i < section.Pages.Count; i++)
+                    var current = stack.Pop();
+                    if (current is Section section)
                     {
-                        yield return section.Pages[i];
+                        foreach (var page in section.Pages)
+                        {
+                            yield return page;
+                        }
                     }
-                }
-                else
-                {
-                    var children = current.Children;
-                    for (int i = 0; i < children.Count; i++)
+                    else
                     {
-                        stack.Push(children[i]);
+                        foreach (var child in current.Children)
+                        {
+                            stack.Push(child);
+                        }
                     }
                 }
             }
@@ -312,61 +256,11 @@ namespace Odotocodot.OneNote.Linq.Extensions
         {
             ArgumentNullException.ThrowIfNull(source);
 
-            using var stack = StackPool.Rent();
-            if (source is IList<IOneNoteItem> list)
+            return GetAllPages();
+
+            IEnumerable<Page> GetAllPages()
             {
-                for (int j = 0; j < list.Count; j++)
-                {
-                    stack.Push(list[j]);
-                    while (stack.Count > 0)
-                    {
-                        var current = stack.Pop();
-                        if (current is Section section)
-                        {
-                            for (int i = 0; i < section.Pages.Count; i++)
-                            {
-                                yield return section.Pages[i];
-                            }
-                        }
-                        else
-                        {
-                            var children = current.Children;
-                            for (int i = 0; i < children.Count; i++)
-                            {
-                                stack.Push(children[i]);
-                            }
-                        }
-                    }
-                }
-            }
-            else if (source is IReadOnlyList<IOneNoteItem> list2)
-            {
-                for (int j = 0; j < list2.Count; j++)
-                {
-                    stack.Push(list2[j]);
-                    while (stack.Count > 0)
-                    {
-                        var current = stack.Pop();
-                        if (current is Section section)
-                        {
-                            for (int i = 0; i < section.Pages.Count; i++)
-                            {
-                                yield return section.Pages[i];
-                            }
-                        }
-                        else
-                        {
-                            var children = current.Children;
-                            for (int i = 0; i < children.Count; i++)
-                            {
-                                stack.Push(children[i]);
-                            }
-                        }
-                    }
-                }
-            }
-            else
-            {
+                using var stack = StackPool.Rent();
                 foreach (var item in source)
                 {
                     stack.Push(item);
@@ -375,23 +269,21 @@ namespace Odotocodot.OneNote.Linq.Extensions
                         var current = stack.Pop();
                         if (current is Section section)
                         {
-                            for (int i = 0; i < section.Pages.Count; i++)
+                            foreach (var page in section.Pages)
                             {
-                                yield return section.Pages[i];
+                                yield return page;
                             }
                         }
                         else
                         {
-                            var children = current.Children;
-                            for (int i = 0; i < children.Count; i++)
+                            foreach (var child in current.Children)
                             {
-                                stack.Push(children[i]);
+                                stack.Push(child);
                             }
                         }
                     }
                 }
             }
         }
-
     }
 }
