@@ -1,8 +1,7 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
+using Odotocodot.OneNote.Linq.Internal;
 
 namespace Odotocodot.OneNote.Linq.Extensions
 {
@@ -89,37 +88,13 @@ namespace Odotocodot.OneNote.Linq.Extensions
         // public static IOneNoteItem FindByID(this IEnumerable<INavigable> source, string id) =>
         //     source.Traverse(i => i.Id == id).FirstOrDefault();
 
-        private static class StackPool
+        internal static readonly SimplePool<Stack2> StackPool = new(5);
+        internal class Stack2 : Stack<IOneNoteItem>, IDisposable
         {
-            private static readonly ConcurrentBag<Stack2> pool = [];
-            private static readonly int max = 5;
-            private static int count = 0;
-
-            public static Stack2 Rent()
+            public void Dispose()
             {
-                if (pool.TryTake(out var stack))
-                {
-                    Interlocked.Decrement(ref count);
-                    return stack;
-                }
-                return new Stack2();
-            }
-
-            private static void Return(Stack2 stack)
-            {
-                if (Interlocked.Increment(ref count) <= max)
-                {
-                    pool.Add(stack);
-                }
-                else
-                {
-                    Interlocked.Decrement(ref count);
-                }
-            }
-
-            internal class Stack2 : Stack<IOneNoteItem>, IDisposable
-            {
-                public void Dispose() => Return(this);
+                Clear();
+                StackPool.Return(this);
             }
         }
 
