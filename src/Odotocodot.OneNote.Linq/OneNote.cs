@@ -186,7 +186,6 @@ namespace Odotocodot.OneNote.Linq
         private static void ValidateSearch(string search)
         {
             ArgumentNullException.ThrowIfNull(search);
-
             if (string.IsNullOrWhiteSpace(search))
             {
                 throw new ArgumentException("Search string cannot be empty or only whitespace", nameof(search));
@@ -302,134 +301,165 @@ namespace Odotocodot.OneNote.Linq
                     break;
             }
         }
-        #endregion
 
+        #endregion
         #region Creating New OneNote Items Methods
 
         /// <summary>
         /// Creates a <see cref="Page">page</see> with a title equal to <paramref name="name"/> located in the specified <paramref name="section"/>.<br/>
-        /// If <paramref name="section"/> is <see langword="null"/>, this method creates a page in the default quick notes location.
-        /// </summary>        
+        /// </summary>
         /// <param name="section">The section to create the page in.</param>
         /// <param name="name">The title of the page.</param>
-        /// <param name="open">Whether to open the newly created page in OneNote immediately.</param>
-        /// <returns>The <see cref="OneNoteItem.Id"/> of the newly created page.</returns>
-        public static string CreatePage(Section section, string name, bool open)
+        /// <param name="openMode">Specifies whether/how the newly created page should be opened.</param>
+        /// <returns>The newly created <see cref="Page">page</see>.</returns>
+        public static Page CreatePage(Section section, string name, OpenMode openMode = OpenMode.None)
         {
-            string sectionId;
+            if (section == null)
+            {
+                throw new ArgumentNullException(nameof(section), $"Parameter section cannot be null. Use {nameof(OneNote)}.{nameof(CreateQuickNote)} instead.");
+            }
+
             using var handle = new OneNoteHandle();
-            if (section != null)
-            {
-                sectionId = section.Id;
-            }
-            else
-            {
-                var path = GetUnfiledNotesSection();
-                handle.OneNote.OpenHierarchy(path, null, out sectionId, CreateFileType.cftNone);
-            }
+            handle.OneNote.SyncHierarchy(section.Id);
+            handle.OneNote.CreateNewPage(section.Id, out string pageId, NewPageStyle.npsBlankPageWithTitle);
+            handle.OneNote.GetPageContent(pageId, out string pageContentXml, PageInfo.piBasic, xmlSchema);
 
-            handle.OneNote.SyncHierarchy(sectionId);
-            handle.OneNote.CreateNewPage(sectionId, out string pageId, NewPageStyle.npsBlankPageWithTitle);
-            handle.OneNote.GetPageContent(pageId, out string xml, PageInfo.piBasic, xmlSchema);
-            XDocument doc = XDocument.Parse(xml);
-
+            XDocument doc = XDocument.Parse(pageContentXml);
             XNamespace one = XNamespace.Get(Constants.NamespaceUri);
-
             XElement xTitle = doc.Descendants(one + "T").First();
             xTitle.Value = name;
 
             handle.OneNote.UpdatePageContent(doc.ToString());
+            handle.OneNote.GetHierarchy(pageId, HierarchyScope.hsSelf, out var pageXml, xmlSchema);
+            var page = (Page)xmlParser.Parse(pageXml, section);
+            section.pages.Add(page);
+            UseOpenMode(in handle, openMode, page.Id);
+            return page;
+        }
 
-            if (open)
-                handle.OneNote.NavigateTo(pageId);
-
-            return pageId;
+        private static void UseOpenMode(in OneNoteHandle handle, OpenMode openMode, string id)
+        {
+            switch (openMode)
+            {
+                case OpenMode.ExistingOrNewWindow:
+                    handle.OneNote.NavigateTo(id);
+                    break;
+                case OpenMode.NewWindow:
+                    handle.OneNote.NavigateTo(id, fNewWindow: true);
+                    break;
+            }
         }
 
         /// <summary>
-        /// Creates a quick note page located at the users quick notes location.
-        /// </summary>       
-        /// <param name="open"><inheritdoc cref="CreatePage(Section, string, bool)" path="/param[@name='open']"/></param>
-        /// <returns>The <see cref="OneNoteItem.Id"/> of the newly created quick note page.</returns>
-        public static string CreateQuickNote(bool open)
+        /// Creates a quick note page located at the users quick/default notes location.
+        /// </summary>
+        /// <param name="openMode"><inheritdoc cref="CreatePage(Section, string, OpenMode)" path="/param[@name='openMode']"/></param>
+        /// <returns>The <see cref="INavigable.Id"/> of the newly created quick note page.</returns>
+        public static string CreateQuickNote(OpenMode openMode = OpenMode.None)
         {
-            var path = GetUnfiledNotesSection();
             using var handle = new OneNoteHandle();
             handle.OneNote.GetSpecialLocation(SpecialLocation.slUnfiledNotesSection, out string path);
             handle.OneNote.OpenHierarchy(path, null, out string sectionId, CreateFileType.cftNone);
             handle.OneNote.SyncHierarchy(sectionId);
             handle.OneNote.CreateNewPage(sectionId, out string pageId, NewPageStyle.npsDefault);
 
-            if (open)
-                handle.OneNote.NavigateTo(pageId);
-
+            UseOpenMode(in handle, openMode, pageId);
             return pageId;
         }
 
         /// <summary>
-        /// Creates a quick note page with the title specified by <paramref name="name"/>, located at the users quick notes location.
+        /// Creates a quick note page with the title specified by <paramref name="name"/>, located at the users quick/default notes location.
         /// </summary>
-        /// <remarks>This is identical to calling <see cref="CreatePage(Section, string, bool)"/> with the
-        /// section parameter set to null</remarks>
-        /// <param name="name"><inheritdoc cref="CreatePage(Section, string, bool)" path="/param[@name='name']"/></param>
-        /// <param name="open"><inheritdoc cref="CreatePage(Section, string, bool)" path="/param[@name='open']"/></param>
-        /// <returns>The <see cref="OneNoteItem.Id"/> of the newly created quick note page.</returns>
-        public static string CreateQuickNote(string name, bool open) => CreatePage(null, name, open);
+        /// <param name="name"><inheritdoc cref="CreatePage(Section, string, OpenMode)" path="/param[@name='name']"/></param>
+        /// <param name="openMode"><inheritdoc cref="CreatePage(Section, string, OpenMode)" path="/param[@name='openMode']"/></param>
+        /// <returns>The <see cref="INavigable.Id"/> of the newly created quick note page.</returns>
+        public static string CreateQuickNote(string name, OpenMode openMode = OpenMode.None)
+        {
+            using var handle = new OneNoteHandle();
+            handle.OneNote.GetSpecialLocation(SpecialLocation.slUnfiledNotesSection, out string path);
+            handle.OneNote.OpenHierarchy(path, null, out string sectionId, CreateFileType.cftNone);
+            handle.OneNote.SyncHierarchy(sectionId);
+            handle.OneNote.CreateNewPage(sectionId, out string pageId, NewPageStyle.npsBlankPageWithTitle);
+            handle.OneNote.GetPageContent(pageId, out string pageContentXml, PageInfo.piBasic, xmlSchema);
 
-        private static string CreateItem<T>(
-            IOneNoteItem parent,
+            XDocument doc = XDocument.Parse(pageContentXml);
+            XNamespace one = XNamespace.Get(Constants.NamespaceUri);
+            XElement xTitle = doc.Descendants(one + "T").First();
+            xTitle.Value = name;
+
+            handle.OneNote.UpdatePageContent(doc.ToString());
+            UseOpenMode(in handle, openMode, pageId);
+            return pageId;
+        }
+
+        private static T CreateItem<T>(in OneNoteHandle handle, IOneNoteItem parent,
             string name,
-            bool open,
             string path,
+            OpenMode openMode,
             CreateFileType createFileType) where T : INameInvalidCharacters
         {
             if (!IsValidName<T>(name))
+            {
                 throw new ArgumentException($"Invalid {nameof(T).ToLower()} name provided: \"{name}\". {nameof(T)} names cannot empty, only whitespace or contain the symbols: \t {string.Join(" ", T.InvalidCharacters)}");
+            }
 
-            using var handle = new OneNoteHandle();
             handle.OneNote.OpenHierarchy(path, parent?.Id, out string newItemId, createFileType);
-            if (open)
-                handle.OneNote.NavigateTo(newItemId);
-
-            return newItemId;
+            handle.OneNote.GetHierarchy(newItemId, HierarchyScope.hsSelf, out var itemXml, xmlSchema);
+            T newItem = (T)xmlParser.Parse(itemXml, parent);
+            UseOpenMode(in handle, openMode, newItemId);
+            return newItem;
         }
 
         /// <summary>
         /// Creates a <see cref="Section">section</see> with a title equal to <paramref name="name"/> located in the specified <paramref name="parent"/>.
-        /// </summary>        
+        /// </summary>
         /// <param name="parent">The hierarchy item to create the section in.</param>
         /// <param name="name">The name of the new section.</param>
-        /// <param name="open">Whether to open the newly created section in OneNote immediately.</param>
+        /// <param name="openMode">Whether to open the newly created section in OneNote immediately.</param>
         /// <typeparam name="TNotebookOrSectionGroup">Represents a <see cref="Notebook">notebook</see> or a <see cref="SectionGroup">section group</see>.</typeparam>
         /// <exception cref="ArgumentException">Thrown if the <paramref name="name"/> is not a valid section name.</exception>
         /// <seealso cref="IsValidName(string)"/>
-        /// <returns>The <see cref="OneNoteItem.Id"/> of the newly created section.</returns>
-        public static string CreateSection<TNotebookOrSectionGroup>(TNotebookOrSectionGroup parent, string name, bool open) where TNotebookOrSectionGroup : INotebookOrSectionGroup
-            => CreateItem<Section>(parent, name, open, $"{name}.one", CreateFileType.cftSection);
+        /// <returns>The newly created <see cref="Section">section</see>.</returns>
+        public static Section CreateSection<TNotebookOrSectionGroup>(TNotebookOrSectionGroup parent, string name, OpenMode openMode = OpenMode.None) where TNotebookOrSectionGroup : INotebookOrSectionGroup
+        {
+            using var handle = new OneNoteHandle();
+            Section section = CreateItem<Section>(in handle, parent, name, $"{name}.one", openMode, CreateFileType.cftSection);
+            ((ReadOnlyList<Section>)parent.Sections).Add(section);
+            return section;
+        }
 
         /// <summary>
         /// Creates a <see cref="SectionGroup">section group</see> with a title equal to <paramref name="name"/> located in the specified <paramref name="parent"/>.
-        /// </summary>        
+        /// </summary>
         /// <param name="parent">The hierarchy item to create the section group in.</param>
         /// <param name="name">The name of the new section group.</param>
-        /// <param name="open">Whether to open the newly created section group in OneNote immediately.</param>
+        /// <param name="openMode">Whether to open the newly created section group in OneNote immediately.</param>
         /// <typeparam name="TNotebookOrSectionGroup">Represents a <see cref="Notebook">notebook</see> or a <see cref="SectionGroup">section group</see>.</typeparam>
         /// <exception cref="ArgumentException">Thrown if the <paramref name="name"/> is not a valid section group name.</exception>
         /// <seealso cref="IsValidName(string)"/>
-        /// <returns>The <see cref="OneNoteItem.Id"/> of the newly created section group.</returns>
-        public static string CreateSectionGroup<TNotebookOrSectionGroup>(TNotebookOrSectionGroup parent, string name, bool open) where TNotebookOrSectionGroup : INotebookOrSectionGroup
-            => CreateItem<SectionGroup>(parent, name, open, name, CreateFileType.cftFolder);
+        /// <returns>The newly created <see cref="SectionGroup">section group</see>.</returns>
+        public static SectionGroup CreateSectionGroup<TNotebookOrSectionGroup>(TNotebookOrSectionGroup parent, string name, OpenMode openMode = OpenMode.None) where TNotebookOrSectionGroup : INotebookOrSectionGroup
+        {
+            using var handle = new OneNoteHandle();
+            SectionGroup sectionGroup = CreateItem<SectionGroup>(in handle, parent, name, name, openMode, CreateFileType.cftFolder);
+            ((ReadOnlyList<SectionGroup>)parent.SectionGroups).Add(sectionGroup);
+            return sectionGroup;
+        }
 
         /// <summary>
         /// Creates a <see cref="Notebook">notebook</see> with a title equal to <paramref name="name"/> located in the <see cref="GetDefaultNotebookLocation()">default notebook location</see>.
         /// </summary>        
         /// <param name="name">The name of the new notebook.</param>
-        /// <param name="open">Whether to open the newly created notebook in OneNote immediately.</param>
+        /// <param name="openMode">Whether to open the newly created notebook in OneNote immediately.</param>
         /// <exception cref="ArgumentException">Thrown if the <paramref name="name"/> is not a valid notebook name.</exception>
         /// <seealso cref="IsValidName(string)"/>
-        /// <returns>The <see cref="OneNoteItem.Id"/> of the newly created notebook.</returns>
-        public static string CreateNotebook(string name, bool open)
-            => CreateItem<Notebook>(null, name, open, System.IO.Path.Combine(GetDefaultNotebookLocation(), name), CreateFileType.cftNotebook);
+        /// <returns>The newly created <see cref="Notebook">notebook</see>.</returns>
+        public static Notebook CreateNotebook(string name, OpenMode openMode = OpenMode.None)
+        {
+            using var handle = new OneNoteHandle();
+            handle.OneNote.GetSpecialLocation(SpecialLocation.slDefaultNotebookFolder, out string path);
+            return CreateItem<Notebook>(in handle, null, name, System.IO.Path.Combine(path, name), openMode, CreateFileType.cftNotebook);
+        }
 
         #endregion
 
@@ -437,7 +467,7 @@ namespace Odotocodot.OneNote.Linq
 
         /// <summary>
         /// Retrieves the path on disk to the default notebook folder location, this is where new notebooks are created and saved to.
-        /// </summary>        
+        /// </summary>
         /// <returns>The path to the default notebook folder location.</returns>
         public static string GetDefaultNotebookLocation()
         {
@@ -447,7 +477,7 @@ namespace Odotocodot.OneNote.Linq
         }
         /// <summary>
         /// Retrieves the path on disk to the backup folder location.
-        /// </summary>        
+        /// </summary>
         /// <returns>The path on disk to the backup folder location.</returns>
         public static string GetBackUpLocation()
         {
@@ -457,7 +487,7 @@ namespace Odotocodot.OneNote.Linq
         }
         /// <summary>
         /// Retrieves the folder path on disk to the default notes section, this is where by default quick notes are created and saved to.
-        /// </summary>   
+        /// </summary>
         /// <returns>The folder path on disk to the default notes section.</returns>
         public static string GetDefaultNotesLocation()
         {
