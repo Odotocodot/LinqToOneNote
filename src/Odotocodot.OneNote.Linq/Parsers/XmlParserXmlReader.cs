@@ -89,9 +89,6 @@ namespace Odotocodot.OneNote.Linq.Parsers
                         case Elements.Notebook:
                             notebooks.Add(ParseNotebook(reader, new Notebook()));
                             break;
-                        case Elements.UnfiledNotes:
-                            root.UnfiledNotes = ParseUnfiledNotes(reader);
-                            break;
                         case Elements.OpenSections:
                             root.OpenSections = ParseOpenSections(reader);
                             break;
@@ -109,34 +106,6 @@ namespace Odotocodot.OneNote.Linq.Parsers
             reader.ReadEndElement();
             root.Notebooks = notebooks;
             return root;
-        }
-
-        private static UnfiledNotes ParseUnfiledNotes(XmlReader reader)
-        {
-            var unfiledNotes = new UnfiledNotes();
-            while (reader.MoveToNextAttribute())
-            {
-                if (reader.LocalName == Attributes.ID)
-                {
-                    unfiledNotes.Id = reader.Value;
-                }
-            }
-
-            reader.MoveToElement();
-            if (reader.IsEmptyElement)
-            {
-                reader.Skip();
-                unfiledNotes.Section = null;
-                return unfiledNotes;
-            }
-            reader.ReadStartElement();
-            reader.MoveToContent();
-            if (reader.NodeType == XmlNodeType.Element && reader.LocalName == Elements.Section)
-            {
-                unfiledNotes.Section = ParseSection(reader, new Section(), null);
-            }
-            reader.ReadEndElement();
-            return unfiledNotes;
         }
 
         private static OpenSections ParseOpenSections(XmlReader reader)

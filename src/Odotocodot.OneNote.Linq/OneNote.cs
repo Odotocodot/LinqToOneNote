@@ -355,6 +355,7 @@ namespace Odotocodot.OneNote.Linq
         {
             var path = GetUnfiledNotesSection();
             using var handle = new OneNoteHandle();
+            handle.OneNote.GetSpecialLocation(SpecialLocation.slUnfiledNotesSection, out string path);
             handle.OneNote.OpenHierarchy(path, null, out string sectionId, CreateFileType.cftNone);
             handle.OneNote.SyncHierarchy(sectionId);
             handle.OneNote.CreateNewPage(sectionId, out string pageId, NewPageStyle.npsDefault);
@@ -455,10 +456,10 @@ namespace Odotocodot.OneNote.Linq
             return path;
         }
         /// <summary>
-        /// Retrieves the folder path on disk to the unfiled notes section, this is also where quick notes are created and saved to.
+        /// Retrieves the folder path on disk to the default notes section, this is where by default quick notes are created and saved to.
         /// </summary>   
-        /// <returns>The folder path on disk to the unfiled notes section.</returns>
-        public static string GetUnfiledNotesSection()
+        /// <returns>The folder path on disk to the default notes section.</returns>
+        public static string GetDefaultNotesLocation()
         {
             using var handle = new OneNoteHandle();
             handle.OneNote.GetSpecialLocation(SpecialLocation.slUnfiledNotesSection, out string path);
