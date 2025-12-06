@@ -77,7 +77,6 @@ namespace Odotocodot.OneNote.Linq.Parsers
                 return root;
             }
 
-            var notebooks = new List<Notebook>();
             reader.ReadStartElement();
             reader.MoveToContent();
             while (reader.NodeType != XmlNodeType.EndElement && reader.NodeType != XmlNodeType.None)
@@ -87,7 +86,7 @@ namespace Odotocodot.OneNote.Linq.Parsers
                     switch (reader.LocalName)
                     {
                         case Elements.Notebook:
-                            notebooks.Add(ParseNotebook(reader, new Notebook()));
+                            root.notebooks.Add(ParseNotebook(reader, new Notebook()));
                             break;
                         case Elements.OpenSections:
                             root.OpenSections = ParseOpenSections(reader);
@@ -104,14 +103,12 @@ namespace Odotocodot.OneNote.Linq.Parsers
             }
 
             reader.ReadEndElement();
-            root.Notebooks = notebooks;
             return root;
         }
 
         private static OpenSections ParseOpenSections(XmlReader reader)
         {
             var openSections = new OpenSections();
-            var sections = new List<Section>();
             while (reader.MoveToNextAttribute())
             {
                 if (reader.LocalName == Attributes.ID)
@@ -124,7 +121,6 @@ namespace Odotocodot.OneNote.Linq.Parsers
             if (reader.IsEmptyElement)
             {
                 reader.Skip();
-                openSections.Sections = [];
                 return openSections;
             }
 
@@ -134,7 +130,7 @@ namespace Odotocodot.OneNote.Linq.Parsers
             {
                 if (reader.NodeType == XmlNodeType.Element && reader.LocalName == Elements.Section)
                 {
-                    sections.Add(ParseSection(reader, new Section(), null));
+                    openSections.sections.Add(ParseSection(reader, new Section(), null));
                 }
                 else
                 {
@@ -144,7 +140,6 @@ namespace Odotocodot.OneNote.Linq.Parsers
             }
 
             reader.ReadEndElement();
-            openSections.Sections = sections;
             return openSections;
         }
 
@@ -157,26 +152,18 @@ namespace Odotocodot.OneNote.Linq.Parsers
             if (reader.IsEmptyElement)
             {
                 reader.Skip();
-                notebook.Children = [];
-                notebook.Sections = [];
-                notebook.SectionGroups = [];
                 return notebook;
             }
 
             reader.ReadStartElement();
             reader.MoveToContent();
-            ParseChildren(reader, notebook, out List<Section> sections, out List<SectionGroup> sectionGroups, out List<IOneNoteItem> children);
-            notebook.Sections = sections;
-            notebook.SectionGroups = sectionGroups;
-            notebook.Children = children;
+            ParseChildren(reader, notebook, notebook.sections, notebook.sectionGroups);
             reader.ReadEndElement();
             return notebook;
         }
 
-        private static void ParseChildren(XmlReader reader, INotebookOrSectionGroup parent, out List<Section> sections, out List<SectionGroup> sectionGroups, out List<IOneNoteItem> children)
+        private static void ParseChildren(XmlReader reader, INotebookOrSectionGroup parent, ReadOnlyList<Section> sections, ReadOnlyList<SectionGroup> sectionGroups)
         {
-            sections = [];
-            sectionGroups = [];
             while (reader.NodeType != XmlNodeType.EndElement && reader.NodeType != XmlNodeType.None)
             {
                 if (reader.NodeType == XmlNodeType.Element)
@@ -200,8 +187,6 @@ namespace Odotocodot.OneNote.Linq.Parsers
                 }
                 reader.MoveToContent();
             }
-
-            children = [.. sections, .. sectionGroups];
         }
 
         private static SectionGroup ParseSectionGroup(XmlReader reader, SectionGroup sectionGroup, INotebookOrSectionGroup parent)
@@ -216,18 +201,12 @@ namespace Odotocodot.OneNote.Linq.Parsers
             if (reader.IsEmptyElement)
             {
                 reader.Skip();
-                sectionGroup.Children = [];
-                sectionGroup.Sections = [];
-                sectionGroup.SectionGroups = [];
                 return sectionGroup;
             }
 
             reader.ReadStartElement();
             reader.MoveToContent();
-            ParseChildren(reader, sectionGroup, out List<Section> sections, out List<SectionGroup> sectionGroups, out List<IOneNoteItem> children);
-            sectionGroup.Sections = sections;
-            sectionGroup.SectionGroups = sectionGroups;
-            sectionGroup.Children = children;
+            ParseChildren(reader, sectionGroup, sectionGroup.sections, sectionGroup.sectionGroups);
             reader.ReadEndElement();
             return sectionGroup;
         }
@@ -244,18 +223,16 @@ namespace Odotocodot.OneNote.Linq.Parsers
             if (reader.IsEmptyElement)
             {
                 reader.Skip();
-                section.Pages = [];
                 return section;
             }
 
-            var pages = new List<Page>();
             reader.ReadStartElement();
             reader.MoveToContent();
             while (reader.NodeType != XmlNodeType.EndElement && reader.NodeType != XmlNodeType.None)
             {
                 if (reader.NodeType == XmlNodeType.Element && reader.LocalName == Elements.Page)
                 {
-                    pages.Add(ParsePage(reader, new Page(), section));
+                    section.pages.Add(ParsePage(reader, new Page(), section));
                 }
                 else
                 {
@@ -263,7 +240,6 @@ namespace Odotocodot.OneNote.Linq.Parsers
                 }
                 reader.MoveToContent();
             }
-            section.Pages = pages;
             reader.ReadEndElement();
             return section;
         }

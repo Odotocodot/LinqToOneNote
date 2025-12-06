@@ -11,7 +11,13 @@ namespace Odotocodot.OneNote.Linq
     /// </summary>
     public class Notebook : OneNoteItem, IOneNoteItem, INotebookOrSectionGroup, INameInvalidCharacters, IHasPath, IHasColor
     {
-        internal Notebook() { }
+        internal ReadOnlyList<Section> sections;
+        internal ReadOnlyList<SectionGroup> sectionGroups;
+        internal Notebook()
+        {
+            sections = [];
+            sectionGroups = [];
+        }
 
         /// <summary>
         /// A collection containing the characters that are not allowed in a <see cref="Notebook">notebook</see> name.<br/>
@@ -36,15 +42,21 @@ namespace Odotocodot.OneNote.Linq
         /// <summary>
         /// The sections that this notebook contains (direct children only).
         /// </summary>
-        public IReadOnlyList<Section> Sections { get; internal set; }
+        public IReadOnlyList<Section> Sections => sections;
 
         /// <summary>
         /// The section groups that this notebook contains (direct children only).
         /// </summary>
-        public IReadOnlyList<SectionGroup> SectionGroups { get; internal set; }
+        public IReadOnlyList<SectionGroup> SectionGroups => sectionGroups;
 
-        // TODO: Could make Children an extension method 
-        public IReadOnlyList<IOneNoteItem> Children { get; internal set; }
+        public IReadOnlyList<IOneNoteItem> Children
+        {
+            get
+            {
+                field ??= new ChildrenCollection(sections.list, sectionGroups.list);
+                return field;
+            }
+        }
 
         IOneNoteItem IOneNoteItem.Parent { get; } = null;
     }

@@ -11,7 +11,8 @@ namespace Odotocodot.OneNote.Linq
     /// </summary>
     public class Section : OneNoteItem, IOneNoteItem, INameInvalidCharacters, IHasIsInRecycleBin, IHasPath, IHasColor
     {
-        internal Section() { }
+        internal ReadOnlyList<Page> pages;
+        internal Section() { pages = []; }
 
         /// <summary>
         /// An array containing the characters that are not allowed in a <see cref="Section">section</see> name.<br/>
@@ -60,8 +61,8 @@ namespace Odotocodot.OneNote.Linq
         /// <summary>
         /// The collection of pages within this section, equal to <see cref="IOneNoteItem.Children"/> for a section.
         /// </summary>
-        public IReadOnlyList<Page> Pages { get; internal set; }
-        public IReadOnlyList<IOneNoteItem> Children => Pages;
+        public IReadOnlyList<Page> Pages => pages;
+        public IReadOnlyList<IOneNoteItem> Children => pages;
         public INotebookOrSectionGroup Parent { get; internal set; }
         IOneNoteItem IOneNoteItem.Parent => Parent;
     }

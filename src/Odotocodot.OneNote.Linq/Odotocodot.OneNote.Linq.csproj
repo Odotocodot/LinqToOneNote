@@ -10,6 +10,7 @@
 		<Copyright>Copyright © 2023 Odotocodot</Copyright>
 		<PackageIcon>logo.png</PackageIcon>
 		<PackageTags>OneNote;Interop;LINQ;linqpad-samples</PackageTags>
+		<LangVersion>14.0</LangVersion>
 		<PackageReadmeFile>NuGet.md</PackageReadmeFile>
 		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
 		<PackageProjectUrl>https://odotocodot.github.io/Linq2OneNote/</PackageProjectUrl>
