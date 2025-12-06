@@ -59,6 +59,22 @@ namespace Odotocodot.OneNote.Linq.Extensions
             return sectionGroup != null;
         }
 
+        public static bool TryGetNotebook(this IOneNoteItem item, out Notebook notebook)
+        {
+            var current = item.Parent;
+            while (current.Parent != null)
+            {
+                current = current.Parent;
+            }
+            if (current is Notebook nb)
+            {
+                notebook = nb;
+                return true;
+            }
+            notebook = null;
+            return false;
+        }
+
 
         public static string GetRelativePath(this IOneNoteItem item)
         {
