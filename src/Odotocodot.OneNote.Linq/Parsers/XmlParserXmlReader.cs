@@ -34,10 +34,10 @@ namespace Odotocodot.OneNote.Linq.Parsers
                     Elements.Section => ParseSection(reader, new Section(), (INotebookOrSectionGroup)parent),
                     Elements.SectionGroup => ParseSectionGroup(reader, new SectionGroup(), (INotebookOrSectionGroup)parent),
                     Elements.Page => ParsePage(reader, new Page(), (Section)parent),
-                    _ => throw new InvalidOperationException($"XML element '{reader.LocalName}' is not supported."),
+                    _ => Throw.InvalidXmlElement(reader.LocalName),
                 };
             }
-            throw new InvalidOperationException($"XML node type '{reader.NodeType}' is not supported.");
+            return Throw.InvalidXmlNodeType(reader.NodeType.ToString());
         }
 
         public void ParseExisting(string xml, IOneNoteItem item)
@@ -62,7 +62,8 @@ namespace Odotocodot.OneNote.Linq.Parsers
                         ParsePage(reader, page, page.Parent);
                         break;
                     default:
-                        throw new InvalidOperationException($"'{item.GetType().Name}' is not a valid OneNote item type.");
+                        Throw.InvalidIOneNoteItem(item);
+                        break;
                 }
             }
         }

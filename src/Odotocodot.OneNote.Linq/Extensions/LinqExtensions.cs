@@ -100,7 +100,7 @@ namespace Odotocodot.OneNote.Linq.Extensions
 
         public static IEnumerable<IOneNoteItem> Descendants(this IOneNoteItem source)
         {
-            ArgumentNullException.ThrowIfNull(source);
+            Throw.IfNull(source);
 
             return Descendants();
 
@@ -122,8 +122,8 @@ namespace Odotocodot.OneNote.Linq.Extensions
 
         public static IEnumerable<IOneNoteItem> Descendants(this IOneNoteItem source, Func<IOneNoteItem, bool> predicate)
         {
-            ArgumentNullException.ThrowIfNull(source);
-            ArgumentNullException.ThrowIfNull(predicate);
+            Throw.IfNull(source);
+            Throw.IfNull(predicate);
 
             return Descendants();
 
@@ -146,7 +146,7 @@ namespace Odotocodot.OneNote.Linq.Extensions
 
         public static IEnumerable<IOneNoteItem> Descendants(this IEnumerable<IOneNoteItem> source)
         {
-            ArgumentNullException.ThrowIfNull(source);
+            Throw.IfNull(source);
 
             return Descendants();
 
@@ -171,8 +171,8 @@ namespace Odotocodot.OneNote.Linq.Extensions
 
         public static IEnumerable<IOneNoteItem> Descendants(this IEnumerable<IOneNoteItem> source, Func<IOneNoteItem, bool> predicate)
         {
-            ArgumentNullException.ThrowIfNull(source);
-            ArgumentNullException.ThrowIfNull(predicate);
+            Throw.IfNull(source);
+            Throw.IfNull(predicate);
 
             return Descendants();
 
@@ -198,7 +198,7 @@ namespace Odotocodot.OneNote.Linq.Extensions
 
         public static IEnumerable<Page> GetAllPages(this IOneNoteItem source)
         {
-            ArgumentNullException.ThrowIfNull(source);
+            Throw.IfNull(source);
 
             return GetAllPages();
 
@@ -229,7 +229,7 @@ namespace Odotocodot.OneNote.Linq.Extensions
 
         public static IEnumerable<Page> GetAllPages(this IEnumerable<IOneNoteItem> source)
         {
-            ArgumentNullException.ThrowIfNull(source);
+            Throw.IfNull(source);
 
             return GetAllPages();
 

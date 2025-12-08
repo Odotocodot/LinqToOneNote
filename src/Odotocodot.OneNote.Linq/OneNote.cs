@@ -145,13 +145,14 @@ namespace Odotocodot.OneNote.Linq
         /// <summary>
         /// Get a flattened collection of <see cref="Page">pages</see> that match the <paramref name="search"/> parameter.
         /// </summary>
-        /// <param name="search">The search query. This should be exactly the same string that you would type into the search box in the OneNote UI. You can use bitwise operators, such as AND and OR, which must be all uppercase.</param>
+        /// <param name="search">The search query. This should be exactly the same string that you would type into the search box in the OneNote UI. You can use bitwise operators, such as "AND" and "OR", which must be all uppercase.</param>
         /// <returns>An <see cref="IEnumerable{T}">IEnumerable</see>&lt;<see cref="Page"/>&gt; that contains <see cref="Page">pages</see> that match the <paramref name="search"/> parameter.</returns>
-        /// <inheritdoc cref="ValidateSearch(string)" path="/exception"/>
+        /// <exception cref="ArgumentException">Thrown if <paramref name="search"/> is empty or only whitespace, or if the first character of <paramref name="search"/> is NOT a letter or a digit.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="search"/> is <see langword="null"/>.</exception>
         /// <seealso cref="FindPages(string, IOneNoteItem)"/>
         public static IEnumerable<Page> FindPages(string search)
         {
-            ValidateSearch(search);
+            Throw.IfInvalidSearch(search);
             using var handle = new OneNoteHandle();
             handle.OneNote.FindPages(null, search, out string xml, xsSchema: xmlSchema);
             return xmlParser.ParseRoot(xml).GetAllPages();
@@ -164,37 +165,16 @@ namespace Odotocodot.OneNote.Linq
         /// <param name="scope">The hierarchy item to search within.</param>
         /// <returns><inheritdoc cref="FindPages(string)" path="/returns"/></returns>
         /// <seealso cref="FindPages(string)"/>
-        /// <exception cref="ArgumentException"><inheritdoc cref="ValidateSearch(string)" path="/exception[@cref='ArgumentException']"/></exception>
+        /// <exception cref="ArgumentException"><inheritdoc cref="FindPages(string)" path="/exception[@cref='ArgumentException']"/></exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="search"/> or <paramref name="scope"/> is <see langword="null"/>.</exception>
         public static IEnumerable<Page> FindPages(string search, IOneNoteItem scope)
         {
-            ArgumentNullException.ThrowIfNull(scope);
-
-            ValidateSearch(search);
+            Throw.IfNull(scope);
+            Throw.IfInvalidSearch(search);
 
             using var handle = new OneNoteHandle();
             handle.OneNote.FindPages(scope.Id, search, out string xml, xsSchema: xmlSchema);
             return xmlParser.Parse(xml, scope).GetAllPages();
-        }
-
-        /// <summary>
-        /// _
-        /// </summary>
-        /// <param name="search"></param>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="search"/> is <see langword="null"/>.</exception>
-        /// <exception cref="ArgumentException">Thrown if <paramref name="search"/> is empty or only whitespace, or if the first character of <paramref name="search"/> is NOT a letter or a digit.</exception>
-        private static void ValidateSearch(string search)
-        {
-            ArgumentNullException.ThrowIfNull(search);
-            if (string.IsNullOrWhiteSpace(search))
-            {
-                throw new ArgumentException("Search string cannot be empty or only whitespace", nameof(search));
-            }
-
-            if (!char.IsLetterOrDigit(search[0]))
-            {
-                throw new ArgumentException("The first character of the search must be a letter or a digit", nameof(search));
-            }
         }
 
         /// <summary>
@@ -314,10 +294,7 @@ namespace Odotocodot.OneNote.Linq
         /// <returns>The newly created <see cref="Page">page</see>.</returns>
         public static Page CreatePage(Section section, string name, OpenMode openMode = OpenMode.None)
         {
-            if (section == null)
-            {
-                throw new ArgumentNullException(nameof(section), $"Parameter section cannot be null. Use {nameof(OneNote)}.{nameof(CreateQuickNote)} instead.");
-            }
+            Throw.IfNullSection(section);
 
             using var handle = new OneNoteHandle();
             handle.OneNote.SyncHierarchy(section.Id);
@@ -398,10 +375,7 @@ namespace Odotocodot.OneNote.Linq
             OpenMode openMode,
             CreateFileType createFileType) where T : INameInvalidCharacters
         {
-            if (!IsValidName<T>(name))
-            {
-                throw new ArgumentException($"Invalid {nameof(T).ToLower()} name provided: \"{name}\". {nameof(T)} names cannot empty, only whitespace or contain the symbols: \t {string.Join(" ", T.InvalidCharacters)}");
-            }
+            Throw.IfInvalidName<T>(name);
 
             handle.OneNote.OpenHierarchy(path, parent?.Id, out string newItemId, createFileType);
             handle.OneNote.GetHierarchy(newItemId, HierarchyScope.hsSelf, out var itemXml, xmlSchema);
@@ -534,7 +508,7 @@ namespace Odotocodot.OneNote.Linq
 
             public static IReadOnlyList<IOneNoteItem> GetChildren(IOneNoteItem item)
             {
-                ArgumentNullException.ThrowIfNull(item);
+                Throw.IfNull(item);
 
                 if (item is Page)
                 {
@@ -548,7 +522,7 @@ namespace Odotocodot.OneNote.Linq
 
             public static IReadOnlyList<IOneNoteItem> GetChildrenAndUpdate(IOneNoteItem item, bool force = false) //HierarchyScope scope?
             {
-                ArgumentNullException.ThrowIfNull(item);
+                Throw.IfNull(item);
                 if (item is Page)
                 {
                     return [];
@@ -567,7 +541,7 @@ namespace Odotocodot.OneNote.Linq
 
             public static IOneNoteItem GetParent(IOneNoteItem item)
             {
-                ArgumentNullException.ThrowIfNull(item);
+                Throw.IfNull(item);
 
                 if (item is Notebook)
                 {
@@ -582,7 +556,7 @@ namespace Odotocodot.OneNote.Linq
 
             public static IOneNoteItem GetParentAndUpdate(IOneNoteItem item, bool force)
             {
-                ArgumentNullException.ThrowIfNull(item);
+                Throw.IfNull(item);
 
                 if (item is Notebook)
                 {
