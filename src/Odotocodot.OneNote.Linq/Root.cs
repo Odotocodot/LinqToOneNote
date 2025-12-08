@@ -22,24 +22,26 @@ namespace Odotocodot.OneNote.Linq
 
 		private struct Enumerator(Root root) : IEnumerator<IOneNoteItem>
 		{
+			private List<Notebook>.Enumerator notebookEnumerator = root.notebooks.GetEnumerator();
+			private readonly List<Section>.Enumerator? openSectionsEnumerator = root.OpenSections?.sections.GetEnumerator();
 			public IOneNoteItem Current { get; private set; }
 			readonly object IEnumerator.Current => Current;
 			public bool MoveNext()
 			{
-				var notebookEnumerator = root.notebooks.GetEnumerator();
 				while (notebookEnumerator.MoveNext())
 				{
 					Current = notebookEnumerator.Current;
 					return true;
 				}
-				if (root.OpenSections is not null)
+
+				if (openSectionsEnumerator is null)
+					return false;
+
+				var enumerator = openSectionsEnumerator.Value;
+				while (enumerator.MoveNext())
 				{
-					var openSectionsEnumerator = root.OpenSections.sections.GetEnumerator();
-					while (openSectionsEnumerator.MoveNext())
-					{
-						Current = openSectionsEnumerator.Current;
-						return true;
-					}
+					Current = enumerator.Current;
+					return true;
 				}
 				return false;
 			}
