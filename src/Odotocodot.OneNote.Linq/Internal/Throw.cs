@@ -1,7 +1,7 @@
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using Odotocodot.OneNote.Linq.Abstractions;
+using Odotocodot.OneNote.Linq.Extensions;
 
 namespace Odotocodot.OneNote.Linq.Internal
 {
@@ -23,9 +23,16 @@ namespace Odotocodot.OneNote.Linq.Internal
             }
         }
 
-        internal static void IfNullSection(Section? section)
+        internal static void IfInvalidParent<T>(T? parent, string? messageExtra = null, [CallerArgumentExpression(nameof(parent))] string? paramName = null) where T : IOneNoteItem
         {
-            throw new ArgumentNullException(nameof(section), $"Parameter 'section' cannot be null. Use {nameof(OneNote)}.{nameof(OneNote.CreateQuickNote)} instead.");
+            if (parent == null)
+            {
+                throw new ArgumentNullException(paramName, $"Parameter '{paramName}' cannot be null. {messageExtra}");
+            }
+            if (parent.IsInRecycleBin())
+            {
+                throw new ArgumentException("Cannot create OneNote items if their parent is in the Recycle Bin.", paramName);
+            }
         }
 
         internal static void IfInvalidName<T>(string? name) where T : INameInvalidCharacters
@@ -34,22 +41,6 @@ namespace Odotocodot.OneNote.Linq.Internal
             {
                 throw new ArgumentException($"Invalid {nameof(T).ToLower()} name provided: \"{name}\". {nameof(T)} names cannot empty, only whitespace or contain the symbols: \t {string.Join(" ", T.InvalidCharacters)}");
             }
-        }
-
-#nullable restore
-        internal static IOneNoteItem InvalidXmlElement(string elementName)
-        {
-            throw new InvalidOperationException($"The XML element '{elementName}' is not valid in the current context.");
-        }
-
-        internal static IOneNoteItem InvalidXmlNodeType(string nodeType)
-        {
-            throw new InvalidOperationException($"The XML node type '{nodeType}' is not valid in the current context.");
-        }
-
-        internal static void InvalidIOneNoteItem(IOneNoteItem item)
-        {
-            throw new InvalidOperationException($"'{item.GetType().Name}' is not a valid OneNote item type.");
         }
     }
 }
