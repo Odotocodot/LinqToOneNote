@@ -75,25 +75,30 @@ namespace Odotocodot.OneNote.Linq.Extensions
             return false;
         }
 
-        internal static readonly SimplePool<StringBuilder> StringBuilderPool = new(10);
-
-        public static string GetRelativePath(this IOneNoteItem item)
+        private static readonly SimplePool<StringBuilder> StringBuilderPool = new(10);
+        private const string DefaultRelativePathSeparator = "\\";
+        public static string GetRelativePath(this IOneNoteItem item, bool useNotebookDisplayName = true, string separator = DefaultRelativePathSeparator)
         {
+            Throw.IfNull(item);
             StringBuilder sb = StringBuilderPool.Rent();
             IOneNoteItem current = item;
             while (true)
             {
-                sb.Insert(0, current.Name);
-                if (current.Parent == null)
+                if (current is Notebook notebook)
                 {
-                    if (current is not Notebook)
-                    {
-                        sb.Insert(0, Constants.RelativePathSeparator);
-                    }
+                    sb.Insert(0, useNotebookDisplayName ? notebook.DisplayName : notebook.Name);
                     break;
                 }
+
+                if (current is null)
+                {
+                    break;
+                }
+                
+                sb.Insert(0, current.Name);
+                sb.Insert(0, separator);
                 current = current.Parent;
-                sb.Insert(0, Constants.RelativePathSeparator);
+
             }
             string relativePath = sb.ToString();
             sb.Clear();
