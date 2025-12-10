@@ -27,9 +27,10 @@ namespace Odotocodot.OneNote.Linq
         public static IReadOnlyList<char> InvalidCharacters { get; } = Array.AsReadOnly(['\\', '/', '*', '?', '"', '|', '<', '>', ':', '%', '#', '.']);
 
         /// <summary>
-        /// The nickname of the notebook.
+        /// The display name of the notebook. Differs from <see cref="IOneNoteItem.Name"/> as it may contain characters that are invalid for folder names. Furthermore,
+        /// <see cref="IOneNoteItem.Name"/> represents the folder name of the notebook on disk.
         /// </summary>
-        public string NickName { get; internal set; }
+        public string DisplayName { get; internal set; }
         /// <summary>
         /// The full path to the notebook.
         /// </summary>

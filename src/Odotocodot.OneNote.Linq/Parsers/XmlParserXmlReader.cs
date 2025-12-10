@@ -295,7 +295,7 @@ namespace Odotocodot.OneNote.Linq.Parsers
                             Unsafe.As<Section>(item).IsInRecycleBin = bool.Parse(reader.Value);
                         break;
                     case Attributes.NickName:
-                        Unsafe.As<Notebook>(item).NickName = reader.Value;
+                        Unsafe.As<Notebook>(item).DisplayName = reader.Value;
                         break;
                     case Attributes.IsRecycleBin:
                         Unsafe.As<SectionGroup>(item).IsRecycleBin = bool.Parse(reader.Value);
