@@ -17,13 +17,12 @@ namespace Odotocodot.OneNote.Linq.Internal
 			return new InvalidOperationException($"The XML node type '{nodeType}' is not valid in the current context.");
 		}
 
-		internal static InvalidOperationException InvalidIOneNoteItem(IOneNoteItem item)
+		internal static ArgumentException InvalidIOneNoteItem(IOneNoteItem item)
 		{
-			return new InvalidOperationException($"'{item.GetType().Name}' is not a valid OneNote item type.");
+			return new ArgumentException($"'{item.GetType().Name}' is not a valid OneNote item type.");
 		}
 
-		[UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_message")]
-		private static extern ref string GetExceptionMessageField(Exception ex);
+
 
 		//https://learn.microsoft.com/en-us/office/client-developer/onenote/error-codes-onenote
 		internal static COMException NicifiedComException(COMException ex)
@@ -43,6 +42,9 @@ namespace Odotocodot.OneNote.Linq.Internal
 				// Nested try catch and silencing exceptions -> sus territory 
 			}
 			return ex;
+
+			[UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_message")]
+			static extern ref string GetExceptionMessageField(Exception ex);
 		}
 
 		private static string GetErrorDescription(uint errorCode) => errorCode switch
