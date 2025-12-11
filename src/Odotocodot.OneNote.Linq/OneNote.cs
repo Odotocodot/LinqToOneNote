@@ -157,33 +157,25 @@ namespace Odotocodot.OneNote.Linq
         /// </summary>
         /// <param name="item">The item to open</param>
         /// <param name="newWindow">Whether to create a new OneNote window or add to an existing one. Does nothing if there are no windows of OneNote.</param>
-        public static void Open(INavigable item, bool newWindow = false)
-        {
-            Run(app => app.NavigateTo(item.Id, fNewWindow: newWindow));
-        }
+        public static void Open(INavigable item, bool newWindow = false) => Run(app => app.NavigateTo(item.Id, fNewWindow: newWindow));
 
         /// <summary>
         /// Forces OneNote to sync the <paramref name="item"/>.
         /// </summary>
         /// <param name="item"><inheritdoc cref="Open" path="/param[@name='item']"/></param>
-        public static void SyncItem(INavigable item)
-        {
-            Run(app => app.SyncHierarchy(item.Id));
-        }
+        public static void SyncItem(INavigable item) => Run(app => app.SyncHierarchy(item.Id));
 
         /// <summary>
         /// Gets the content of the specified <paramref name="page"/>.
         /// </summary>
         /// <param name="page">The page to retrieve content from.</param>
         /// <returns>An <see langword="string"/> in the OneNote XML format.</returns>
-        public static string GetPageContent(Page page)
-        {
-            return Run(app =>
+        public static string GetPageContent(Page page) =>
+            Run(app =>
             {
                 app.GetPageContent(page.Id, out string xml, xsSchema: xmlSchema);
                 return xml;
             });
-        }
 
         /// <summary>
         /// Updates the content of a OneNote page with the provided <paramref name="xml"/>. 
@@ -587,8 +579,37 @@ namespace Odotocodot.OneNote.Linq
                 });
                 return xmlParser.Parse(xml, item).Children;
             }
+            
+            public static IOneNoteItem UpdateDescendants(IOneNoteItem item, HierarchyScope depth, bool force = false)
+            {
+                Throw.IfNull(item);
+                if (depth == HierarchyScope.Notebooks || depth == HierarchyScope.Self || item is Page)
+                {
+                    return item;
+                }
 
-            public static IReadOnlyList<IOneNoteItem> GetChildrenAndUpdate(IOneNoteItem item, bool force = false) //HierarchyScope scope?
+                if (force || item.Children.Count == 0)
+                {
+                    if (item is INotebookOrSectionGroup nbors)
+                    {
+                        ((ReadOnlyList<Section>)nbors.Sections).Clear();
+                        ((ReadOnlyList<SectionGroup>)nbors.SectionGroups).Clear();
+                    }
+                    else if (item is Section section)
+                    {
+                        ((ReadOnlyList<Page>)section.Pages).Clear();
+                    }
+
+                    var xml = Run(app =>
+                    {
+                        app.GetHierarchy(item.Id, depth.ToInterop(), out string xml, xmlSchema);
+                        return xml;
+                    });
+                    xmlParser.ParseExisting(xml, item);
+                }
+                return item;
+            }
+
             public static IReadOnlyList<IOneNoteItem> GetAndUpdateChildren(IOneNoteItem item, bool force = false)
             {
                 Throw.IfNull(item);
