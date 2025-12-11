@@ -22,8 +22,10 @@ namespace Odotocodot.OneNote.Linq.Internal
         public override T this[int index] => list[index];
         public void Add(T item) => list.Add(item);
         public bool Remove(T item) => list.Remove(item);
+        public void Clear() => list.Clear();
         public override int Count => list.Count;
         public override List<T>.Enumerator GetEnumerator() => list.GetEnumerator();
+
     }
 
     internal class ChildrenCollection(List<Section> sections, List<SectionGroup> sectionGroups) : ReadOnlyListBase<IOneNoteItem, ChildrenCollection.Enumerator>
