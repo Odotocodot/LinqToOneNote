@@ -217,42 +217,47 @@ namespace Odotocodot.OneNote.Linq
         //     handle.OneNote.CloseNotebook(notebook.Id);
         // }
 
-        // //TODO: Works but UpdateHierarchy takes A LONG TIME!
-        // internal static void RenameItem(IOneNoteItem item, string newName)
-        // {
-        //     if (item.IsInRecycleBin())
-        //     {
-        //         throw new ArgumentException("Cannot rename unique items, such as recycle bin.");
-        //     }
-        //     using var handle = new OneNoteHandle();
-        //     handle.OneNote.GetHierarchy(null, HierarchyScope.hsPages, out string xml);
-        //     var doc = XDocument.Parse(xml);
-        //     var element = doc.Descendants()
-        //                      .FirstOrDefault(e => (string)e.Attribute("ID") == item.Id);
 
-        //     if (element == null)
-        //         return;
-
-        //     element.Attribute("name").SetValue(newName);
-        //     handle.OneNote.UpdateHierarchy(doc.ToString());
-        //     switch (item)
-        //     {
-        //         case Notebook nb:
-        //             nb.Name = newName;
-        //             break;
-        //         case SectionGroup sg:
-        //             sg.Name = newName;
-        //             break;
-        //         case Section s:
-        //             s.Name = newName;
-        //             break;
-        //         case Page p:
-        //             p.Name = newName;
-        //             break;
-        //     }
-        // }
-
-        // #endregion
+        /// <summary>
+        /// Renames the specified <paramref name="item"/> to <paramref name="newName"/>.
+        /// For <see cref="Notebook">notebooks</see>, this renames its <see cref="Notebook.DisplayName">display name</see>, not the folder on disk.
+        /// </summary>
+        /// <param name="item">The item to be renamed</param>
+        /// <param name="newName">The new name of the item</param>
+        /// <exception cref="ArgumentException">Thrown if the <paramref name="item"/> is in the Recycle Bin.<br/> Thrown if <paramref name="newName"></paramref>
+        /// is invalid for the <paramref name="item"/> type. See <see cref="IsValidName"/>.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="item"/> is null.</exception>
+        public static void RenameItem(IOneNoteItem item, string newName)
+        {
+            Throw.IfNull(item);
+            Throw.IfNullOrWhiteSpace(newName);
+            Throw.IfInRecycleBin(item, "Cannot rename items in the Recycle Bin.");
+            Throw.IfInvalidName(newName, item);
+            Run(app =>
+            {
+                app.GetHierarchy(item.Id, HierarchyScope.hsSelf, out string xml, xmlSchema);
+                var element = XElement.Parse(xml);
+                switch (item)
+                {
+                    case Notebook notebook:
+                        element.Attribute(Constants.Attributes.NickName)!.SetValue(newName);
+                        notebook.DisplayName = newName;
+                        break;
+                    case Page:
+                        app.GetPageContent(item.Id, out string pageContentXml, PageInfo.piBasic, xmlSchema);
+                        XDocument doc = XDocument.Parse(pageContentXml);
+                        XElement xTitle = doc.Descendants(XName.Get("T", Constants.NamespaceUri)).First();
+                        xTitle.Value = newName;
+                        app.UpdatePageContent(doc.ToString());
+                        break;
+                    default:
+                        element.Attribute(Constants.Attributes.Name)!.SetValue(newName);
+                        ((OneNoteItem)item).Name = newName;
+                        break;
+                }
+                app.UpdateHierarchy(element.ToString(), xmlSchema);
+            });
+        }
 
         #region Creating New OneNote Items Methods
 
@@ -263,7 +268,7 @@ namespace Odotocodot.OneNote.Linq
         /// <param name="name">The title of the page.</param>
         /// <param name="openMode">Specifies whether/how the newly created page should be opened.</param>
         /// <returns>The newly created <see cref="Page">page</see>.</returns>
-        public static Page CreatePage(Section section, string name, OpenMode openMode = OpenMode.None)
+        public static Page CreatePage(Section section, string name = "", OpenMode openMode = OpenMode.None)
         {
             Throw.IfInvalidParent(section, $"Use {nameof(OneNote)}.{nameof(CreateQuickNote)} instead.");
 
@@ -478,9 +483,8 @@ namespace Odotocodot.OneNote.Linq
         public static bool IsValidName<THierarchyItem>(string name) where THierarchyItem : INameInvalidCharacters
             => !string.IsNullOrWhiteSpace(name) && !THierarchyItem.InvalidCharacters.Any(name.Contains);
 
-
         // Used to make releasing and getting the COM object easier depending on the ComObjectSetting.
-        // TODO rename to UseCOM
+        // rename to UseCOM?
         internal static T Run<T>(Func<Application, T> func)
         {
             try

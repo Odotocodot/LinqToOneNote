@@ -12,6 +12,11 @@ namespace Odotocodot.OneNote.Linq.Internal
         {
             ArgumentNullException.ThrowIfNull(argument, paramName);
         }
+        
+        public static void IfNullOrWhiteSpace(string? name, [CallerArgumentExpression(nameof(name))] string? paramName = null)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(name, paramName);
+        }
 
         internal static void IfInvalidSearch(string? search, [CallerArgumentExpression(nameof(search))] string? paramName = null)
         {
@@ -29,9 +34,14 @@ namespace Odotocodot.OneNote.Linq.Internal
             {
                 throw new ArgumentNullException(paramName, $"Parameter '{paramName}' cannot be null. {messageExtra}");
             }
-            if (parent.IsInRecycleBin())
+            IfInRecycleBin(parent, "Cannot create OneNote items if their parent is in the Recycle Bin.");
+        }
+
+        internal static void IfInRecycleBin<T>(T item, string message, [CallerArgumentExpression(nameof(item))] string? paramName = null) where T : IOneNoteItem
+        {
+            if (item.IsInRecycleBin())
             {
-                throw new ArgumentException("Cannot create OneNote items if their parent is in the Recycle Bin.", paramName);
+                throw new ArgumentException(message + $" Consider checking with the {nameof(OneNoteItemExtensions.IsInRecycleBin)}() extension method.", paramName);
             }
         }
 
@@ -40,6 +50,26 @@ namespace Odotocodot.OneNote.Linq.Internal
             if (!OneNote.IsValidName<T>(name))
             {
                 throw new ArgumentException($"Invalid {nameof(T).ToLower()} name provided: \"{name}\". {nameof(T)} names cannot empty, only whitespace or contain the symbols: \t {string.Join(" ", T.InvalidCharacters)}");
+            }
+        }
+
+        internal static void IfInvalidName(string name, IOneNoteItem item)
+        {
+            switch (item)
+            {
+                case Notebook:
+                    IfInvalidName<Notebook>(name);
+                    break;
+                case SectionGroup:
+                    IfInvalidName<SectionGroup>(name);
+                    break;
+                case Section:
+                    IfInvalidName<Section>(name);
+                    break;
+                case Page:
+                    break;
+                default:
+                    throw Exceptions.InvalidIOneNoteItem(item);
             }
         }
     }
