@@ -7,7 +7,7 @@ namespace Odotocodot.OneNote.Linq
     /// <summary>
     /// Represents a section group in OneNote.
     /// </summary>
-    public class SectionGroup : OneNoteItem, IOneNoteItem, INotebookOrSectionGroup, INameInvalidCharacters, IHasPath
+    public class SectionGroup : OneNoteItem, IOneNoteItem, INotebookOrSectionGroup, INameInvalidCharacters, IHasPath, IDeletable
     {
         internal ReadOnlyList<Section> sections;
         internal ReadOnlyList<SectionGroup> sectionGroups;

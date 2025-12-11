@@ -8,7 +8,7 @@ namespace Odotocodot.OneNote.Linq
     /// <summary>
     /// Represents a page in OneNote.
     /// </summary>
-    public class Page : OneNoteItem, IOneNoteItem, IHasIsInRecycleBin
+    public class Page : OneNoteItem, IOneNoteItem, IHasIsInRecycleBin, IDeletable
     {
         internal Page() { }
         /// <summary>

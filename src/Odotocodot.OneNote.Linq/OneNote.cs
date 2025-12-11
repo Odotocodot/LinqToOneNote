@@ -194,18 +194,45 @@ namespace Odotocodot.OneNote.Linq
         /// found <a href="https://github.com/idvorkin/onom/blob/eb9ce52764e9ad639b2c9b4bca0622ee6221106f/OneNoteObjectModel/onenote.xsd">here</a>.</remarks>
         /// <param name="xml">An <see langword="string"/> in the OneNote XML format. </param>
         public static void UpdatePageContent(string xml) => Run(app => app.UpdatePageContent(xml, xsSchema: xmlSchema));
-
-        // #region Experimental API Methods
-
-        // /// <summary>
-        // /// Deletes the hierarchy <paramref name="item"/> from the OneNote notebook hierarchy.
-        // /// </summary>
-        // /// <param name="item"><inheritdoc cref="Open" path="/param[@name='item']"/></param>
-        // internal static void DeleteItem(IOneNoteItem item)
-        // {
-        //     using var handle = new OneNoteHandle();
-        //     handle.OneNote.DeleteHierarchy(item.Id);
-        // }
+        
+        /// <summary>
+        /// Deletes the hierarchy <paramref name="item"/> from the OneNote notebook hierarchy. For <see cref="Notebook">notebooks</see> use
+        /// <see cref="CloseNotebook"/>. Does nothing if the <paramref name="item"/> is already in the Recycle Bin.
+        /// </summary>
+        /// <param name="item"><inheritdoc cref="Open" path="/param[@name='item']"/></param>
+        /// <param name="dateExpectedLastModified">The date and time that you think the object you want to delete was last modified. If you pass a
+        /// non-zero value for this parameter, OneNote proceeds with the update only if the value you pass matches the actual date and time the object
+        /// was last modified. Passing a value for this parameter helps prevent accidentally overwriting edits users made since the last time the
+        /// object was modified.</param>
+        /// <param name="deletePermanently"><see langword="true"/> to permanently delete the content; <see langword="false"/> to move the content into
+        /// the OneNote recycle bin for the corresponding Notebook (the default). If the Notebook is in OneNote 2007 format, no recycle bin exists, so
+        /// the content is permanently deleted.</param>
+        public static void DeleteItem(IDeletable item, DateTime dateExpectedLastModified = default, bool deletePermanently = false)
+        {
+            Throw.IfNull(item);
+            if (item.IsInRecycleBin())
+            {
+                return;
+            }
+            Run(app => app.DeleteHierarchy(item.Id, dateExpectedLastModified, deletePermanently));
+            switch (item.Parent)
+            {
+                case INotebookOrSectionGroup parent:
+                    switch (item)
+                    {
+                        case SectionGroup group:
+                            ((ReadOnlyList<SectionGroup>)parent.SectionGroups).Remove(group);
+                            break;
+                        case Section section:
+                            ((ReadOnlyList<Section>)parent.Sections).Remove(section);
+                            break;
+                    }
+                    break;
+                case Section section:
+                    section.pages.Remove((Page)item);
+                    break;
+            }
+        }
 
         // /// <summary>
         // /// Closes the <paramref name="notebook"/>.

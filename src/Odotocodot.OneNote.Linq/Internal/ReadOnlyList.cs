@@ -21,6 +21,7 @@ namespace Odotocodot.OneNote.Linq.Internal
 
         public override T this[int index] => list[index];
         public void Add(T item) => list.Add(item);
+        public bool Remove(T item) => list.Remove(item);
         public override int Count => list.Count;
         public override List<T>.Enumerator GetEnumerator() => list.GetEnumerator();
     }

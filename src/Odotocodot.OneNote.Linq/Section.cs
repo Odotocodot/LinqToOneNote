@@ -9,7 +9,7 @@ namespace Odotocodot.OneNote.Linq
     /// <summary>
     /// Represents a section in OneNote.
     /// </summary>
-    public class Section : OneNoteItem, IOneNoteItem, INameInvalidCharacters, IHasIsInRecycleBin, IHasPath, IHasColor
+    public class Section : OneNoteItem, IOneNoteItem, INameInvalidCharacters, IHasIsInRecycleBin, IHasPath, IHasColor, IDeletable
     {
         internal ReadOnlyList<Page> pages;
         internal Section() { pages = []; }
