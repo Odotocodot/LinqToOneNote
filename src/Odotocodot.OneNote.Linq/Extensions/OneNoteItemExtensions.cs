@@ -22,6 +22,28 @@ namespace Odotocodot.OneNote.Linq.Extensions
         /// <inheritdoc cref="OneNote.GetPageContent(Page)"/>
         public static string GetPageContent(this Page page) => OneNote.GetPageContent(page);
 
+        ///<inheritdoc cref="OneNote.RenameItem"/>
+        public static void Rename(this IOneNoteItem item, string newName) => OneNote.RenameItem(item, newName);
+
+        /// <inheritdoc cref="OneNote.DeleteItem"/>
+        public static void Delete(this IDeletable item, DateTime dateExpectedLastModified = default, bool deletePermanently = false)
+            => OneNote.DeleteItem(item, dateExpectedLastModified, deletePermanently);
+
+        /// <inheritdoc cref="OneNote.CloseNotebook"/>
+        public static void Close(this Notebook notebook, bool force = false) => OneNote.CloseNotebook(notebook, force);
+
+        /// <inheritdoc cref="OneNote.CreateSectionGroup"/>
+        public static SectionGroup CreateSectionGroup(this INotebookOrSectionGroup parent, string name, OpenMode openMode = OpenMode.None)
+            => OneNote.CreateSectionGroup(parent, name, openMode);
+
+        /// <inheritdoc cref="OneNote.CreateSection"/>
+        public static Section CreateSection(this INotebookOrSectionGroup parent, string name, OpenMode openMode = OpenMode.None)
+            => OneNote.CreateSection(parent, name, openMode);
+
+        /// <inheritdoc cref="OneNote.CreatePage"/>
+        public static Page CreatePage(this Section parent, string name = "", OpenMode openMode = OpenMode.None)
+            => OneNote.CreatePage(parent, name, openMode);
+
         /// <summary>
         /// Returns a value that indicates whether the <paramref name="item"/> is in or is a recycle bin.
         /// </summary>
