@@ -107,6 +107,31 @@ namespace Odotocodot.OneNote.Linq.Extensions
         }
 
         /// <summary>
+        /// Extension that method that combines <see cref="OneNote.DeleteItem"/> and <see cref="OneNote.CloseNotebook"/>,
+        /// i.e. deletes the item if it is a <see cref="IDeletable"/> or closes it if it is a <see cref="Notebook">notebook</see>.
+        /// </summary>
+        /// <param name="item">The item to be deleted or closed if it is a <see cref="Notebook">notebook</see></param>
+        /// <param name="dateExpectedLastModified"><inheritdoc cref="OneNote.DeleteItem" path="/param[@name='dateExpectedLastModified']"/></param>
+        /// <param name="deletePermanently"><inheritdoc cref="OneNote.DeleteItem" path="/param[@name='deletePermanently']"/></param>
+        /// <param name="force"><inheritdoc cref="OneNote.CloseNotebook" path="/param[@name='force']"/></param>
+        /// <exception cref="ArgumentException"></exception>
+        public static void DeleteOrClose(this IOneNoteItem item, DateTime dateExpectedLastModified = default, bool deletePermanently = false, bool force = false)
+        {
+            if (item is IDeletable deletable)
+            {
+                OneNote.DeleteItem(deletable, dateExpectedLastModified, deletePermanently);
+            }
+            else if (item is Notebook notebook)
+            {
+                OneNote.CloseNotebook(notebook, force);
+            }
+            else
+            {
+                throw Exceptions.InvalidIOneNoteItem(item);
+            }
+        }
+        
+        /// <summary>
         /// Checks if two <see cref="IOneNoteItem"/>s represent the same item in OneNote.<br/>
         /// Shorthand for comparing the <see cref="IOneNoteItem.Id">ID</see> of OneNote hierarchy items. E.g.
         /// <code lang="C#">
