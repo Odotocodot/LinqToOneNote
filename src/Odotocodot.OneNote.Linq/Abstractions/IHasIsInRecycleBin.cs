@@ -1,14 +1,12 @@
-using Odotocodot.OneNote.Linq.Extensions;
-
 namespace Odotocodot.OneNote.Linq.Abstractions
 {
 	/// <summary>
 	/// Represents an OneNote hierarchy item that can be <b>in</b> a OneNote recycle bin. <br/>
-	/// For ease, use <see cref="OneNoteItemExtensions.IsInRecycleBin"/> instead.
+	/// For ease, use <see cref="Extensions.IsInRecycleBin"/> instead.
 	/// </summary>
 	/// <seealso cref="Section"/>
 	/// <seealso cref="Page"/>
-	/// <seealso cref="OneNoteItemExtensions.IsInRecycleBin"/>
+	/// <seealso cref="Extensions.IsInRecycleBin"/>
 	public interface IHasIsInRecycleBin : IOneNoteItem
 	{
 		/// <summary>

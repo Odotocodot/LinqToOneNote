@@ -1,17 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Odotocodot.OneNote.Linq.Abstractions;
 using Odotocodot.OneNote.Linq.Internal;
-using Odotocodot.OneNote.Linq.Parsers;
 
-namespace Odotocodot.OneNote.Linq.Extensions
+namespace Odotocodot.OneNote.Linq
 {
     /// <summary>
     /// A static class containing extension methods for the <see cref="IOneNoteItem"/> object.
     /// </summary>
-    public static class OneNoteItemExtensions
+    public static class Extensions
     {
         /// <inheritdoc cref="OneNote.Open"/>
         public static void Open(this INavigable item) => OneNote.Open(item);

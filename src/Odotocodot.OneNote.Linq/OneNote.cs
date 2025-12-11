@@ -7,7 +7,7 @@ using System.Threading;
 using System.Xml.Linq;
 using Microsoft.Office.Interop.OneNote;
 using Odotocodot.OneNote.Linq.Abstractions;
-using Odotocodot.OneNote.Linq.Extensions;
+using Odotocodot.OneNote.Linq;
 using Odotocodot.OneNote.Linq.Internal;
 using Odotocodot.OneNote.Linq.Parsers;
 
@@ -104,7 +104,7 @@ namespace Odotocodot.OneNote.Linq
         {
             string xml = Run(app =>
             {
-                app.GetHierarchy(null, HierarchyScope.hsPages, out string xml, xmlSchema);
+                app.GetHierarchy(null, HierarchyScope.Pages.ToInterop(), out string xml, xmlSchema);
                 return xml;
             });
             return xmlParser.ParseRoot(xml);
@@ -260,7 +260,7 @@ namespace Odotocodot.OneNote.Linq
             Throw.IfInvalidName(newName, item);
             Run(app =>
             {
-                app.GetHierarchy(item.Id, HierarchyScope.hsSelf, out string xml, xmlSchema);
+                app.GetHierarchy(item.Id, HierarchyScope.Self.ToInterop(), out string xml, xmlSchema);
                 var element = XElement.Parse(xml);
                 switch (item)
                 {
@@ -307,7 +307,7 @@ namespace Odotocodot.OneNote.Linq
                 XElement xTitle = doc.Descendants(XName.Get("T", Constants.NamespaceUri)).First();
                 xTitle.Value = name;
                 app.UpdatePageContent(doc.ToString());
-                app.GetHierarchy(pageId, HierarchyScope.hsSelf, out var pageXml, xmlSchema);
+                app.GetHierarchy(pageId, HierarchyScope.Self.ToInterop(), out var pageXml, xmlSchema);
                 var page = (Page)xmlParser.Parse(pageXml, section);
                 section.pages.Add(page);
                 UseOpenMode(app, openMode, page.Id);
@@ -387,7 +387,7 @@ namespace Odotocodot.OneNote.Linq
             }
 
             app.OpenHierarchy(path, parent?.Id, out string newItemId, createFileType);
-            app.GetHierarchy(newItemId, HierarchyScope.hsSelf, out var itemXml, xmlSchema);
+            app.GetHierarchy(newItemId, HierarchyScope.Self.ToInterop(), out var itemXml, xmlSchema);
             T newItem = (T)xmlParser.Parse(itemXml, parent);
             UseOpenMode(app, openMode, newItemId);
             return newItem;
@@ -557,22 +557,15 @@ namespace Odotocodot.OneNote.Linq
         }
 
 
+        //TODO: document side effects, like updating the values
+
         public static class Partial
         {
-            //TODO: document side effects, like updating the values
-            public enum HierarchyScope
-            {
-                Self = Microsoft.Office.Interop.OneNote.HierarchyScope.hsSelf,
-                Children = Microsoft.Office.Interop.OneNote.HierarchyScope.hsChildren,
-                Notebooks = Microsoft.Office.Interop.OneNote.HierarchyScope.hsNotebooks,
-                Sections = Microsoft.Office.Interop.OneNote.HierarchyScope.hsSections,
-                Pages = Microsoft.Office.Interop.OneNote.HierarchyScope.hsPages,
-            }
             public static Root GetHierarchy(HierarchyScope scope)
             {
                 var xml = Run(app =>
                 {
-                    app.GetHierarchy(null, scope.Cast(), out string xml, xmlSchema);
+                    app.GetHierarchy(null, scope.ToInterop(), out string xml, xmlSchema);
                     return xml;
                 });
                 return xmlParser.ParseRoot(xml);
@@ -589,7 +582,7 @@ namespace Odotocodot.OneNote.Linq
 
                 var xml = Run(app =>
                 {
-                    app.GetHierarchy(item.Id, HierarchyScope.Children.Cast(), out string xml, xmlSchema);
+                    app.GetHierarchy(item.Id, HierarchyScope.Children.ToInterop(), out string xml, xmlSchema);
                     return xml;
                 });
                 return xmlParser.Parse(xml, item).Children;
@@ -610,7 +603,7 @@ namespace Odotocodot.OneNote.Linq
 
                 var xml = Run(app =>
                 {
-                    app.GetHierarchy(item.Id, HierarchyScope.Children.Cast(), out string xml, xmlSchema);
+                    app.GetHierarchy(item.Id, HierarchyScope.Children.ToInterop(), out string xml, xmlSchema);
                     return xml;
                 });
                 xmlParser.ParseExisting(xml, item);
@@ -629,7 +622,7 @@ namespace Odotocodot.OneNote.Linq
                 var xml = Run(app =>
                 {
                     app.GetHierarchyParent(item.Id, out string parentId);
-                    app.GetHierarchy(parentId, HierarchyScope.Self.Cast(), out string xml, xmlSchema);
+                    app.GetHierarchy(parentId, HierarchyScope.Self.ToInterop(), out string xml, xmlSchema);
                     return xml;
                 });
                 return xmlParser.Parse(xml, null);
@@ -652,7 +645,7 @@ namespace Odotocodot.OneNote.Linq
                 var xml = Run(app =>
                 {
                     app.GetHierarchyParent(item.Id, out string parentId);
-                    app.GetHierarchy(parentId, HierarchyScope.Self.Cast(), out string xml, xmlSchema);
+                    app.GetHierarchy(parentId, HierarchyScope.Self.ToInterop(), out string xml, xmlSchema);
                     return xml;
                 });
                 var parent = xmlParser.Parse(xml, null);
@@ -671,8 +664,5 @@ namespace Odotocodot.OneNote.Linq
                 return parent;
             }
         }
-
-        private static HierarchyScope Cast(this Partial.HierarchyScope scope) => (HierarchyScope)scope;
-
     }
 }

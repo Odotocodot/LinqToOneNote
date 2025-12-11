@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using Odotocodot.OneNote.Linq.Abstractions;
-using Odotocodot.OneNote.Linq.Extensions;
+using Odotocodot.OneNote.Linq;
 
 namespace Odotocodot.OneNote.Linq.Internal
 {
@@ -41,7 +41,7 @@ namespace Odotocodot.OneNote.Linq.Internal
         {
             if (item.IsInRecycleBin())
             {
-                throw new ArgumentException(message + $" Consider checking with the {nameof(OneNoteItemExtensions.IsInRecycleBin)}() extension method.", paramName);
+                throw new ArgumentException(message + $" Consider checking with the {nameof(Extensions.IsInRecycleBin)}() extension method.", paramName);
             }
         }
 

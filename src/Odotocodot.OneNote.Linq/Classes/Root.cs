@@ -48,6 +48,5 @@ namespace Odotocodot.OneNote.Linq
 			public readonly void Reset() { }
 			public readonly void Dispose() { }
 		}
-
 	}
 }
