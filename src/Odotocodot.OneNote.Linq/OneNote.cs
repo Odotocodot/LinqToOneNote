@@ -199,12 +199,12 @@ namespace Odotocodot.OneNote.Linq
         /// Deletes the hierarchy <paramref name="item"/> from the OneNote notebook hierarchy. For <see cref="Notebook">notebooks</see> use
         /// <see cref="CloseNotebook"/>. Does nothing if the <paramref name="item"/> is already in the Recycle Bin.
         /// </summary>
-        /// <param name="item"><inheritdoc cref="Open" path="/param[@name='item']"/></param>
+        /// <param name="item">The item to be deleted</param>
         /// <param name="dateExpectedLastModified">The date and time that you think the object you want to delete was last modified. If you pass a
         /// non-zero value for this parameter, OneNote proceeds with the update only if the value you pass matches the actual date and time the object
         /// was last modified. Passing a value for this parameter helps prevent accidentally overwriting edits users made since the last time the
         /// object was modified.</param>
-        /// <param name="deletePermanently"><see langword="true"/> to permanently delete the content; <see langword="false"/> to move the content into
+        /// <param name="deletePermanently"><see langword="true"/> to permanently delete the item; <see langword="false"/> to move the item into
         /// the OneNote recycle bin for the corresponding Notebook (the default). If the Notebook is in OneNote 2007 format, no recycle bin exists, so
         /// the content is permanently deleted.</param>
         public static void DeleteItem(IDeletable item, DateTime dateExpectedLastModified = default, bool deletePermanently = false)
