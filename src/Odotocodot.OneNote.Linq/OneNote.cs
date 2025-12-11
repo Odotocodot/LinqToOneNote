@@ -234,16 +234,14 @@ namespace Odotocodot.OneNote.Linq
             }
         }
 
-        // /// <summary>
-        // /// Closes the <paramref name="notebook"/>.
-        // /// </summary>
-        // /// <param name="notebook">The specified OneNote notebook.</param>
-        // internal static void CloseNotebook(Notebook notebook)
-        // {
-        //     using var handle = new OneNoteHandle();
-        //     handle.OneNote.CloseNotebook(notebook.Id);
-        // }
-
+        /// <summary>
+        /// Causes OneNote to synchronizes any offline files with the <see cref="notebook">notebook</see>, if necessary, and then closes the specified
+        /// notebook. After the method returns, the notebook no longer appears in the list of open notebooks in the OneNote user interface (UI).
+        /// </summary>
+        /// <param name="notebook">The specified OneNote notebook.</param>
+        /// <param name="force"><see langword="true"/> to close the notebook, even if there are changes in the notebook that OneNote cannot sync
+        /// before closing; otherwise, <see langword="false"/>.</param>
+        public static void CloseNotebook(Notebook notebook, bool force = false) => Run(app => app.CloseNotebook(notebook.Id, force));
 
         /// <summary>
         /// Renames the specified <paramref name="item"/> to <paramref name="newName"/>.
