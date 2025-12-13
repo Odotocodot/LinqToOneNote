@@ -1,8 +1,10 @@
-﻿using Odotocodot.OneNote.Linq.Internal;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Xml.Linq;
+using Odotocodot.OneNote.Linq.Abstractions;
+using Odotocodot.OneNote.Linq.Internal;
 
 namespace Odotocodot.OneNote.Linq.Parsers
 {
@@ -15,36 +17,101 @@ namespace Odotocodot.OneNote.Linq.Parsers
         private static readonly XName SectionGroupXName = XName.Get(Elements.SectionGroup, NamespaceUri);
         private static readonly XName SectionXName = XName.Get(Elements.Section, NamespaceUri);
         private static readonly XName PageXName = XName.Get(Elements.Page, NamespaceUri);
+        private static readonly XName OpenSectionsXName = XName.Get(Elements.OpenSections, NamespaceUri);
 
-        private static readonly Dictionary<XName, Func<XElement, IOneNoteItem, IOneNoteItem>> runtimeParser =
-            new Dictionary<XName, Func<XElement, IOneNoteItem, IOneNoteItem>>
+        public Root ParseRoot(string xml)
         {
-            { NotebookXName, (element, parent) => Parse(new Notebook(), element, parent) },
-            { SectionGroupXName, (element, parent) => Parse(new SectionGroup(), element, parent) },
-            { SectionXName, (element, parent) => Parse(new Section(), element, parent) },
-            { PageXName, (element, parent) => Parse(new Page(), element, parent) }
-        };
+            XElement rootElement = XElement.Parse(xml);
+            IEnumerable<XElement> notebookElements = rootElement.Elements(NotebookXName);
+            XElement openSectionElement = rootElement.Element(OpenSectionsXName);
+            return new Root
+            {
+                notebooks = [.. notebookElements.Select(e => Parse(new Notebook(), e, null))],
+                OpenSections = new OpenSections()
+                {
+                    Id = openSectionElement?.Attribute(Attributes.ID).Value,
+                    sections = [.. openSectionElement?.Elements()
+                                                      .Select(e => Parse(new Section(), e, null))]
+                }
+            };
+        }
 
-        public IEnumerable<Notebook> ParseNotebooks(string xml) => XElement.Parse(xml).Elements()
-                                                                                             .Select(e => Parse(new Notebook(), e, null));
-
-        public IOneNoteItem ParseUnknown(string xml, IOneNoteItem parent)
+        public IOneNoteItem Parse(string xml, IOneNoteItem parent)
         {
-            var root = XElement.Parse(xml);
-            return runtimeParser[root.Name](root, parent);
+            var element = XElement.Parse(xml);
+            return element.Name switch
+            {
+                _ when element.Name == NotebookXName => Parse(new Notebook(), element, parent),
+                _ when element.Name == SectionGroupXName => Parse(new SectionGroup(), element, parent),
+                _ when element.Name == SectionXName => Parse(new Section(), element, parent),
+                _ when element.Name == PageXName => Parse(new Page(), element, parent),
+                _ => throw Exceptions.InvalidXmlElement(element.Name.LocalName),
+            };
+        }
+
+        public void ParseExisting(string xml, IOneNoteItem item)
+        {
+            var element = XElement.Parse(xml);
+            switch (item)
+            {
+                case Notebook notebook:
+                    Parse(notebook, element, null);
+                    break;
+                case SectionGroup sectionGroup:
+                    Parse(sectionGroup, element, sectionGroup.Parent);
+                    break;
+                case Section section:
+                    Parse(section, element, section.Parent);
+                    break;
+                case Page page:
+                    Parse(page, element, page.Parent);
+                    break;
+                default:
+                    throw Exceptions.InvalidIOneNoteItem(item);
+            }
         }
 
         private static T Parse<T>(T item, XElement element, IOneNoteItem parent) where T : OneNoteItem
         {
             SetAttributes(item, element.Attributes());
-            item.Parent = parent;
-            item.Notebook = parent?.Notebook;
-            item.RelativePath = $"{parent?.RelativePath}{RelativePathSeparatorString}{item.Name}";
-            item.Children = element.Elements().Select(e => runtimeParser[e.Name](e, item));
+            if (typeof(T) == typeof(Notebook))
+            {
+                var notebook = Unsafe.As<Notebook>(item);
+                foreach (var child in element.Elements())
+                {
+                    if (child.Name == SectionXName)
+                        notebook.sections.Add(Parse(new Section(), child, notebook));
+                    else if (child.Name == SectionGroupXName)
+                        notebook.sectionGroups.Add(Parse(new SectionGroup(), child, notebook));
+                }
+            }
+            else if (typeof(T) == typeof(SectionGroup))
+            {
+                var sectionGroup = Unsafe.As<SectionGroup>(item);
+                foreach (var child in element.Elements())
+                {
+                    if (child.Name == SectionXName)
+                        sectionGroup.sections.Add(Parse(new Section(), child, sectionGroup));
+                    else if (child.Name == SectionGroupXName)
+                        sectionGroup.sectionGroups.Add(Parse(new SectionGroup(), child, sectionGroup));
+                }
+                sectionGroup.Parent = (INotebookOrSectionGroup)parent;
+            }
+            else if (typeof(T) == typeof(Section))
+            {
+                var section = Unsafe.As<Section>(item);
+                section.pages = [.. element.Elements().Select(e => Parse(new Page(), e, section))];
+                section.Parent = (INotebookOrSectionGroup)parent;
+            }
+            else if (typeof(T) == typeof(Page))
+            {
+                var page = Unsafe.As<Page>(item);
+                page.Parent = (Section)parent;
+            }
             return item;
         }
 
-        private static void SetAttributes(OneNoteItem item, IEnumerable<XAttribute> attributes)
+        private static void SetAttributes<T>(T item, IEnumerable<XAttribute> attributes) where T : OneNoteItem
         {
             foreach (var attribute in attributes)
             {
@@ -63,34 +130,45 @@ namespace Odotocodot.OneNote.Linq.Parsers
                         item.LastModified = (DateTime)attribute;
                         break;
                     case Attributes.Path:
-                        ((IWritablePath)item).Path = attribute.Value;
+                        if (typeof(T) == typeof(Section))
+                            Unsafe.As<Section>(item).Path = attribute.Value;
+                        else if (typeof(T) == typeof(SectionGroup))
+                            Unsafe.As<SectionGroup>(item).Path = attribute.Value;
+                        else if (typeof(T) == typeof(Notebook))
+                            Unsafe.As<Notebook>(item).Path = attribute.Value;
                         break;
                     case Attributes.Color:
-                        ((IWritableColor)item).Color = GetColor(attribute.Value);
+                        if (typeof(T) == typeof(Section))
+                            Unsafe.As<Section>(item).Color = GetColor(attribute.Value);
+                        else if (typeof(T) == typeof(Notebook))
+                            Unsafe.As<Notebook>(item).Color = GetColor(attribute.Value);
                         break;
                     case Attributes.IsInRecycleBin:
-                        ((IWritableIsInRecycleBin)item).IsInRecycleBin = (bool)attribute;
+                        if (typeof(T) == typeof(Page))
+                            Unsafe.As<Page>(item).IsInRecycleBin = bool.Parse(attribute.Value);
+                        else if (typeof(T) == typeof(Section))
+                            Unsafe.As<Section>(item).IsInRecycleBin = bool.Parse(attribute.Value);
                         break;
                     case Attributes.NickName:
-                        ((Notebook)item).NickName = attribute.Value;
+                        Unsafe.As<Notebook>(item).DisplayName = attribute.Value;
                         break;
                     case Attributes.IsRecycleBin:
-                        ((SectionGroup)item).IsRecycleBin = (bool)attribute;
+                        Unsafe.As<SectionGroup>(item).IsRecycleBin = (bool)attribute;
                         break;
                     case Attributes.Encrypted:
-                        ((Section)item).Encrypted = (bool)attribute;
+                        Unsafe.As<Section>(item).Encrypted = (bool)attribute;
                         break;
                     case Attributes.Locked:
-                        ((Section)item).Locked = (bool)attribute;
+                        Unsafe.As<Section>(item).Locked = (bool)attribute;
                         break;
                     case Attributes.IsDeletedPages:
-                        ((Section)item).IsDeletedPages = (bool)attribute;
+                        Unsafe.As<Section>(item).IsDeletedPages = (bool)attribute;
                         break;
                     case Attributes.PageLevel:
-                        ((Page)item).Level = (int)attribute;
+                        Unsafe.As<Page>(item).Level = (int)attribute;
                         break;
                     case Attributes.DateTime:
-                        ((Page)item).Created = (DateTime)attribute;
+                        Unsafe.As<Page>(item).Created = (DateTime)attribute;
                         break;
                 }
             }
