@@ -14,7 +14,7 @@ namespace Odotocodot.OneNote.Linq
 		public IReadOnlyList<Notebook> Notebooks => notebooks;
 
 #nullable enable
-		public OpenSections? OpenSections { get; internal set; }
+		public OpenSections? OpenSections { get; internal set; } //TODO make empty rather than null
 #nullable restore
 
 		IEnumerator<IOneNoteItem> IEnumerable<IOneNoteItem>.GetEnumerator() => new Enumerator(this);

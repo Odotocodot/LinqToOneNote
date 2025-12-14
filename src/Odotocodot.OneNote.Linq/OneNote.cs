@@ -7,7 +7,6 @@ using System.Threading;
 using System.Xml.Linq;
 using Microsoft.Office.Interop.OneNote;
 using Odotocodot.OneNote.Linq.Abstractions;
-using Odotocodot.OneNote.Linq;
 using Odotocodot.OneNote.Linq.Internal;
 using Odotocodot.OneNote.Linq.Parsers;
 
@@ -24,6 +23,7 @@ namespace Odotocodot.OneNote.Linq
         /// <summary>
         /// The directory separator used in <see cref="IOneNoteItem.RelativePath"/>.
         /// </summary>
+        //TODO Remove
         public const char RelativePathSeparator = Constants.RelativePathSeparator;
 
         // You never know they might add a new one... (Press X to doubt)
@@ -186,7 +186,7 @@ namespace Odotocodot.OneNote.Linq
         /// found <a href="https://github.com/idvorkin/onom/blob/eb9ce52764e9ad639b2c9b4bca0622ee6221106f/OneNoteObjectModel/onenote.xsd">here</a>.</remarks>
         /// <param name="xml">An <see langword="string"/> in the OneNote XML format. </param>
         public static void UpdatePageContent(string xml) => Run(app => app.UpdatePageContent(xml, xsSchema: xmlSchema));
-        
+
         /// <summary>
         /// Deletes the hierarchy <paramref name="item"/> from the OneNote notebook hierarchy. For <see cref="Notebook">notebooks</see> use
         /// <see cref="CloseNotebook"/>. Does nothing if the <paramref name="item"/> is already in the Recycle Bin.
@@ -497,7 +497,7 @@ namespace Odotocodot.OneNote.Linq
         /// <seealso cref="Notebook.InvalidCharacters"/>
         /// <seealso cref="SectionGroup.InvalidCharacters"/>
         /// <seealso cref="Section.InvalidCharacters"/>
-        public static bool IsValidName<THierarchyItem>(string name) where THierarchyItem : INameInvalidCharacters
+        public static bool IsValidName<THierarchyItem>(string name) where THierarchyItem : INameInvalidCharacters //Maybe switch to Regex
             => !string.IsNullOrWhiteSpace(name) && !THierarchyItem.InvalidCharacters.Any(name.Contains);
 
         // Used to make releasing and getting the COM object easier depending on the ComObjectSetting.
@@ -579,7 +579,7 @@ namespace Odotocodot.OneNote.Linq
                 });
                 return xmlParser.Parse(xml, item).Children;
             }
-            
+
             public static IOneNoteItem UpdateDescendants(IOneNoteItem item, HierarchyScope depth, bool force = false)
             {
                 Throw.IfNull(item);

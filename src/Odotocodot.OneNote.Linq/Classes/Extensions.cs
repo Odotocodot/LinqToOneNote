@@ -135,6 +135,8 @@ namespace Odotocodot.OneNote.Linq
         /// <param name="deletePermanently"><inheritdoc cref="OneNote.DeleteItem" path="/param[@name='deletePermanently']"/></param>
         /// <param name="force"><inheritdoc cref="OneNote.CloseNotebook" path="/param[@name='force']"/></param>
         /// <exception cref="ArgumentException"></exception>
+        /// <seealso cref="Delete"/>
+        /// <seealso cref="Close"/>
         public static void DeleteOrClose(this IOneNoteItem item, DateTime dateExpectedLastModified = default, bool deletePermanently = false, bool force = false)
         {
             if (item is IDeletable deletable)
