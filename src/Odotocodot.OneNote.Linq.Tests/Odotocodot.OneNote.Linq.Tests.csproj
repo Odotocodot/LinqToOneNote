@@ -20,12 +20,9 @@
   <ItemGroup>
 	<ProjectReference Include="..\Odotocodot.OneNote.Linq\Odotocodot.OneNote.Linq.csproj" />
   </ItemGroup>
-
+	
   <ItemGroup>
-	<None Remove="Inputs\*.xml" />
-	<Content Include="Inputs\*.xml">
-	  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	</Content>
+    <Content Include="Input.xml" CopyToOutputDirectory="PreserveNewest"/>
   </ItemGroup>
   
 </Project>

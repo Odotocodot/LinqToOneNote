@@ -2,7 +2,7 @@
 <one:Notebooks xmlns:one="http://schemas.microsoft.com/office/onenote/2013/onenote">
 	<one:Notebook name="Its A Notebook" nickname="It's A Notebook" ID="{81B591F0-CB49-4F8C-BFB1-98DA213B93FC}{1}{B0}" path="C:\Users\User\Desktop\Its A Notebook" lastModifiedTime="2023-10-04T15:15:45.000Z" color="#EE9597">
 		<one:Section name="First Section" ID="{1B9CDD3C-6836-4DC6-9C44-0EDC06A9B8CB}{1}{B0}" path="C:\Users\User\Desktop\Its A Notebook\First Section.one" lastModifiedTime="2023-02-28T18:50:21.000Z" color="#8AA8E4">
-			<one:Page ID="{1B9CDD3C-6836-4DC6-9C44-0EDC06A9B8CB}{1}{E19481616267573963101920151005250203326127411}" name="Important Info" dateTime="2022-12-01T18:10:02.000Z" lastModifiedTime="2022-12-01T18:10:34.000Z" pageLevel="1"/>
+			<one:Page ID="{1B9CDD3C-6836-4DC6-9C44-0EDC06A9B8CB}{1}{E19481616267573963101920151005250203326127411}" name="Important Info" dateTime="2022-12-01T18:10:02.000Z" lastModifiedTime="2022-12-01T18:10:34.000Z" pageLevel="1" isUnread="true"/>
 			<one:Page ID="{1B9CDD3C-6836-4DC6-9C44-0EDC06A9B8CB}{1}{E1950976568319977820861971785342399322290061}" name="Hello World" dateTime="2022-12-01T18:11:03.000Z" lastModifiedTime="2022-12-01T18:11:13.000Z" pageLevel="1"/>
 			<one:Page ID="{1B9CDD3C-6836-4DC6-9C44-0EDC06A9B8CB}{1}{E19555063449304805155720150397156089269940691}" name="Lorem Ipsum" dateTime="2022-12-01T18:11:15.000Z" lastModifiedTime="2022-12-01T18:12:40.000Z" pageLevel="1"/>
 			<one:Page ID="{1B9CDD3C-6836-4DC6-9C44-0EDC06A9B8CB}{1}{E1947317976456822107321982625560703900844871}" name="Wowza it’s a Title" dateTime="2022-12-01T18:14:02.000Z" lastModifiedTime="2022-12-01T19:13:54.000Z" pageLevel="1"/>
@@ -85,4 +85,13 @@
 		</one:SectionGroup>
 		<one:SectionGroup name="yet another section group" ID="{B39685A8-A6C2-4FA4-B885-2CF57EFADFB8}{1}{B0}" path="C:\Users\User\Documents\OneNote Notebooks\Test Notebook\yet another section group" lastModifiedTime="2023-10-04T19:16:53.000Z"/>
 	</one:Notebook>
+	<one:OpenSections ID="{2CFD5279-E2F3-4544-9878-0F1CB3609489}{1}{B0}" >
+		<one:Section name="Its a Lost Section" ID="{E1115D65-B00F-05ED-384F-1B6E5350C9F1}{1}{B0}" path="C:\Users\User\Desktop\Its a Lost Section.one" lastModifiedTime="2025-12-06T00:32:21.000Z" color="#D5A4BB" >
+			<one:Page ID="{E1115D65-B00F-05ED-384F-1B6E5350C9F1}{1}{E1873587805641610868020151059577175089636011}" name="HELLO THERE" dateTime="2025-12-06T00:32:15.000Z" lastModifiedTime="2025-12-06T00:32:18.000Z" pageLevel="1" />
+		</one:Section>
+		<one:Section name="If a section is open in OneNote is it an OpenSection" ID="{5A75942A-9BA8-0C6B-01C5-E53DF7ED726F}{1}{B0}" path="C:\Users\User\Desktop\Another Folder\If a section is open in OneNote is it an OpenSection.one" lastModifiedTime="2025-11-26T17:28:35.000Z" color="#9BBBD2" >
+			<one:Page ID="{5A75942A-9BA8-0C6B-01C5-E53DF7ED726F}{1}{E182682822277760473991989701476020379492261}" name="Untitled" dateTime="2025-11-26T17:26:38.000Z" lastModifiedTime="2025-11-26T17:28:23.000Z" pageLevel="1" />
+			<one:Page ID="{5A75942A-9BA8-0C6B-01C5-E53DF7ED726F}{1}{E1951280209777769959941926153272532305035611}" name="Title of a second Page" dateTime="2025-11-26T17:28:23.000Z" lastModifiedTime="2025-11-26T17:28:23.000Z" pageLevel="1" />
+		</one:Section>
+	</one:OpenSections>
 </one:Notebooks>
