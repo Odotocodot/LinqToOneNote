@@ -4,7 +4,6 @@ using System.Drawing;
 using System.IO;
 using AwesomeAssertions;
 using NUnit.Framework;
-using Odotocodot.OneNote.Linq.Abstractions;
 using Odotocodot.OneNote.Linq.Parsers;
 using static AwesomeAssertions.FluentActions;
 
@@ -34,21 +33,6 @@ namespace Odotocodot.OneNote.Linq.Tests
 			var xml = File.ReadAllText(@"Input.xml");
 			root = xmlParser.ParseRoot(xml);
 		}
-
-		[Test]
-		[TestCase(typeof(Notebook), 4)]
-		[TestCase(typeof(SectionGroup), 7)]
-		[TestCase(typeof(Section), 20 + 2)]
-		[TestCase(typeof(Page), 28 + 3)]
-		//TODO: Move to LinqTests
-		public void FulHierarchy_CorrectNumberOfItems(Type itemType, int expectedCount)
-		{
-			var items = root.Descendants(item => item.GetType() == itemType);
-
-			items.Should().HaveCount(expectedCount);
-		}
-
-
 
 		[Test]
 		public void Notebook_Properties()
