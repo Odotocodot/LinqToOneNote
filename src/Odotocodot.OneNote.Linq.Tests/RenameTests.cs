@@ -11,7 +11,6 @@ namespace Odotocodot.OneNote.Linq.Tests
 	[TestFixture]
 	public class RenameTests : BaseCreationTests
 	{
-
 		[Test]
 		public void Rename_Throw_Null()
 		{
@@ -45,7 +44,7 @@ namespace Odotocodot.OneNote.Linq.Tests
 		{
 			var section = OneNote.CreateSection(notebook, GenerateName());
 			TrackCreatedItem(section);
-			Invoking(() => OneNote.RenameItem(section, GenerateInvalidName<Section>())).Should().Throw<ArgumentException>().WithMessage("*names cannot empty, only whitespace or contain the symbols");
+			Invoking(() => OneNote.RenameItem(section, GenerateInvalidName<Section>())).Should().Throw<ArgumentException>().WithMessage(ExpectedWildcardPattern);
 		}
 
 		[Test]
@@ -60,7 +59,7 @@ namespace Odotocodot.OneNote.Linq.Tests
 		{
 			var sectionGroup = OneNote.CreateSectionGroup(notebook, GenerateName());
 			TrackCreatedItem(sectionGroup);
-			Invoking(() => OneNote.RenameItem(sectionGroup, GenerateInvalidName<SectionGroup>())).Should().Throw<ArgumentException>().WithMessage("*names cannot empty, only whitespace or contain the symbols");
+			Invoking(() => OneNote.RenameItem(sectionGroup, GenerateInvalidName<SectionGroup>())).Should().Throw<ArgumentException>().WithMessage(ExpectedWildcardPattern);
 		}
 
 		[Test]
@@ -75,7 +74,7 @@ namespace Odotocodot.OneNote.Linq.Tests
 		{
 			var notebook = OneNote.CreateNotebook(GenerateName());
 			TrackCreatedItem(notebook);
-			Invoking(() => OneNote.RenameItem(notebook, GenerateInvalidName<Notebook>())).Should().Throw<ArgumentException>().WithMessage("*names cannot empty, only whitespace or contain the symbols");
+			Invoking(() => OneNote.RenameItem(notebook, GenerateInvalidName<Notebook>())).Should().Throw<ArgumentException>().WithMessage(ExpectedWildcardPattern);
 		}
 
 		private void Rename<T>(T item) where T : IOneNoteItem

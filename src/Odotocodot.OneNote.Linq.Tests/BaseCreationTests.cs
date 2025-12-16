@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using AwesomeAssertions;
 using NUnit.Framework;
 using Odotocodot.OneNote.Linq.Abstractions;
 
 namespace Odotocodot.OneNote.Linq.Tests
 {
+    //Used when a class Test class creates items
     //NOTE: Needs a pre-created notebook named "TempNotebook" with a section named "Section"
     public abstract class BaseCreationTests
     {
@@ -19,6 +19,8 @@ namespace Odotocodot.OneNote.Linq.Tests
         private Random random;
         private readonly List<string> createdIds = [];
         private readonly List<(string id, string path)> createdNotebooks = [];
+
+        protected const string ExpectedWildcardPattern = "*names cannot empty, only whitespace or contain the symbols";
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
@@ -77,13 +79,16 @@ namespace Odotocodot.OneNote.Linq.Tests
         }
         protected void TrackCreatedItem(IOneNoteItem item)
         {
-            if (item is Notebook notebook)
+            switch (item)
             {
-                createdNotebooks.Add((notebook.Id, notebook.Path));
-            }
-            else
-            {
-                createdIds.Add(item.Id);
+                case null:
+                    return;
+                case Notebook notebook:
+                    createdNotebooks.Add((notebook.Id, notebook.Path));
+                    break;
+                default:
+                    createdIds.Add(item.Id);
+                    break;
             }
         }
     }

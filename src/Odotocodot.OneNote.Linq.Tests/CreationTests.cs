@@ -1,7 +1,9 @@
+using System;
 using System.Linq;
 using AwesomeAssertions;
 using AwesomeAssertions.Execution;
 using NUnit.Framework;
+using static AwesomeAssertions.FluentActions;
 
 namespace Odotocodot.OneNote.Linq.Tests
 {
@@ -24,10 +26,34 @@ namespace Odotocodot.OneNote.Linq.Tests
         }
 
         [Test]
+        public void CreateSection_InvalidName()
+        {
+            var invalidName = GenerateInvalidName<Section>();
+            Invoking(() =>
+            {
+                var section = OneNote.CreateSection(notebook, invalidName);
+                TrackCreatedItem(section);
+                return section;
+            }).Should().Throw<ArgumentException>().WithMessage(ExpectedWildcardPattern);
+        }
+
+        [Test]
         public void CreateSectionGroup()
         {
             var newSectionGroup = OneNote.CreateSectionGroup(notebook, GenerateName());
             Check(newSectionGroup, notebook);
+        }
+
+        [Test]
+        public void CreateSectionGroup_InvalidName()
+        {
+            var invalidName = GenerateInvalidName<SectionGroup>();
+            Invoking(() =>
+            {
+                var sectionGroup = OneNote.CreateSectionGroup(notebook, invalidName);
+                TrackCreatedItem(sectionGroup);
+                return sectionGroup;
+            }).Should().Throw<ArgumentException>().WithMessage(ExpectedWildcardPattern);
         }
 
         [Test]
@@ -45,6 +71,20 @@ namespace Odotocodot.OneNote.Linq.Tests
             expected.Should().NotBeNull();
             newNotebook.Should().BeEquivalentTo(expected, options => options.WithoutRecursing());
         }
+
+        [Test]
+        public void CreateNotebook_InvalidName()
+        {
+            var invalidName = GenerateInvalidName<Notebook>();
+            Invoking(() =>
+            {
+                var notebook = OneNote.CreateNotebook(invalidName);
+                TrackCreatedItem(notebook);
+                return notebook;
+            }).Should().Throw<ArgumentException>().WithMessage(ExpectedWildcardPattern);
+        }
+
+
 
         private void Check<T, TParent>(T newItem, TParent parent) where T : IOneNoteItem where TParent : IOneNoteItem
         {
