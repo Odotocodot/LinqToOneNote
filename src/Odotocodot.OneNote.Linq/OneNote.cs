@@ -260,11 +260,12 @@ namespace Odotocodot.OneNote.Linq
                         element.Attribute(Constants.Attributes.NickName)!.SetValue(newName);
                         notebook.DisplayName = newName;
                         break;
-                    case Page:
+                    case Page page:
                         app.GetPageContent(item.Id, out string pageContentXml, PageInfo.piBasic, xmlSchema);
                         XDocument doc = XDocument.Parse(pageContentXml);
                         XElement xTitle = doc.Descendants(XName.Get("T", Constants.NamespaceUri)).First();
                         xTitle.Value = newName;
+                        page.Name = newName;
                         app.UpdatePageContent(doc.ToString());
                         break;
                     default:
