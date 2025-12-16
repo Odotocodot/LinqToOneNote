@@ -249,7 +249,15 @@ namespace Odotocodot.OneNote.Linq
             Throw.IfNull(item);
             Throw.IfNullOrWhiteSpace(newName);
             Throw.IfInRecycleBin(item, "Cannot rename items in the Recycle Bin.");
-            Throw.IfInvalidName(newName, item);
+            switch (item) //Don't need to check notebook as its renaming the DisplayName which can be anything
+            {
+                case SectionGroup:
+                    Throw.IfInvalidName<SectionGroup>(newName);
+                    break;
+                case Section:
+                    Throw.IfInvalidName<Section>(newName);
+                    break;
+            }
             Run(app =>
             {
                 app.GetHierarchy(item.Id, HierarchyScope.Self.ToInterop(), out string xml, xmlSchema);

@@ -63,18 +63,10 @@ namespace Odotocodot.OneNote.Linq.Tests
 		}
 
 		[Test]
-		public void Rename_Notebook_Valid()
+		public void Rename_Notebook()
 		{
 			var notebook = OneNote.CreateNotebook(GenerateName());
 			Rename(notebook);
-		}
-
-		[Test]
-		public void Rename_Notebook_Invalid()
-		{
-			var notebook = OneNote.CreateNotebook(GenerateName());
-			TrackCreatedItem(notebook);
-			Invoking(() => OneNote.RenameItem(notebook, GenerateInvalidName<Notebook>())).Should().Throw<ArgumentException>().WithMessage(ExpectedWildcardPattern);
 		}
 
 		private void Rename<T>(T item) where T : IOneNoteItem

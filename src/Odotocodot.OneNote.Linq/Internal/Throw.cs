@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
-using Odotocodot.OneNote.Linq.Abstractions;
 using Odotocodot.OneNote.Linq;
+using Odotocodot.OneNote.Linq.Abstractions;
 
 namespace Odotocodot.OneNote.Linq.Internal
 {
@@ -12,7 +12,7 @@ namespace Odotocodot.OneNote.Linq.Internal
         {
             ArgumentNullException.ThrowIfNull(argument, paramName);
         }
-        
+
         public static void IfNullOrWhiteSpace(string? name, [CallerArgumentExpression(nameof(name))] string? paramName = null)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(name, paramName);
@@ -50,26 +50,6 @@ namespace Odotocodot.OneNote.Linq.Internal
             if (!OneNote.IsValidName<T>(name))
             {
                 throw new ArgumentException($"Invalid {nameof(T).ToLower()} name provided: \"{name}\". {nameof(T)} names cannot empty, only whitespace or contain the symbols: \t {string.Join(" ", T.InvalidCharacters)}");
-            }
-        }
-
-        internal static void IfInvalidName(string name, IOneNoteItem item)
-        {
-            switch (item)
-            {
-                case Notebook:
-                    IfInvalidName<Notebook>(name);
-                    break;
-                case SectionGroup:
-                    IfInvalidName<SectionGroup>(name);
-                    break;
-                case Section:
-                    IfInvalidName<Section>(name);
-                    break;
-                case Page:
-                    break;
-                default:
-                    throw Exceptions.InvalidIOneNoteItem(item);
             }
         }
     }
