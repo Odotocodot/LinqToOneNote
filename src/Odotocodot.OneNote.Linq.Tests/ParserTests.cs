@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using AwesomeAssertions;
+using AwesomeAssertions.Execution;
 using NUnit.Framework;
 using Odotocodot.OneNote.Linq.Parsers;
 using static AwesomeAssertions.FluentActions;
@@ -60,8 +61,9 @@ namespace Odotocodot.OneNote.Linq.Tests
 			Notebook notebook = null;
 			Invoking(() => notebook = root.Notebooks[0]).Should().NotThrow<ArgumentOutOfRangeException>();
 
-			notebook.sections.Should().HaveCount(4);
-			notebook.sectionGroups.Should().ContainSingle();
+			using var scope = new AssertionScope();
+			notebook.Sections.Should().HaveCount(4);
+			notebook.SectionGroups.Should().ContainSingle();
 			notebook.Children.Should().HaveCount(5);
 		}
 
@@ -89,6 +91,7 @@ namespace Odotocodot.OneNote.Linq.Tests
 			SectionGroup sectionGroup = null;
 			Invoking(() => sectionGroup = root.Notebooks[3].SectionGroups[1]).Should().NotThrow<ArgumentOutOfRangeException>();
 
+			using var scope = new AssertionScope();
 			sectionGroup.Sections.Should().HaveCount(4);
 			sectionGroup.SectionGroups.Should().ContainSingle();
 			sectionGroup.Children.Should().HaveCount(5);
