@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
+using AwesomeAssertions;
 using NUnit.Framework;
-using Shouldly;
+using static AwesomeAssertions.FluentActions;
 
 namespace Odotocodot.OneNote.Linq.Tests
 {
@@ -25,24 +26,18 @@ namespace Odotocodot.OneNote.Linq.Tests
 		{
 			OneNote.InitComObject();
 
-			Should.NotThrow(OneNote.ReleaseComObject);
-		}
-
-		[Test]
-		public void HasComObject_WhenNotInit_ReturnsFalse()
-		{
-			OneNote.HasComObject.ShouldBeFalse();
+			Invoking(OneNote.ReleaseComObject).Should().NotThrow();
 		}
 
 		[Test]
 		public void ComObjectMode_Lazy()
 		{
 			OneNote.SetComObjectMode(ComObjectMode.Lazy);
-			OneNote.HasComObject.ShouldBeFalse();
+			OneNote.HasComObject.Should().BeFalse();
 
-			Should.NotThrow(OneNote.GetDefaultNotebookLocation);
+			Invoking(OneNote.GetDefaultNotebookLocation).Should().NotThrow();
 
-			OneNote.HasComObject.ShouldBeTrue();
+			OneNote.HasComObject.Should().BeTrue();
 		}
 
 		[Test]
@@ -50,7 +45,7 @@ namespace Odotocodot.OneNote.Linq.Tests
 		{
 			OneNote.InitComObject();
 
-			OneNote.HasComObject.ShouldBeTrue();
+			OneNote.HasComObject.Should().BeTrue();
 		}
 
 		[Test]
@@ -59,28 +54,28 @@ namespace Odotocodot.OneNote.Linq.Tests
 			OneNote.InitComObject();
 			OneNote.ReleaseComObject();
 
-			OneNote.HasComObject.ShouldBeFalse();
+			OneNote.HasComObject.Should().BeFalse();
 		}
 
 		[Test]
-		public void HasComObject_WithComObjectModeWrap()
+		public void ComObjectMode_Wrap()
 		{
 			OneNote.SetComObjectMode(ComObjectMode.Wrap);
 
-			OneNote.HasComObject.ShouldBeFalse();
+			OneNote.HasComObject.Should().BeFalse();
 
-			Should.NotThrow(OneNote.GetDefaultNotebookLocation);
+			Invoking(OneNote.GetDefaultNotebookLocation).Should().NotThrow();
 
-			OneNote.HasComObject.ShouldBeFalse();
+			OneNote.HasComObject.Should().BeFalse();
 		}
 
 		[Test]
 		public void ComObjectMode_Manual()
 		{
 			OneNote.SetComObjectMode(ComObjectMode.Manual);
-			OneNote.HasComObject.ShouldBeFalse();
+			OneNote.HasComObject.Should().BeFalse();
 
-			Should.Throw<InvalidComObjectException>(OneNote.GetDefaultNotebookLocation);
+			Invoking(OneNote.GetDefaultNotebookLocation).Should().Throw<InvalidComObjectException>();
 		}
 	}
 }

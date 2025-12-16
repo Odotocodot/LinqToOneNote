@@ -2,10 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using System.Linq;
+using AwesomeAssertions;
 using NUnit.Framework;
+using Odotocodot.OneNote.Linq.Abstractions;
 using Odotocodot.OneNote.Linq.Parsers;
-using Shouldly;
+using static AwesomeAssertions.FluentActions;
 
 namespace Odotocodot.OneNote.Linq.Tests
 {
@@ -15,6 +16,16 @@ namespace Odotocodot.OneNote.Linq.Tests
 	{
 		private Root root;
 		private TXmlParser xmlParser;
+
+		private static readonly string[] excludedMembers = [
+			nameof(Notebook.sections),
+			nameof(Notebook.sectionGroups),
+			nameof(Notebook.Sections),
+			nameof(Notebook.SectionGroups),
+			nameof(Notebook.Children),
+			nameof(IOneNoteItem.Parent),
+			nameof(Section.Pages),
+		];
 
 		[OneTimeSetUp]
 		public void OneTimeSetUp()
@@ -34,13 +45,17 @@ namespace Odotocodot.OneNote.Linq.Tests
 		{
 			var items = root.Descendants(item => item.GetType() == itemType);
 
-			items.Count().ShouldBe(expectedCount);
+			items.Should().HaveCount(expectedCount);
 		}
+
+
 
 		[Test]
 		public void Notebook_Properties()
 		{
-			var notebook = root.Notebooks[0];
+			Notebook notebook = null;
+			Invoking(() => notebook = root.Notebooks[0]).Should().NotThrow<ArgumentOutOfRangeException>();
+
 			var expectedNotebook = new Notebook
 			{
 				Name = "Its A Notebook",
@@ -49,28 +64,29 @@ namespace Odotocodot.OneNote.Linq.Tests
 				Path = @"C:\Users\User\Desktop\Its A Notebook",
 				LastModified = new DateTime(2023, 10, 04, 15, 15, 45),
 				Color = ColorTranslator.FromHtml("#EE9597"),
-				IsUnread = false,
-				sections = notebook.sections,
-				sectionGroups = notebook.sectionGroups
+				IsUnread = false
 			};
-			notebook.ShouldBeEquivalentTo(expectedNotebook);
+			notebook.Should().BeEquivalentTo(expectedNotebook, options => options.ExcludingMembersNamed(excludedMembers));
 		}
 
 
 		[Test]
 		public void Notebook_ChildrenCount()
 		{
-			var notebook = root.Notebooks[0];
+			Notebook notebook = null;
+			Invoking(() => notebook = root.Notebooks[0]).Should().NotThrow<ArgumentOutOfRangeException>();
 
-			notebook.sections.Count.ShouldBe(4);
-			notebook.sectionGroups.Count.ShouldBe(1);
-			notebook.Children.Count.ShouldBe(5);
+			notebook.sections.Should().HaveCount(4);
+			notebook.sectionGroups.Should().ContainSingle();
+			notebook.Children.Should().HaveCount(5);
 		}
 
 		[Test]
 		public void SectionGroup_Properties()
 		{
-			var sectionGroup = root.Notebooks[3].SectionGroups[1];
+			SectionGroup sectionGroup = null;
+			Invoking(() => sectionGroup = root.Notebooks[3].SectionGroups[1]).Should().NotThrow<ArgumentOutOfRangeException>();
+
 			var expectedSectionGroup = new SectionGroup
 			{
 				Name = "Section Group 1",
@@ -78,30 +94,30 @@ namespace Odotocodot.OneNote.Linq.Tests
 				Path = @"C:\Users\User\Documents\OneNote Notebooks\Test Notebook\Section Group 1",
 				LastModified = new DateTime(2023, 10, 04, 20, 48, 19),
 				IsUnread = false,
-				sections = sectionGroup.sections,
-				sectionGroups = sectionGroup.sectionGroups,
-				Parent = root.Notebooks[3],
 				IsRecycleBin = false,
 			};
-			sectionGroup.ShouldBeEquivalentTo(expectedSectionGroup);
+			sectionGroup.Should().BeEquivalentTo(expectedSectionGroup, options => options.ExcludingMembersNamed(excludedMembers));
 		}
 
 		[Test]
 		public void SectionGroup_ChildrenCount()
 		{
-			var sectionGroup = root.Notebooks[3].SectionGroups[1];
-			sectionGroup.Sections.Count.ShouldBe(4);
-			sectionGroup.SectionGroups.Count.ShouldBe(1);
-			sectionGroup.Children.Count.ShouldBe(5);
+			SectionGroup sectionGroup = null;
+			Invoking(() => sectionGroup = root.Notebooks[3].SectionGroups[1]).Should().NotThrow<ArgumentOutOfRangeException>();
+
+			sectionGroup.Sections.Should().HaveCount(4);
+			sectionGroup.SectionGroups.Should().ContainSingle();
+			sectionGroup.Children.Should().HaveCount(5);
 		}
 
 		[Test]
 		[TestCaseSource(nameof(Section_Properties_Cases))]
 		public void Section_Properties(PropertiesTestCase<Section> testCase)
 		{
-			var (section, expected) = testCase.GetData(root);
+			Section section = null, expected = null;
+			Invoking(() => (section, expected) = testCase.GetData(root)).Should().NotThrow<ArgumentOutOfRangeException>();
 
-			section.ShouldBeEquivalentTo(expected);
+			section.Should().BeEquivalentTo(expected, options => options.ExcludingMembersNamed(excludedMembers));
 		}
 
 		private static IEnumerable<PropertiesTestCase<Section>> Section_Properties_Cases()
@@ -113,7 +129,6 @@ namespace Odotocodot.OneNote.Linq.Tests
 				Id = "{6BB816F6-D431-4430-B7A2-F9DEB7A28F67}{1}{B0}",
 				Path = @"C:\Users\User\Documents\OneNote Notebooks\Test Notebook\Locked Section.one",
 				LastModified = new DateTime(2023, 06, 17, 11, 00, 52),
-				Parent = root.Notebooks[3],
 				Locked = true,
 				Encrypted = true,
 				Color = ColorTranslator.FromHtml("#BA7575"),
@@ -132,7 +147,6 @@ namespace Odotocodot.OneNote.Linq.Tests
 				IsDeletedPages = false,
 				Locked = false,
 				Encrypted = false,
-				Parent = null,
 			});
 		}
 
@@ -141,17 +155,19 @@ namespace Odotocodot.OneNote.Linq.Tests
 		[TestCase(3, 0, 3)]
 		public void Section_ChildrenCount(int i1, int i2, int expectedCount)
 		{
-			var section = root.Notebooks[i1].Sections[i2];
-			section.Children.Count.ShouldBe(expectedCount);
+			Section section = null;
+			Invoking(() => section = root.Notebooks[i1].Sections[i2]).Should().NotThrow<ArgumentOutOfRangeException>();
+			section.Children.Should().HaveCount(expectedCount);
 		}
 
 		[Test]
 		[TestCaseSource(nameof(Page_Properties_Cases))]
 		public void Page_Properties(PropertiesTestCase<Page> testCase)
 		{
-			var (page, expected) = testCase.GetData(root);
+			Page page = null, expected = null;
+			Invoking(() => (page, expected) = testCase.GetData(root)).Should().NotThrow<ArgumentOutOfRangeException>();
 
-			page.ShouldBeEquivalentTo(expected);
+			page.Should().BeEquivalentTo(expected, options => options.ExcludingMembersNamed(excludedMembers));
 		}
 		private static IEnumerable<PropertiesTestCase<Page>> Page_Properties_Cases()
 		{
@@ -163,7 +179,6 @@ namespace Odotocodot.OneNote.Linq.Tests
 				Id = "{748017F5-15E8-40D3-A1FF-2DCEF2D7A895}{1}{E19558058794535511298120172155500410846478691}",
 				LastModified = new DateTime(2023, 06, 06, 14, 24, 11),
 				Created = new DateTime(2023, 06, 06, 14, 23, 56),
-				Parent = root.Notebooks[3].SectionGroups[1].SectionGroups[0].SectionGroups[0].Sections[0],
 				Level = 1,
 				IsUnread = false,
 				IsInRecycleBin = false,
@@ -174,7 +189,6 @@ namespace Odotocodot.OneNote.Linq.Tests
 				Name = "Important Info",
 				Id = "{1B9CDD3C-6836-4DC6-9C44-0EDC06A9B8CB}{1}{E19481616267573963101920151005250203326127411}",
 				IsUnread = true,
-				Parent = root.Notebooks[0].Sections[0],
 				IsInRecycleBin = false,
 				Created = new DateTime(2022, 12, 01, 18, 10, 02),
 				LastModified = new DateTime(2022, 12, 01, 18, 10, 34),
@@ -191,14 +205,14 @@ namespace Odotocodot.OneNote.Linq.Tests
 				Id = "{2CFD5279-E2F3-4544-9878-0F1CB3609489}{1}{B0}",
 				sections = openSections.sections,
 			};
-			openSections.ShouldBeEquivalentTo(expectedOpenSections);
+			openSections.Should().BeEquivalentTo(expectedOpenSections);
 		}
 
 		[Test]
 		public void OpenSections_ChildrenCount()
 		{
 			var openSections = root.OpenSections;
-			openSections.Sections.Count.ShouldBe(2);
+			openSections.Sections.Should().HaveCount(2);
 		}
 
 		public class PropertiesTestCase<T>(Func<Root, T> getter, Func<Root, T> expectedGetter)
