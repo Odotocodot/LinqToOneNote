@@ -159,7 +159,7 @@ namespace Odotocodot.OneNote.Linq.Tests
 		private static IEnumerable<PropertiesTestCase<Page>> Page_Properties_Cases()
 		{
 			//one:Notebooks/one:Notebook[4]/one:SectionGroup[2]/one:SectionGroup/one:SectionGroup/one:SectionGroup/one:Section/one:Page
-			yield return new(root => root.Notebooks[3].SectionGroups[1].SectionGroups[0].SectionGroups[0].Sections[0].Pages[0],
+			yield return new(root => root.Notebooks[3].SectionGroups[1].SectionGroups[0].SectionGroups[0].SectionGroups[0].Sections[0].Pages[0],
 			root => new Page
 			{
 				Name = "Very nested",
