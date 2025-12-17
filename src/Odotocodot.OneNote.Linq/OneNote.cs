@@ -545,6 +545,10 @@ namespace Odotocodot.OneNote.Linq
                 {
                     InitComObject();
                 }
+                else if (!HasComObject) // Only happens when on ComObjectMode.Manual
+                {
+                    throw Exceptions.NoComObject();
+                }
                 return func(application);
             }
             catch (COMException ex)
@@ -567,6 +571,10 @@ namespace Odotocodot.OneNote.Linq
                 if (ComObjectMode == ComObjectMode.Wrap || ComObjectMode == ComObjectMode.Lazy)
                 {
                     InitComObject();
+                }
+                else if (!HasComObject)
+                {
+                    throw Exceptions.NoComObject();
                 }
                 action(application);
             }
@@ -612,7 +620,7 @@ namespace Odotocodot.OneNote.Linq
                     app.GetHierarchy(item.Id, HierarchyScope.Children.ToInterop(), out string xml, xmlSchema);
                     return xml;
                 });
-                return xmlParser.Parse(xml, item).Children;
+                return xmlParser.Parse(xml, null).Children;
             }
 
             public static IOneNoteItem UpdateDescendants(IOneNoteItem item, HierarchyScope depth, bool force = false)

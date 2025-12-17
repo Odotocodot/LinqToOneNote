@@ -28,6 +28,12 @@ namespace Odotocodot.OneNote.Linq.Internal
 			return new IOException($"The directory '{directory}' does not exist.");
 		}
 
+		internal static InvalidComObjectException NoComObject()
+		{
+			return new InvalidComObjectException($"COM Object is not initialised with {nameof(OneNote)}.{nameof(OneNote.ComObjectMode)} set to {ComObjectMode.Manual}. Call {nameof(OneNote)}.{nameof(OneNote.InitComObject)}() first or set {nameof(OneNote)}.{nameof(OneNote.ComObjectMode)} to {ComObjectMode.Lazy} or {ComObjectMode.Wrap}.");
+		}
+
+
 		//https://learn.microsoft.com/en-us/office/client-developer/onenote/error-codes-onenote
 		internal static COMException NicifiedComException(COMException ex)
 		{
