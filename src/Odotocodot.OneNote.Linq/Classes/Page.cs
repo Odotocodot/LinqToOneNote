@@ -30,6 +30,6 @@ namespace Odotocodot.OneNote.Linq
         public Section Parent { get; internal set; }
 
         IOneNoteItem IOneNoteItem.Parent => Parent;
-        IReadOnlyList<IOneNoteItem> IOneNoteItem.Children { get; } = [];
+        IReadOnlyList<IOneNoteItem> IOneNoteItem.Children { get; } = ReadOnlyList.Empty;
     }
 }

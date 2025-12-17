@@ -208,23 +208,7 @@ namespace Odotocodot.OneNote.Linq
                 return;
             }
             Run(app => app.DeleteHierarchy(item.Id, dateExpectedLastModified, deletePermanently));
-            switch (item.Parent)
-            {
-                case INotebookOrSectionGroup parent:
-                    switch (item)
-                    {
-                        case SectionGroup group:
-                            ((ReadOnlyList<SectionGroup>)parent.SectionGroups).Remove(group);
-                            break;
-                        case Section section:
-                            ((ReadOnlyList<Section>)parent.Sections).Remove(section);
-                            break;
-                    }
-                    break;
-                case Section section:
-                    section.pages.Remove((Page)item);
-                    break;
-            }
+            ((ReadOnlyList)item.Parent.Children).Remove(item);
         }
 
         /// <summary>

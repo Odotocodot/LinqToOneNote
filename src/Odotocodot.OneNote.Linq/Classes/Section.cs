@@ -11,8 +11,8 @@ namespace Odotocodot.OneNote.Linq
     /// </summary>
     public class Section : OneNoteItem, IOneNoteItem, INameInvalidCharacters, IHasIsInRecycleBin, IHasPath, IHasColor, IDeletable
     {
-        internal ReadOnlyList<Page> pages;
-        internal Section() { pages = []; }
+        internal ReadOnlyList<Page> pages = [];
+        internal Section() { }
 
         /// <summary>
         /// An array containing the characters that are not allowed in a <see cref="Section">section</see> name.<br/>
