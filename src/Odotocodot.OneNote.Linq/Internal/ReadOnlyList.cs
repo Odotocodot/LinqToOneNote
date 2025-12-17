@@ -37,18 +37,20 @@ namespace Odotocodot.OneNote.Linq.Internal
 
         public struct Enumerator(List<Section> sections, List<SectionGroup> sectionGroups) : IEnumerator<IOneNoteItem>
         {
+            List<Section>.Enumerator sectionEnumerator = sections.GetEnumerator();
+            List<SectionGroup>.Enumerator sectionGroupEnumerator = sectionGroups.GetEnumerator();
+
             public IOneNoteItem Current { get; private set; }
             readonly object IEnumerator.Current => Current;
 
             public bool MoveNext()
             {
-                var sectionEnumerator = sections.GetEnumerator();
                 while (sectionEnumerator.MoveNext())
                 {
                     Current = sectionEnumerator.Current;
                     return true;
                 }
-                var sectionGroupEnumerator = sectionGroups.GetEnumerator();
+
                 while (sectionGroupEnumerator.MoveNext())
                 {
                     Current = sectionGroupEnumerator.Current;
