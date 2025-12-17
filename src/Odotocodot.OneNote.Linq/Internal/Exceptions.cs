@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Xml;
@@ -22,7 +23,10 @@ namespace Odotocodot.OneNote.Linq.Internal
 			return new ArgumentException($"'{item.GetType().Name}' is not a valid OneNote item type.");
 		}
 
-
+		internal static IOException DirectoryDoesNotExist(string directory)
+		{
+			return new IOException($"The directory '{directory}' does not exist.");
+		}
 
 		//https://learn.microsoft.com/en-us/office/client-developer/onenote/error-codes-onenote
 		internal static COMException NicifiedComException(COMException ex)

@@ -30,6 +30,19 @@ namespace Odotocodot.OneNote.Linq
         /// <inheritdoc cref="OneNote.CloseNotebook"/>
         public static void Close(this Notebook notebook, bool force = false) => OneNote.CloseNotebook(notebook, force);
 
+        /// <inheritdoc cref="OneNote.CreateNotebook(string,string,OpenMode)"/>
+        /// <remarks> This method also adds the created notebook to the <see cref="Root.Notebooks"/> collection.</remarks>
+        public static Notebook CreateNotebook(this Root root, string name, string directory = null, OpenMode openMode = OpenMode.None)
+        {
+            Notebook notebook = OneNote.CreateNotebook(name, directory, openMode);
+            root.notebooks.Add(notebook);
+            return notebook;
+        }
+
+        /// <inheritdoc cref="CreateNotebook(Root,string,string,OpenMode)"/>
+        public static Notebook CreateNotebook(this Root root, string name, OpenMode openMode = OpenMode.None)
+            => root.CreateNotebook(name, null, openMode);
+
         /// <inheritdoc cref="OneNote.CreateSectionGroup"/>
         public static SectionGroup CreateSectionGroup(this INotebookOrSectionGroup parent, string name, OpenMode openMode = OpenMode.None)
             => OneNote.CreateSectionGroup(parent, name, openMode);
@@ -114,7 +127,7 @@ namespace Odotocodot.OneNote.Linq
                 {
                     break;
                 }
-                
+
                 sb.Insert(0, current.Name);
                 sb.Insert(0, separator);
                 current = current.Parent;
@@ -152,7 +165,7 @@ namespace Odotocodot.OneNote.Linq
                 throw Exceptions.InvalidIOneNoteItem(item);
             }
         }
-        
+
         /// <summary>
         /// Checks if two <see cref="IOneNoteItem"/>s represent the same item in OneNote.<br/>
         /// Shorthand for comparing the <see cref="IOneNoteItem.Id">ID</see> of OneNote hierarchy items. E.g.

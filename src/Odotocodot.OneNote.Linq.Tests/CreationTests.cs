@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using AwesomeAssertions;
 using AwesomeAssertions.Execution;
@@ -73,6 +74,43 @@ namespace Odotocodot.OneNote.Linq.Tests
         }
 
         [Test]
+        public void CreateNotebook_InDirectory()
+        {
+            string tempDir = Path.Combine(Path.GetTempPath(), GenerateName());
+            Directory.CreateDirectory(tempDir);
+            try
+            {
+                var newNotebook = OneNote.CreateNotebook(GenerateName(), tempDir);
+
+                TrackCreatedItem(newNotebook);
+
+                var notebooks = OneNote.Partial.GetHierarchy(HierarchyScope.Notebooks).Notebooks;
+
+                var expected = notebooks.FirstOrDefault(x => x.Id == newNotebook.Id);
+
+                using var scope = new AssertionScope();
+                expected.Should().NotBeNull();
+                newNotebook.Path.Should().StartWith(tempDir);
+                newNotebook.Should().BeEquivalentTo(expected, options => options.WithoutRecursing());
+            }
+            finally
+            {
+                Directory.Delete(tempDir, true);
+            }
+        }
+
+        [Test]
+        public void CreateNotebook_InvalidDirectory()
+        {
+            Invoking(() =>
+            {
+                var notebook = OneNote.CreateNotebook(GenerateName(), $"C:\\{GenerateName()}\\DoesNotExist\\{GenerateName()}");
+                TrackCreatedItem(notebook);
+                return notebook;
+            }).Should().Throw<IOException>();
+        }
+
+        [Test]
         public void CreateNotebook_InvalidName()
         {
             var invalidName = GenerateInvalidName<Notebook>();
@@ -83,8 +121,6 @@ namespace Odotocodot.OneNote.Linq.Tests
                 return notebook;
             }).Should().Throw<ArgumentException>().WithMessage(ExpectedWildcardPattern);
         }
-
-
 
         private void Check<T, TParent>(T newItem, TParent parent) where T : IOneNoteItem where TParent : IOneNoteItem
         {

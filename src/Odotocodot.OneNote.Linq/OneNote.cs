@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -435,21 +436,46 @@ namespace Odotocodot.OneNote.Linq
         }
 
         /// <summary>
-        /// Creates a <see cref="Notebook">notebook</see> with a title equal to <paramref name="name"/> located in the <see cref="GetDefaultNotebookLocation()">default notebook location</see>.
-        /// </summary>        
+        /// Creates a <see cref="Notebook">notebook</see> with a title equal to <paramref name="name"/> located in the <paramref name="directory"/>. If <paramref name="directory"/> is
+        /// <see langword="null"/>, the <see cref="GetDefaultNotebookLocation">default notebook location</see> is used.
+        /// </summary>
         /// <param name="name">The name of the new notebook.</param>
+        /// <param name="directory">The directory to create the notebook</param>
         /// <param name="openMode">Whether to open the newly created notebook in OneNote immediately.</param>
-        /// <exception cref="ArgumentException">Thrown if the <paramref name="name"/> is not a valid notebook name.</exception>
-        /// <seealso cref="IsValidName(string)"/>
+        /// <exception cref="ArgumentException">Thrown if the <paramref name="name"/> is not valid for a notebook.</exception>
+        /// <exception cref="IOException">Thrown if the specified <paramref name="directory"/> is not <see langword="null"/> and does not exist.</exception>
         /// <returns>The newly created <see cref="Notebook">notebook</see>.</returns>
-        public static Notebook CreateNotebook(string name, OpenMode openMode = OpenMode.None)
+        /// <seealso cref="IsValidName(string)"/>
+        /// <seealso cref="GetDefaultNotebookLocation"/>
+        /// <seealso cref="CreateNotebook(string, OpenMode)"/>
+        public static Notebook CreateNotebook(string name, string directory, OpenMode openMode = OpenMode.None)
         {
             return Run(app =>
             {
-                app.GetSpecialLocation(SpecialLocation.slDefaultNotebookFolder, out string path);
-                return CreateItem<Notebook>(app, null, name, System.IO.Path.Combine(path, name), openMode, CreateFileType.cftNotebook);
+                if (string.IsNullOrWhiteSpace(directory))
+                {
+                    app.GetSpecialLocation(SpecialLocation.slDefaultNotebookFolder, out directory);
+                }
+                else if (!Directory.Exists(directory))
+                {
+                    throw Exceptions.DirectoryDoesNotExist(directory);
+                }
+
+                return CreateItem<Notebook>(app, null, name, Path.Combine(directory, name), openMode, CreateFileType.cftNotebook);
             });
         }
+
+        /// <summary>
+        /// Creates a <see cref="Notebook">notebook</see> with a title equal to <paramref name="name"/> located in the <see cref="GetDefaultNotebookLocation">default notebook location</see>.
+        /// </summary>
+        /// <param name="name"><inheritdoc cref="CreateNotebook(string,string,OpenMode)"/></param>
+        /// <param name="openMode"><inheritdoc cref="CreateNotebook(string,string,OpenMode)"/></param>
+        /// <exception cref="ArgumentException">Thrown if the <paramref name="name"/> is not valid for a notebook.</exception>
+        /// <returns>The newly created <see cref="Notebook">notebook</see>.</returns>
+        /// <seealso cref="IsValidName(string)"/>
+        /// <seealso cref="GetDefaultNotebookLocation"/>
+        /// <seealso cref="CreateNotebook(string, string, OpenMode)"/>
+        public static Notebook CreateNotebook(string name, OpenMode openMode = OpenMode.None) => CreateNotebook(name, null, openMode);
 
         #endregion
 
