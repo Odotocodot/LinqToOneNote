@@ -4,16 +4,26 @@ using Odotocodot.OneNote.Linq.Internal;
 
 namespace Odotocodot.OneNote.Linq
 {
-
+	/// <summary>
+	/// The root of object containing the OneNote hierarchy.<br/>
+	/// Enumerating this will yield all the notebooks in the property <see cref="Notebooks"/> followed by all the sections in <see cref="OpenSections"/> (if not null).
+	/// </summary>
 	public class Root : IEnumerable<IOneNoteItem>
 	{
-		internal ReadOnlyList<Notebook> notebooks;
+		internal ReadOnlyList<Notebook> notebooks = [];
 
-		internal Root() { notebooks = []; }
+		internal Root() { }
 
+		/// <summary>
+		/// The notebooks in the OneNote hierarchy.
+		/// </summary>
 		public IReadOnlyList<Notebook> Notebooks => notebooks;
 
 #nullable enable
+		/// <summary>
+		/// The open sections in OneNote that are not contained in any notebook. <br/>
+		/// Can be <see langword="null"/> if there are no open sections.
+		/// </summary>
 		public OpenSections? OpenSections { get; internal set; } //TODO make empty rather than null
 #nullable restore
 

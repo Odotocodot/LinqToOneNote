@@ -32,7 +32,7 @@ namespace Odotocodot.OneNote.Linq
         IReadOnlyList<IOneNoteItem> Children { get; }
         /// <summary>
         /// The parent of the OneNote hierarchy item. <br/>
-        /// <see langword="null"/> if the OneNote item has no parent i.e. a <see cref="Notebook">notebook</see>.
+        /// <see langword="null"/> if the item has no parent e.g. a <see cref="Notebook">notebook</see>.
         /// </summary>
         IOneNoteItem Parent { get; } //TODO: maybe remove complete and just use extension method
         // /// <summary>

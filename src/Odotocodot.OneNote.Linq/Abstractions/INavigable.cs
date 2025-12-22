@@ -7,7 +7,7 @@ namespace Odotocodot.OneNote.Linq.Abstractions
     public interface INavigable
     {
         /// <summary>
-        /// The ID of the OneNote hierarchy item.
+        /// The id of the OneNote hierarchy item.
         /// </summary>
         string Id { get; }
     }

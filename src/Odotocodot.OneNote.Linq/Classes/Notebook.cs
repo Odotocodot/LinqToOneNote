@@ -46,6 +46,9 @@ namespace Odotocodot.OneNote.Linq
         /// </summary>
         public IReadOnlyList<SectionGroup> SectionGroups => sectionGroups;
 
+        /// <summary>
+        /// The direct children of the notebook, containing its <see cref="Notebook.Sections">sections</see> and <see cref="Notebook.SectionGroups">section groups</see>.
+        /// </summary>
         public IReadOnlyList<IOneNoteItem> Children
         {
             get

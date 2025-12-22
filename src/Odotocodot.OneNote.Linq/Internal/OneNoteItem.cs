@@ -1,24 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+using Odotocodot.OneNote.Linq.Abstractions;
 
 namespace Odotocodot.OneNote.Linq.Internal
 {
-    //TODO: maybe remove 
     /// <summary>
     /// Use <see cref="IOneNoteItem"/> instead.
     /// </summary>
     /// <seealso cref="IOneNoteItem"/>
-    public abstract class OneNoteItem// : IOneNoteItem 
+    public abstract class OneNoteItem // : IOneNoteItem 
     {
         internal OneNoteItem() { }
 
-        /// <inheritdoc/>
+        /// <inheritdoc cref="INavigable.Id"/>
         public string Id { get; internal set; }
-        /// <inheritdoc/>
+        /// <inheritdoc cref="IOneNoteItem.Name"/>
         public string Name { get; internal set; }
-        /// <inheritdoc/>
+        /// <inheritdoc cref="IOneNoteItem.IsUnread"/>
         public bool IsUnread { get; internal set; }
-        /// <inheritdoc/>
+        /// <inheritdoc cref="IOneNoteItem.LastModified"/>
         public DateTime LastModified { get; internal set; }
         // /// <inheritdoc/>
         // public IEnumerable<IOneNoteItem> Children { get; internal set; } = Enumerable.Empty<IOneNoteItem>();

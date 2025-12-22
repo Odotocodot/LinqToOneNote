@@ -92,6 +92,15 @@ namespace Odotocodot.OneNote.Linq
             return sectionGroup != null;
         }
 
+
+        /// <summary>
+        /// Attempts to get the <see cref="Notebook"/> that contains the specified <paramref name="item"/>.
+        /// This can be <see langword="false"/> if the <paramref name="item"/> is in a open section or a its a hierarchy is only partially queried.
+        /// </summary>
+        /// <param name="item">The item to get the notebook of.</param>
+        /// <param name="notebook">When this method returns, <paramref name="notebook"/> contains the notebook of the <paramref name="item"/> if it was found;
+        /// otherwise, <see langword="null"/>.</param>
+        /// <returns><see langword="true"/> if the <paramref name="item"/> <see cref="Notebook"/> can be found; otherwise, <see langword="false"/>.</returns>
         public static bool TryGetNotebook(this IOneNoteItem item, out Notebook notebook)
         {
             var current = item.Parent;
@@ -109,7 +118,18 @@ namespace Odotocodot.OneNote.Linq
         }
 
         private static readonly SimplePool<StringBuilder> StringBuilderPool = new(10);
-        private const string DefaultRelativePathSeparator = "\\";
+
+        /// <summary>
+        /// The default separator used in <see cref="GetRelativePath"/>.
+        /// </summary>
+        public const string DefaultRelativePathSeparator = "\\";
+
+        /// <summary>
+        /// Returns the relative path of the specified <paramref name="item"/> within its <see cref="Notebook"/>.
+        /// </summary>
+        /// <param name="item">The item to get the relative path of.</param>
+        /// <param name="useNotebookDisplayName">Whether to use the notebook's <see cref="Notebook.DisplayName"/> or <see cref="Notebook.Name"/> when getting the path.</param>
+        /// <param name="separator">The separator to use between path components.</param>
         public static string GetRelativePath(this IOneNoteItem item, bool useNotebookDisplayName = true, string separator = DefaultRelativePathSeparator)
         {
             Throw.IfNull(item);
@@ -167,19 +187,11 @@ namespace Odotocodot.OneNote.Linq
         }
 
         /// <summary>
-        /// Checks if two <see cref="IOneNoteItem"/>s represent the same item in OneNote.<br/>
-        /// Shorthand for comparing the <see cref="IOneNoteItem.Id">ID</see> of OneNote hierarchy items. E.g.
-        /// <code lang="C#">
-        /// if(left.ID == right.ID)
-        /// {
-        ///     Console.WriteLine("Equal")
-        /// }
-        /// </code>
+        /// Checks if two <see cref="IOneNoteItem"/>s represent the same item in OneNote by comparing their <see cref="INavigable.Id"/>.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="left"></param>
-        /// <param name="right"></param>
-        /// <returns></returns>
+        /// <param name="left">The first item to compare.</param>
+        /// <param name="right">The second item to compare.</param>
+        /// <returns><see langword="true"/> if the items represent the same item in OneNote; otherwise <see langword="false"/>.</returns>
         public static bool ItemEquals<T>(this T left, T right) where T : IOneNoteItem
         {
             return OneNoteItem.IdComparer.Equals(left, right);

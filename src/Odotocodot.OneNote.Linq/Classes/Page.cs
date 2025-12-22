@@ -27,6 +27,9 @@ namespace Odotocodot.OneNote.Linq
         /// <seealso cref="Section.IsDeletedPages"/>
         public bool IsInRecycleBin { get; internal set; }
 
+        /// <summary>
+        /// The parent section of the page.
+        /// </summary>
         public Section Parent { get; internal set; }
 
         IOneNoteItem IOneNoteItem.Parent => Parent;

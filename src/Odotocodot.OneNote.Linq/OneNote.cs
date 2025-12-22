@@ -35,6 +35,11 @@ namespace Odotocodot.OneNote.Linq
         private static readonly XmlParserXmlReader xmlParser = new();
 
         #region COM Object Management
+        /// <summary>
+        /// The mode defining how the <see cref="Application">OneNote COM object</see> is managed. See <see cref="ComObjectMode"/>.
+        /// </summary>
+        /// <seealso cref="SetComObjectMode(ComObjectMode)"/>
+        /// <seealso cref="Linq.ComObjectMode"/>
         public static ComObjectMode ComObjectMode { get; private set; } = ComObjectMode.Lazy;
 
         private static Application application;
@@ -58,6 +63,12 @@ namespace Odotocodot.OneNote.Linq
         /// <seealso cref="ReleaseComObject"/>
         public static bool HasComObject => application != null;
 
+        /// <summary>
+        /// Sets the <see cref="ComObjectMode"/> used by the class. See <see cref="Linq.ComObjectMode"/>.
+        /// </summary>
+        /// <param name="mode">The mode to set.</param>
+        /// <seealso cref="ComObjectMode"/>
+        /// <seealso cref="Linq.ComObjectMode"/>
         public static void SetComObjectMode(ComObjectMode mode) => ComObjectMode = mode;
 
         /// <summary>
@@ -212,7 +223,7 @@ namespace Odotocodot.OneNote.Linq
         }
 
         /// <summary>
-        /// Causes OneNote to synchronizes any offline files with the <see cref="notebook">notebook</see>, if necessary, and then closes the specified
+        /// Causes OneNote to synchronizes any offline files with the <paramref name="notebook">notebook</paramref>, if necessary, and then closes the specified
         /// notebook. After the method returns, the notebook no longer appears in the list of open notebooks in the OneNote user interface (UI).
         /// </summary>
         /// <param name="notebook">The specified OneNote notebook.</param>
@@ -575,11 +586,18 @@ namespace Odotocodot.OneNote.Linq
             }
         }
 
-
-        //TODO: document side effects, like updating the values
-
+        /// <summary>
+        /// Contains methods that can query parts of the OneNote hierarchy.<br/>
+        /// This can cause some properties like <see cref="IOneNoteItem.Children"/> and <see cref="IOneNoteItem.Parent"/> to be <see langword="null"/> or empty, even if they have values in OneNote.
+        /// The "Update" functions overwrite the existing data in the provided <see cref="IOneNoteItem">item</see> with the latest data from OneNote.
+        /// </summary>
         public static class Partial
         {
+            /// <summary>
+            /// Gets part of the OneNote hierarchy starting from the root to the specified <paramref name="depth"/>.
+            /// </summary>
+            /// <param name="depth">The depth of the hierarchy to retrieve.</param>
+            /// <returns>Returns a partially filled <see cref="Root"/>.</returns>
             public static Root GetHierarchy(HierarchyScope depth)
             {
                 var xml = Run(app =>
@@ -590,6 +608,14 @@ namespace Odotocodot.OneNote.Linq
                 return xmlParser.ParseRoot(xml);
             }
 
+            /// <summary>
+            /// Gets part of the OneNote hierarchy starting from the specified <paramref name="startNodeId"/> (<see cref="INavigable.Id"/>) to the specified <paramref name="depth"/>.
+            /// </summary>
+            /// <param name="startNodeId">The id of the node to start from.</param>
+            /// <param name="depth">The depth of the hierarchy to retrieve.</param>
+            /// <exception cref="ArgumentException">Thrown if <paramref name="startNodeId"/> is empty or only whitespace.</exception>
+            /// <exception cref="ArgumentNullException">Thrown if <paramref name="startNodeId"/> is <see langword="null"/>.</exception>
+            /// <returns>Returns a partially filled <see cref="IOneNoteItem"/>.</returns>
             public static IOneNoteItem GetHierarchy(string startNodeId, HierarchyScope depth)
             {
                 Throw.IfNullOrWhiteSpace(startNodeId);
@@ -602,6 +628,14 @@ namespace Odotocodot.OneNote.Linq
                 return xmlParser.Parse(xml, null);
             }
 
+            /// <summary>
+            /// Updates the specified <paramref name="item"/> with part of the OneNote hierarchy to the specified <paramref name="depth"/>.
+            /// This overwrites all the existing data in the <paramref name="item"/>.<br/>
+            /// For example, if <paramref name="depth"/> is <see cref="HierarchyScope.Children"/>, the <see cref="IOneNoteItem.Children"/> property of the <paramref name="item"/> is cleared and refilled with the latest data from OneNote.
+            /// </summary>
+            /// <param name="item">The item to update.</param>
+            /// <param name="depth">The depth of the hierarchy to retrieve.</param>
+            /// <exception cref="ArgumentNullException">Thrown if <paramref name="item"/> is <see langword="null"/>.</exception>
             public static void UpdateHierarchy(IOneNoteItem item, HierarchyScope depth)
             {
                 Throw.IfNull(item);
@@ -619,11 +653,23 @@ namespace Odotocodot.OneNote.Linq
                 xmlParser.ParseExisting(xml, item);
             }
 
+            /// <summary>
+            /// Shorthand for <see cref="GetHierarchy(string, HierarchyScope)"/> with the <c>depth</c> parameter set to <see cref="HierarchyScope.Children"/>. Returns the children of the specified <paramref name="item"/>. <br/>
+            /// No update/overwrite occurs.
+            /// </summary>
+            /// <param name="item">The item to get the children of.</param>
+            /// <exception cref="ArgumentNullException">Thrown if <paramref name="item"/> is <see langword="null"/>.</exception>
+            /// <returns>Returns the children of the specified <paramref name="item"/>.</returns>
             public static IReadOnlyList<IOneNoteItem> GetChildren(IOneNoteItem item)
             {
                 return item is Page ? ReadOnlyList.Empty : GetHierarchy(item.Id, HierarchyScope.Children).Children;
             }
 
+            /// <summary>
+            /// Shorthand for <see cref="UpdateHierarchy(IOneNoteItem, HierarchyScope)"/> with the <c>depth</c> parameter set to <see cref="HierarchyScope.Children"/>. Updates the children of the specified <paramref name="item"/>.<br/>
+            /// This overwrites all the existing data in the <paramref name="item"/>.<br/>
+            /// </summary>
+            /// <param name="item">The item to update the children of.</param>
             public static void UpdateChildren(IOneNoteItem item)
             {
                 if (item is Page)
@@ -633,6 +679,12 @@ namespace Odotocodot.OneNote.Linq
                 UpdateHierarchy(item, HierarchyScope.Children);
             }
 
+            /// <summary>
+            /// Gets the parent of the specified <paramref name="item"/> from OneNote.
+            /// </summary>
+            /// <param name="item">The item to get the parent of.</param>
+            /// <exception cref="ArgumentNullException">Thrown if <paramref name="item"/> is <see langword="null"/>.</exception>
+            /// <returns>Returns <see langword="null"/> if the <paramref name="item"/> is a <see cref="Notebook">notebook</see>.</returns>
             public static IOneNoteItem GetParent(IOneNoteItem item)
             {
                 Throw.IfNull(item);
@@ -651,6 +703,13 @@ namespace Odotocodot.OneNote.Linq
                 return xmlParser.Parse(xml, null);
             }
 
+            /// <summary>
+            /// Updates the specified <paramref name="item"/>'s <see cref="IOneNoteItem.Parent"/> property with the latest data from OneNote.<br/>
+            /// Does nothing if the <paramref name="item"/> is a <see cref="Notebook">notebook</see>.<br/>
+            /// Overwrites the existing <see cref="IOneNoteItem.Parent"/> property.
+            /// </summary>
+            /// <param name="item">The item to update the parent property of.</param>
+            /// <exception cref="ArgumentNullException">Thrown if <paramref name="item"/> is <see langword="null"/>.</exception>
             public static void UpdateParent(IOneNoteItem item)
             {
                 Throw.IfNull(item);

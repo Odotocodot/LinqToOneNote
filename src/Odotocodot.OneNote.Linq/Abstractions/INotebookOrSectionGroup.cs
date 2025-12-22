@@ -2,7 +2,6 @@
 
 namespace Odotocodot.OneNote.Linq.Abstractions
 {
-	//TODO:
 	/// <summary>
 	/// Represents a OneNote hierarchy item that can have <see cref="Section">sections</see> and/or <see cref="SectionGroup">section groups</see> as children, i.e. a <see cref="Notebook">notebook</see> or a <see cref="SectionGroup">section group</see>.
 	/// </summary>
@@ -11,7 +10,7 @@ namespace Odotocodot.OneNote.Linq.Abstractions
 	public interface INotebookOrSectionGroup : IOneNoteItem
 	{
 		/// <summary>
-		/// The sections that this item contains (direct children only). 
+		/// The sections that this item contains (direct children only).
 		/// </summary>
 		IReadOnlyList<Section> Sections { get; }
 

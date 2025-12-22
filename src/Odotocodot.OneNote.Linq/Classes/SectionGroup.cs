@@ -42,6 +42,10 @@ namespace Odotocodot.OneNote.Linq
         /// The section groups that this section group contains (direct children only).
         /// </summary>
         public IReadOnlyList<SectionGroup> SectionGroups => sectionGroups;
+
+        /// <summary>
+        /// The direct children of the section group, containing its <see cref="Sections">sections</see> and <see cref="SectionGroups">section groups</see>.
+        /// </summary>
         public IReadOnlyList<IOneNoteItem> Children
         {
             get
@@ -50,6 +54,10 @@ namespace Odotocodot.OneNote.Linq
                 return field;
             }
         }
+
+        /// <summary>
+        /// The parent notebook or section group of the section group.
+        /// </summary>
         public INotebookOrSectionGroup Parent { get; internal set; }
         IOneNoteItem IOneNoteItem.Parent => Parent;
     }

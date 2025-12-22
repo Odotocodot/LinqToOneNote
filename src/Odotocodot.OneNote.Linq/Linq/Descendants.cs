@@ -4,8 +4,11 @@ using Odotocodot.OneNote.Linq.Internal;
 
 namespace Odotocodot.OneNote.Linq
 {
-	public static partial class LinqExtensions
-	{
+    /// <summary>
+    /// Linq extension methods for a <see cref="IOneNoteItem"/>.
+    /// </summary>
+    public static partial class LinqExtensions
+    {
         internal static readonly SimplePool<Stack2> StackPool = new(5);
         internal class Stack2 : Stack<IOneNoteItem>, IDisposable
         {
@@ -15,7 +18,14 @@ namespace Odotocodot.OneNote.Linq
                 StackPool.Return(this);
             }
         }
-        
+
+        /// <summary>
+        /// Returns a flattened collection of OneNote items, which contains the descendants of the <paramref name="source"/>.
+        /// </summary>
+        /// <param name="source">The source OneNote item.</param>
+        /// <returns>An <see cref="IEnumerable{T}">IEnumerable</see>&lt;<see cref="IOneNoteItem"/>&gt; containing all the descendants
+        /// of the <paramref name="source"/>.</returns>
+        /// <remarks>This method uses a non-recursive depth first traversal algorithm.</remarks>
         public static IEnumerable<IOneNoteItem> Descendants(this IOneNoteItem source)
         {
             Throw.IfNull(source);
@@ -38,6 +48,15 @@ namespace Odotocodot.OneNote.Linq
             }
         }
 
+        /// <summary>
+        /// Returns a filtered flattened collection of OneNote items, which contains the descendants of the <paramref name="source"/>.<br/>
+        /// Only items that successfully pass the <paramref name="predicate"/> are returned.
+        /// </summary>
+        /// <param name="source">The source OneNote item.</param>
+        /// <param name="predicate">The predicate to filter the descendants.</param>
+        /// <returns>An <see cref="IEnumerable{T}">IEnumerable</see>&lt;<see cref="IOneNoteItem"/>&gt; containing all the descendants
+        /// of the <paramref name="source"/> that pass the <paramref name="predicate"/>.</returns>
+        /// <remarks><inheritdoc cref="Traverse(IOneNoteItem)" path="/remarks"/></remarks>
         public static IEnumerable<IOneNoteItem> Descendants(this IOneNoteItem source, Func<IOneNoteItem, bool> predicate)
         {
             Throw.IfNull(source);
@@ -62,6 +81,7 @@ namespace Odotocodot.OneNote.Linq
             }
         }
 
+        /// <inheritdoc cref="Descendants(IOneNoteItem)"/>
         public static IEnumerable<IOneNoteItem> Descendants(this IEnumerable<IOneNoteItem> source)
         {
             Throw.IfNull(source);
@@ -87,6 +107,7 @@ namespace Odotocodot.OneNote.Linq
             }
         }
 
+        /// <inheritdoc cref="Descendants(IOneNoteItem,Func{IOneNoteItem, bool})"/>
         public static IEnumerable<IOneNoteItem> Descendants(this IEnumerable<IOneNoteItem> source, Func<IOneNoteItem, bool> predicate)
         {
             Throw.IfNull(source);
@@ -113,5 +134,5 @@ namespace Odotocodot.OneNote.Linq
                 }
             }
         }
-	}
+    }
 }

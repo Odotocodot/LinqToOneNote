@@ -10,6 +10,9 @@ namespace Odotocodot.OneNote.Linq.Abstractions
     /// <seealso cref="Section"/>
     public interface INameInvalidCharacters
     {
+        /// <summary>
+        /// A collection of characters that are invalid for the item's name.
+        /// </summary>
         static abstract IReadOnlyList<char> InvalidCharacters { get; }
     }
 }

@@ -62,7 +62,15 @@ namespace Odotocodot.OneNote.Linq
         /// The collection of pages within this section, equal to <see cref="IOneNoteItem.Children"/> for a section.
         /// </summary>
         public IReadOnlyList<Page> Pages => pages;
+
+        /// <summary>
+        /// The direct children of the section, containing its <see cref="Pages">pages</see>. Use <see cref="Pages"/> for a strongly typed collection.
+        /// </summary>
         public IReadOnlyList<IOneNoteItem> Children => pages;
+
+        /// <summary>
+        /// The parent notebook or section group of the section.
+        /// </summary>
         public INotebookOrSectionGroup Parent { get; internal set; }
         IOneNoteItem IOneNoteItem.Parent => Parent;
     }
