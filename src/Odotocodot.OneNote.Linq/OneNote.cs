@@ -590,82 +590,47 @@ namespace Odotocodot.OneNote.Linq
                 return xmlParser.ParseRoot(xml);
             }
 
-            public static IReadOnlyList<IOneNoteItem> GetChildren(IOneNoteItem item)
+            public static IOneNoteItem GetHierarchy(string startNodeId, HierarchyScope depth)
             {
-                Throw.IfNull(item);
-
-                if (item is Page)
-                {
-                    return [];
-                }
+                Throw.IfNullOrWhiteSpace(startNodeId);
 
                 var xml = Run(app =>
                 {
-                    app.GetHierarchy(item.Id, HierarchyScope.Children.ToInterop(), out string xml, xmlSchema);
+                    app.GetHierarchy(startNodeId, depth.ToInterop(), out string xml, xmlSchema);
                     return xml;
                 });
-                return xmlParser.Parse(xml, null).Children;
+                return xmlParser.Parse(xml, null);
             }
 
-            public static IOneNoteItem UpdateDescendants(IOneNoteItem item, HierarchyScope depth, bool force = false)
+            public static void UpdateHierarchy(IOneNoteItem item, HierarchyScope depth)
             {
                 Throw.IfNull(item);
-                if (depth == HierarchyScope.Notebooks || depth == HierarchyScope.Self || item is Page)
-                {
-                    return item;
-                }
 
-                if (force || item.Children.Count == 0)
+                var xml = Run(app =>
                 {
-                    if (item is INotebookOrSectionGroup nbors)
-                    {
-                        ((ReadOnlyList<Section>)nbors.Sections).Clear();
-                        ((ReadOnlyList<SectionGroup>)nbors.SectionGroups).Clear();
-                    }
-                    else if (item is Section section)
-                    {
-                        ((ReadOnlyList<Page>)section.Pages).Clear();
-                    }
-
-                    var xml = Run(app =>
-                    {
-                        app.GetHierarchy(item.Id, depth.ToInterop(), out string xml, xmlSchema);
-                        return xml;
-                    });
-                    xmlParser.ParseExisting(xml, item);
+                    app.GetHierarchy(item.Id, depth.ToInterop(), out string xml, xmlSchema);
+                    return xml;
+                });
+                //TODO: test HierarchyScope.Notebooks
+                if (depth is HierarchyScope.Children or HierarchyScope.Pages or HierarchyScope.Sections)
+                {
+                    ((ReadOnlyList)item.Children).Clear();
                 }
-                return item;
+                xmlParser.ParseExisting(xml, item);
             }
 
-            public static IReadOnlyList<IOneNoteItem> GetAndUpdateChildren(IOneNoteItem item, bool force = false)
+            public static IReadOnlyList<IOneNoteItem> GetChildren(IOneNoteItem item)
             {
-                Throw.IfNull(item);
+                return item is Page ? ReadOnlyList.Empty : GetHierarchy(item.Id, HierarchyScope.Children).Children;
+            }
+
+            public static void UpdateChildren(IOneNoteItem item)
+            {
                 if (item is Page)
                 {
-                    return [];
+                    return;
                 }
-
-                if (force || item.Children.Count == 0)
-                {
-                    if (item is INotebookOrSectionGroup nbors)
-                    {
-                        ((ReadOnlyList<Section>)nbors.Sections).Clear();
-                        ((ReadOnlyList<SectionGroup>)nbors.SectionGroups).Clear();
-                    }
-                    else if (item is Section section)
-                    {
-                        ((ReadOnlyList<Page>)section.Pages).Clear();
-                    }
-
-                    var xml = Run(app =>
-                    {
-                        app.GetHierarchy(item.Id, HierarchyScope.Children.ToInterop(), out string xml, xmlSchema);
-                        return xml;
-                    });
-                    xmlParser.ParseExisting(xml, item);
-                }
-
-                return item.Children;
+                UpdateHierarchy(item, HierarchyScope.Children);
             }
 
             public static IOneNoteItem GetParent(IOneNoteItem item)
@@ -686,18 +651,13 @@ namespace Odotocodot.OneNote.Linq
                 return xmlParser.Parse(xml, null);
             }
 
-            public static IOneNoteItem GetAndUpdateParent(IOneNoteItem item, bool force)
+            public static void UpdateParent(IOneNoteItem item)
             {
                 Throw.IfNull(item);
 
                 if (item is Notebook)
                 {
-                    return null;
-                }
-
-                if (!force && item.Parent != null)
-                {
-                    return item.Parent;
+                    return;
                 }
 
                 var xml = Run(app =>
@@ -719,7 +679,6 @@ namespace Odotocodot.OneNote.Linq
                         page.Parent = (Section)parent;
                         break;
                 }
-                return parent;
             }
         }
     }
