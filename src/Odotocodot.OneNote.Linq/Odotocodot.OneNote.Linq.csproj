@@ -37,6 +37,7 @@
 	<ItemGroup>
 		<InternalsVisibleTo Include="$(AssemblyName).Playground" />
 		<InternalsVisibleTo Include="$(AssemblyName).Tests" />
+		<InternalsVisibleTo Include="LinqToOneNote.Sandbox" />
 	</ItemGroup>
 
 	<ItemGroup>

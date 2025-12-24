@@ -34,46 +34,6 @@ namespace Odotocodot.OneNote.Linq
         /// The parent of the OneNote hierarchy item. <br/>
         /// <see langword="null"/> if the item has no parent e.g. a <see cref="Notebook">notebook</see>.
         /// </summary>
-        IOneNoteItem Parent { get; } //TODO: maybe remove complete and just use extension method
-        // /// <summary>
-        // /// The path of the OneNote hierarchy item relative to and inclusive of its <see cref="Notebook">notebook</see>.
-        // /// </summary>
-        // string RelativePath { get; }
-        // /// <summary>
-        // /// The <see cref="Notebook">notebook</see> that contains this OneNote hierarchy item.
-        // /// </summary>
-        // Notebook Notebook { get; }
+        IOneNoteItem Parent { get; }
     }
-
-    // public interface IOneNoteItemFull : IOneNoteItem
-    // {
-    //     /// <summary>
-    //     /// The <see cref="Notebook">notebook</see> that contains this OneNote hierarchy item.
-    //     /// </summary>
-    //     NotebookFull Notebook { get; }
-    //     /// <summary>
-    //     /// The parent of the OneNote hierarchy item. <br/>
-    //     /// <see langword="null"/> if the OneNote item has no parent i.e. a <see cref="Notebook">notebook</see>.
-    //     /// </summary>
-    //     OneNoteItem Parent { get; }
-
-    //     /// <summary>
-    //     /// The direct children of the OneNote hierarchy <see cref="OneNoteItem">item</see>, e.g. for a <see cref="Notebook">notebook</see> it could contain <see cref="Section">sections</see> and/or <see cref="SectionGroup">section groups</see>. <br/>
-    //     /// If the <see cref="OneNoteItem">item</see> has no children an empty <see cref="IEnumerable{T}">IEnumerable</see>&lt;<see cref="IOneNoteItem"/>&gt; is returned. For instance, this property is an empty enumerable for a <see cref="Page">page</see>.
-    //     /// </summary>
-    //     IEnumerable<IOneNoteItemFull> Children { get; }
-
-    //     /// <summary>
-    //     /// The path of the OneNote hierarchy item relative to and inclusive of its <see cref="Notebook">notebook</see>.
-    //     /// </summary>
-    //     string RelativePath { get; }
-    // }
-
-    // public static class FullHierarchyExtensions
-    // {
-    // 	public static string GetRelativePath<T>() where T : IFullHierarchy
-    // 	{
-    // 		
-    // 	}
-    // }
 }

@@ -1,6 +1,5 @@
 using System;
 using System.Runtime.CompilerServices;
-using Odotocodot.OneNote.Linq;
 using Odotocodot.OneNote.Linq.Abstractions;
 
 namespace Odotocodot.OneNote.Linq.Internal

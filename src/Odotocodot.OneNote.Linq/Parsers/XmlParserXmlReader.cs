@@ -191,10 +191,7 @@ namespace Odotocodot.OneNote.Linq.Parsers
         private static SectionGroup ParseSectionGroup(XmlReader reader, SectionGroup sectionGroup, INotebookOrSectionGroup parent)
         {
             sectionGroup.Parent = parent;
-            //sectionGroup.Notebook = parent.Notebook;
             SetAttributes(sectionGroup, reader);
-
-            //sectionGroup.RelativePath = $"{parent.RelativePath}{RelativePathSeparatorString}{sectionGroup.Name}";
 
             reader.MoveToElement();
             if (reader.IsEmptyElement)
@@ -213,10 +210,7 @@ namespace Odotocodot.OneNote.Linq.Parsers
         private static Section ParseSection(XmlReader reader, Section section, INotebookOrSectionGroup parent)
         {
             section.Parent = parent;
-            //section.Notebook = parent.Notebook;
             SetAttributes(section, reader);
-
-            //section.RelativePath = $"{parent.RelativePath}{RelativePathSeparatorString}{section.Name}";
 
             reader.MoveToElement();
             if (reader.IsEmptyElement)
@@ -246,11 +240,7 @@ namespace Odotocodot.OneNote.Linq.Parsers
         private static Page ParsePage(XmlReader reader, Page page, Section parent)
         {
             page.Parent = parent;
-            //page.Notebook = parent.Notebook;
             SetAttributes(page, reader);
-
-            //page.RelativePath = $"{parent.RelativePath}{RelativePathSeparatorString}{page.Name}";
-
             reader.Skip();
             return page;
         }
