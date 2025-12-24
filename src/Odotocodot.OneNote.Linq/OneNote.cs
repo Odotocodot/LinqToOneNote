@@ -169,7 +169,15 @@ namespace Odotocodot.OneNote.Linq
         /// </summary>
         /// <param name="item">The item to open</param>
         /// <param name="newWindow">Whether to create a new OneNote window or add to an existing one. Does nothing if there are no windows of OneNote.</param>
-        public static void Open(INavigable item, bool newWindow = false) => Run(app => app.NavigateTo(item.Id, fNewWindow: newWindow));
+        public static void Open(INavigable item, bool newWindow = false) => Open(item.Id, newWindow);
+        
+        /// <summary>
+        /// Opens the item that corresponds to the <paramref name="id"/> in OneNote. If there is no OneNote window a new one is created, else whether a new window is created is
+        /// defined by <paramref name="newWindow"/>.
+        /// </summary>
+        /// <param name="id">The id of the item to open</param>
+        /// <param name="newWindow">Whether to create a new OneNote window or add to an existing one. Does nothing if there are no windows of OneNote.</param>
+        public static void Open(string id, bool newWindow = false) => Run(app =>  app.NavigateTo(id, fNewWindow: newWindow));
 
         /// <summary>
         /// Forces OneNote to sync the <paramref name="item"/>.

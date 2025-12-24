@@ -11,7 +11,7 @@ namespace Odotocodot.OneNote.Linq
     /// </summary>
     public static class Extensions
     {
-        /// <inheritdoc cref="OneNote.Open"/>
+        /// <inheritdoc cref="OneNote.Open(INavigable,bool)"/>
         public static void Open(this INavigable item) => OneNote.Open(item);
 
         /// <inheritdoc cref="OneNote.SyncItem(INavigable)"/>
