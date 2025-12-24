@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -313,10 +312,9 @@ namespace Odotocodot.OneNote.Linq.Parsers
                         Unsafe.As<Page>(item).Level = int.Parse(reader.Value);
                         break;
                     case Attributes.DateTime:
-                        Unsafe.As<Page>(item).Created = DateTime.Parse(reader.Value);
+                        Unsafe.As<Page>(item).Created = DateTime.Parse(reader.Value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
                         break;
                 }
-
             }
         }
     }
