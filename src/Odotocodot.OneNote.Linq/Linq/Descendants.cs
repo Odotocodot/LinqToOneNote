@@ -56,7 +56,7 @@ namespace Odotocodot.OneNote.Linq
         /// <param name="predicate">The predicate to filter the descendants.</param>
         /// <returns>An <see cref="IEnumerable{T}">IEnumerable</see>&lt;<see cref="IOneNoteItem"/>&gt; containing all the descendants
         /// of the <paramref name="source"/> that pass the <paramref name="predicate"/>.</returns>
-        /// <remarks><inheritdoc cref="Traverse(IOneNoteItem)" path="/remarks"/></remarks>
+        /// <remarks><inheritdoc cref="Descendants(IOneNoteItem)" path="/remarks"/></remarks>
         public static IEnumerable<IOneNoteItem> Descendants(this IOneNoteItem source, Func<IOneNoteItem, bool> predicate)
         {
             Throw.IfNull(source);

@@ -68,7 +68,7 @@ namespace Odotocodot.OneNote.Linq
         /// <summary>
         /// Forcible initialises the static class by acquiring a <see cref="Application">OneNote COM object</see>. Does nothing if a COM object is already accessible.
         /// </summary>
-        /// <exception cref="COMException">Thrown if an error occurred when trying to get the 
+        /// <exception cref="COMException">Thrown if an error occurred when trying to get the
         /// <see cref="Application">OneNote COM object</see>.</exception>
         /// <seealso cref="HasComObject"/>
         /// <seealso cref="ReleaseComObject"/>
@@ -105,7 +105,7 @@ namespace Odotocodot.OneNote.Linq
         {
             lock (comLock)
             {
-                if (application != null)
+                if (HasComObject)
                 {
                     var count = Marshal.ReleaseComObject(application);
                     Debug.Assert(count == 0, "COM Object reference count should be zero after release.");
@@ -180,19 +180,19 @@ namespace Odotocodot.OneNote.Linq
         /// <param name="item">The item to open</param>
         /// <param name="newWindow">Whether to create a new OneNote window or add to an existing one. Does nothing if there are no windows of OneNote.</param>
         public static void Open(INavigable item, bool newWindow = false) => Open(item.Id, newWindow);
-        
+
         /// <summary>
         /// Opens the item that corresponds to the <paramref name="id"/> in OneNote. If there is no OneNote window a new one is created, else whether a new window is created is
         /// defined by <paramref name="newWindow"/>.
         /// </summary>
         /// <param name="id">The id of the item to open</param>
         /// <param name="newWindow">Whether to create a new OneNote window or add to an existing one. Does nothing if there are no windows of OneNote.</param>
-        public static void Open(string id, bool newWindow = false) => Run(app =>  app.NavigateTo(id, fNewWindow: newWindow));
+        public static void Open(string id, bool newWindow = false) => Run(app => app.NavigateTo(id, fNewWindow: newWindow));
 
         /// <summary>
         /// Forces OneNote to sync the <paramref name="item"/>.
         /// </summary>
-        /// <param name="item"><inheritdoc cref="Open" path="/param[@name='item']"/></param>
+        /// <param name="item"><inheritdoc cref="Open(INavigable, bool)" path="/param[@name='item']"/></param>
         public static void SyncItem(INavigable item) => Run(app => app.SyncHierarchy(item.Id));
 
         /// <summary>
@@ -461,6 +461,7 @@ namespace Odotocodot.OneNote.Linq
         /// <seealso cref="IsValidName(string)"/>
         /// <seealso cref="GetDefaultNotebookLocation"/>
         /// <seealso cref="CreateNotebook(string, OpenMode)"/>
+        /// <seealso cref="Extensions.CreateNotebook(Root,string,string,OpenMode)"/>
         public static Notebook CreateNotebook(string name, string directory, OpenMode openMode = OpenMode.None)
         {
             return Run(app =>
@@ -488,6 +489,7 @@ namespace Odotocodot.OneNote.Linq
         /// <seealso cref="IsValidName(string)"/>
         /// <seealso cref="GetDefaultNotebookLocation"/>
         /// <seealso cref="CreateNotebook(string, string, OpenMode)"/>
+        /// <seealso cref="Extensions.CreateNotebook(Root,string,OpenMode)"/>
         public static Notebook CreateNotebook(string name, OpenMode openMode = OpenMode.None) => CreateNotebook(name, null, openMode);
 
         #endregion

@@ -35,12 +35,6 @@ namespace Odotocodot.OneNote.Linq.Parsers
 
 		internal const string NamespaceUri = "http://schemas.microsoft.com/office/onenote/2013/onenote";
 
-		internal static Color? GetColor(in string color)
-		{
-			if (color == "none")
-				return null;
-
-			return ColorTranslator.FromHtml(color);
-		}
+		internal static Color? GetColor(string color) => color == "none"  ? null : ColorTranslator.FromHtml(color);
 	}
 }
