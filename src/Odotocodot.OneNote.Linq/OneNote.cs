@@ -21,12 +21,6 @@ namespace Odotocodot.OneNote.Linq
     /// <remarks>A <see cref="Application">OneNote COM object</see> is required to access any of the OneNote API.</remarks>
     public static class OneNote
     {
-        /// <summary>
-        /// The directory separator used in <see cref="IOneNoteItem.RelativePath"/>.
-        /// </summary>
-        //TODO Remove
-        public const char RelativePathSeparator = Constants.RelativePathSeparator;
-
         // You never know they might add a new one... (Press X to doubt)
         // As the docs say:
         // NOTE: We recommend specifying a version of OneNote (such as xs2013) instead of using xsCurrent or leaving it blank, because this will allow your add-in to work with future versions of OneNote.

@@ -9,21 +9,6 @@ namespace Odotocodot.OneNote.Linq
         /// <summary>
         /// Returns a flattened collection of all the <see cref="Page">pages</see> present in the <paramref name="source"/>.
         /// </summary>
-        /// <param name="source"><inheritdoc cref="Linq.LinqExtensions.Traverse(Odotocodot.OneNote.Linq.IOneNoteItem)" path="/param[@name='source']"/></param>
-        /// <returns>An <see cref="IEnumerable{T}">IEnumerable</see>&lt;<see cref="Page"/>&gt; containing all the 
-        /// <see cref="Page">pages</see> present in the <paramref name="source"/>.</returns>
-        public static IEnumerable<Page> GetPages(this IOneNoteItem source)
-            => source.Traverse(i => i is Page).Cast<Page>();
-
-        /// <inheritdoc cref="GetPages(IOneNoteItem)"/>
-        public static IEnumerable<Page> GetPages(this IEnumerable<IOneNoteItem> source)
-            => source.Traverse(i => i is Page).Cast<Page>();
-
-
-
-        /// <summary>
-        /// Returns a flattened collection of all the <see cref="Page">pages</see> present in the <paramref name="source"/>.
-        /// </summary>
         /// <param name="source"><inheritdoc cref="Descendants(IOneNoteItem)" path="/param[@name='source']"/></param>
         /// <returns>An <see cref="IEnumerable{T}">IEnumerable</see>&lt;<see cref="Page"/>&gt; containing all the
         /// <see cref="Page">pages</see> present in the <paramref name="source"/>.</returns>
