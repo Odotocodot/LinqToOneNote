@@ -20,7 +20,7 @@ namespace Odotocodot.OneNote.Linq.Tests
         private readonly List<string> createdIds = [];
         private readonly List<(string id, string path)> createdNotebooks = [];
 
-        protected const string ExpectedWildcardPattern = "*names cannot empty, only whitespace or contain the symbols";
+        protected const string ExpectedWildcardPattern = "*names cannot empty, only whitespace or contain the symbols*";
 
         [OneTimeSetUp]
         public void OneTimeSetUp()

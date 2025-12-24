@@ -30,10 +30,20 @@ namespace Odotocodot.OneNote.Linq
 		IEnumerator<IOneNoteItem> IEnumerable<IOneNoteItem>.GetEnumerator() => new Enumerator(this);
 		IEnumerator IEnumerable.GetEnumerator() => new Enumerator(this);
 
-		private struct Enumerator(Root root) : IEnumerator<IOneNoteItem>
+		private struct Enumerator : IEnumerator<IOneNoteItem>
 		{
-			private List<Notebook>.Enumerator notebookEnumerator = root.notebooks.GetEnumerator();
-			private readonly List<Section>.Enumerator? openSectionsEnumerator = root.OpenSections?.sections.GetEnumerator();
+			private List<Notebook>.Enumerator notebookEnumerator;
+			private List<Section>.Enumerator openSectionsEnumerator;
+			private readonly bool hasOpenSections;
+			public Enumerator(Root root)
+			{
+				notebookEnumerator = root.notebooks.GetEnumerator();
+				if(root.OpenSections != null)
+				{
+					openSectionsEnumerator = root.OpenSections.sections.GetEnumerator();
+					hasOpenSections = true;
+                }
+			}
 			public IOneNoteItem Current { get; private set; }
 			readonly object IEnumerator.Current => Current;
 			public bool MoveNext()
@@ -44,13 +54,12 @@ namespace Odotocodot.OneNote.Linq
 					return true;
 				}
 
-				if (openSectionsEnumerator is null)
+				if (!hasOpenSections)
 					return false;
 
-				var enumerator = openSectionsEnumerator.Value;
-				while (enumerator.MoveNext())
+                while (openSectionsEnumerator.MoveNext())
 				{
-					Current = enumerator.Current;
+					Current = openSectionsEnumerator.Current;
 					return true;
 				}
 				return false;
