@@ -76,7 +76,23 @@ namespace Odotocodot.OneNote.Linq
         {
             lock (comLock)
             {
-                application ??= new Application();
+                if (!HasComObject)
+                {
+                    const int limit = 3;
+                    int attempts = 0;
+                    while (true)
+                    {
+                        try
+                        {
+                            application = new Application();
+                            return;
+                        }
+                        catch (COMException) when (++attempts != limit) //&& ((uint)ex.HResult) == 0x800706BA) The RPC server is unavailable.
+                        {
+                            Thread.Sleep(125);
+                        }
+                    }
+                }
             }
         }
 
