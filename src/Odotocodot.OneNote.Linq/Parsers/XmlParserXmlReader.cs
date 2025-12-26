@@ -29,7 +29,7 @@ namespace Odotocodot.OneNote.Linq.Parsers
             {
                 return reader.LocalName switch
                 {
-                    Elements.Notebook => ParseNotebook(reader, new Notebook()),
+                    Elements.Notebook => ParseNotebook(reader, new Notebook(), null),
                     Elements.Section => ParseSection(reader, new Section(), (INotebookOrSectionGroup)parent),
                     Elements.SectionGroup => ParseSectionGroup(reader, new SectionGroup(), (INotebookOrSectionGroup)parent),
                     Elements.Page => ParsePage(reader, new Page(), (Section)parent),
@@ -49,7 +49,7 @@ namespace Odotocodot.OneNote.Linq.Parsers
                 switch (item)
                 {
                     case Notebook notebook:
-                        ParseNotebook(reader, notebook);
+                        ParseNotebook(reader, notebook, notebook.root);
                         break;
                     case Section section:
                         ParseSection(reader, section, section.Parent);
@@ -85,7 +85,7 @@ namespace Odotocodot.OneNote.Linq.Parsers
                     switch (reader.LocalName)
                     {
                         case Elements.Notebook:
-                            root.notebooks.Add(ParseNotebook(reader, new Notebook()));
+                            root.notebooks.Add(ParseNotebook(reader, new Notebook(), root));
                             break;
                         case Elements.OpenSections:
                             root.OpenSections = ParseOpenSections(reader);
@@ -142,9 +142,10 @@ namespace Odotocodot.OneNote.Linq.Parsers
             return openSections;
         }
 
-        private static Notebook ParseNotebook(XmlReader reader, Notebook notebook)
+        private static Notebook ParseNotebook(XmlReader reader, Notebook notebook, Root root)
         {
             // reader.MoveToContent();
+            notebook.root = root;
             SetAttributes(notebook, reader);
 
             reader.MoveToElement();

@@ -23,17 +23,26 @@ namespace Odotocodot.OneNote.Linq.Parsers
         {
             XElement rootElement = XElement.Parse(xml);
             IEnumerable<XElement> notebookElements = rootElement.Elements(NotebookXName);
-            XElement openSectionElement = rootElement.Element(OpenSectionsXName);
-            return new Root
-            {
-                notebooks = [.. notebookElements.Select(e => Parse(new Notebook(), e, null))],
-                OpenSections = new OpenSections()
+            var root = new Root();
+            root.notebooks = [.. notebookElements.Select(e =>
                 {
-                    Id = openSectionElement?.Attribute(Attributes.ID).Value,
-                    sections = [.. openSectionElement?.Elements()
-                                                      .Select(e => Parse(new Section(), e, null))]
-                }
-            };
+                    var notebook = Parse(new Notebook(), e, null);
+                    notebook.root = root;
+                    return notebook;
+                })];
+            XElement openSectionsElement = rootElement.Element(OpenSectionsXName);
+            root.OpenSections = openSectionsElement == null
+                ? null
+                : new OpenSections()
+                {
+                    Id = openSectionsElement.Attribute(Attributes.ID).Value,
+                    sections =
+                    [
+                        .. openSectionsElement.Elements()
+                                              .Select(e => Parse(new Section(), e, null))
+                    ]
+                };
+            return root;
         }
 
         public IOneNoteItem Parse(string xml, IOneNoteItem parent)

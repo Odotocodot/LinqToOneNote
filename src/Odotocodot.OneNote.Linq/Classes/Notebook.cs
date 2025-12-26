@@ -13,6 +13,7 @@ namespace Odotocodot.OneNote.Linq
     {
         internal readonly ReadOnlyList<Section> sections = [];
         internal readonly ReadOnlyList<SectionGroup> sectionGroups = [];
+        internal Root root;
         internal Notebook() { }
 
         /// <summary>

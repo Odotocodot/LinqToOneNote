@@ -35,6 +35,7 @@ namespace Odotocodot.OneNote.Linq
         public static Notebook CreateNotebook(this Root root, string name, string directory = null, OpenMode openMode = OpenMode.None)
         {
             Notebook notebook = OneNote.CreateNotebook(name, directory, openMode);
+            notebook.root = root;
             root.notebooks.Add(notebook);
             return notebook;
         }
