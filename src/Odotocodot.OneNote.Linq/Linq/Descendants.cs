@@ -30,22 +30,7 @@ namespace Odotocodot.OneNote.Linq
         {
             Throw.IfNull(source);
 
-            return Descendants();
-
-            IEnumerable<IOneNoteItem> Descendants()
-            {
-                using var stack = StackPool.Rent();
-                stack.Push(source);
-                while (stack.Count > 0)
-                {
-                    var current = stack.Pop();
-                    yield return current;
-                    foreach (var child in current.Children)
-                    {
-                        stack.Push(child);
-                    }
-                }
-            }
+            return InternalDescendants(source);
         }
 
         /// <summary>
@@ -62,21 +47,21 @@ namespace Odotocodot.OneNote.Linq
             Throw.IfNull(source);
             Throw.IfNull(predicate);
 
-            return Descendants();
+            return InternalDescendants(source, predicate);
+        }
 
-            IEnumerable<IOneNoteItem> Descendants()
+        private static IEnumerable<IOneNoteItem> InternalDescendants(this IOneNoteItem source, Func<IOneNoteItem, bool> predicate = null)
+        {
+            using var stack = StackPool.Rent();
+            stack.Push(source);
+            while (stack.Count > 0)
             {
-                using var stack = StackPool.Rent();
-                stack.Push(source);
-                while (stack.Count > 0)
+                var current = stack.Pop();
+                if (predicate == null || predicate(current))
+                    yield return current;
+                foreach (var child in current.Children)
                 {
-                    var current = stack.Pop();
-                    if (predicate(current))
-                        yield return current;
-                    foreach (var child in current.Children)
-                    {
-                        stack.Push(child);
-                    }
+                    stack.Push(child);
                 }
             }
         }
@@ -85,26 +70,7 @@ namespace Odotocodot.OneNote.Linq
         public static IEnumerable<IOneNoteItem> Descendants(this IEnumerable<IOneNoteItem> source)
         {
             Throw.IfNull(source);
-
-            return Descendants();
-
-            IEnumerable<IOneNoteItem> Descendants()
-            {
-                using var stack = StackPool.Rent();
-                foreach (var item in source)
-                {
-                    stack.Push(item);
-                    while (stack.Count > 0)
-                    {
-                        var current = stack.Pop();
-                        yield return current;
-                        foreach (var child in current.Children)
-                        {
-                            stack.Push(child);
-                        }
-                    }
-                }
-            }
+            return InternalDescendants(source);
         }
 
         /// <inheritdoc cref="Descendants(IOneNoteItem,Func{IOneNoteItem, bool})"/>
@@ -113,23 +79,23 @@ namespace Odotocodot.OneNote.Linq
             Throw.IfNull(source);
             Throw.IfNull(predicate);
 
-            return Descendants();
+            return InternalDescendants(source, predicate);
+        }
 
-            IEnumerable<IOneNoteItem> Descendants()
+        private static IEnumerable<IOneNoteItem> InternalDescendants(this IEnumerable<IOneNoteItem> source, Func<IOneNoteItem, bool> predicate = null)
+        {
+            using var stack = StackPool.Rent();
+            foreach (var item in source)
             {
-                using var stack = StackPool.Rent();
-                foreach (var item in source)
+                stack.Push(item);
+                while (stack.Count > 0)
                 {
-                    stack.Push(item);
-                    while (stack.Count > 0)
+                    var current = stack.Pop();
+                    if (predicate == null || predicate(current))
+                        yield return current;
+                    foreach (var child in current.Children)
                     {
-                        var current = stack.Pop();
-                        if (predicate(current))
-                            yield return current;
-                        foreach (var child in current.Children)
-                        {
-                            stack.Push(child);
-                        }
+                        stack.Push(child);
                     }
                 }
             }
