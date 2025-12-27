@@ -28,21 +28,21 @@ namespace LinqToOneNote.Tests
 		[Test]
 		public void Rename_Page()
 		{
-			var page = OneNote.CreatePage(section, GenerateName());
+			var page = OneNote.CreatePage(Section, GenerateName());
 			Rename(page);
 		}
 
 		[Test]
 		public void Rename_Section_Valid()
 		{
-			var section = OneNote.CreateSection(notebook, GenerateName());
+			var section = OneNote.CreateSection(Notebook, GenerateName());
 			Rename(section);
 		}
 
 		[Test]
 		public void Rename_Section_Invalid()
 		{
-			var section = OneNote.CreateSection(notebook, GenerateName());
+			var section = OneNote.CreateSection(Notebook, GenerateName());
 			TrackCreatedItem(section);
 			Invoking(() => OneNote.RenameItem(section, GenerateInvalidName<Section>())).Should().Throw<ArgumentException>().WithMessage(ExpectedWildcardPattern);
 		}
@@ -50,14 +50,14 @@ namespace LinqToOneNote.Tests
 		[Test]
 		public void Rename_SectionGroup_Valid()
 		{
-			var sectionGroup = OneNote.CreateSectionGroup(notebook, GenerateName());
+			var sectionGroup = OneNote.CreateSectionGroup(Notebook, GenerateName());
 			Rename(sectionGroup);
 		}
 
 		[Test]
 		public void Rename_SectionGroup_Invalid()
 		{
-			var sectionGroup = OneNote.CreateSectionGroup(notebook, GenerateName());
+			var sectionGroup = OneNote.CreateSectionGroup(Notebook, GenerateName());
 			TrackCreatedItem(sectionGroup);
 			Invoking(() => OneNote.RenameItem(sectionGroup, GenerateInvalidName<SectionGroup>())).Should().Throw<ArgumentException>().WithMessage(ExpectedWildcardPattern);
 		}
@@ -77,14 +77,9 @@ namespace LinqToOneNote.Tests
 			OneNote.RenameItem(item, newName);
 
 			IReadOnlyList<IOneNoteItem> children;
-			if (item is Notebook)
-			{
-				children = OneNote.Partial.GetHierarchy(HierarchyScope.Notebooks).Notebooks;
-			}
-			else
-			{
-				children = OneNote.Partial.GetChildren(item.Parent);
-			}
+			children = item is Notebook 
+				? OneNote.Partial.GetHierarchy(HierarchyScope.Notebooks).Notebooks 
+				: OneNote.Partial.GetChildren(item.Parent);
 
 
 			var expected = children.FirstOrDefault(x => x.Id == item.Id);

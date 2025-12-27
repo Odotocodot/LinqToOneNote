@@ -15,15 +15,15 @@ namespace LinqToOneNote.Tests
         [Test]
         public void CreatePage()
         {
-            Page newPage = OneNote.CreatePage(section, GenerateName());
-            Check(newPage, section);
+            Page newPage = OneNote.CreatePage(Section, GenerateName());
+            Check(newPage, Section);
         }
 
         [Test]
         public void CreateSection()
         {
-            var newSection = OneNote.CreateSection(notebook, GenerateName());
-            Check(newSection, notebook);
+            var newSection = OneNote.CreateSection(Notebook, GenerateName());
+            Check(newSection, Notebook);
         }
 
         [Test]
@@ -32,7 +32,7 @@ namespace LinqToOneNote.Tests
             var invalidName = GenerateInvalidName<Section>();
             Invoking(() =>
             {
-                var section = OneNote.CreateSection(notebook, invalidName);
+                var section = OneNote.CreateSection(Notebook, invalidName);
                 TrackCreatedItem(section);
                 return section;
             }).Should().Throw<ArgumentException>().WithMessage(ExpectedWildcardPattern);
@@ -41,8 +41,8 @@ namespace LinqToOneNote.Tests
         [Test]
         public void CreateSectionGroup()
         {
-            var newSectionGroup = OneNote.CreateSectionGroup(notebook, GenerateName());
-            Check(newSectionGroup, notebook);
+            var newSectionGroup = OneNote.CreateSectionGroup(Notebook, GenerateName());
+            Check(newSectionGroup, Notebook);
         }
 
         [Test]
@@ -51,7 +51,7 @@ namespace LinqToOneNote.Tests
             var invalidName = GenerateInvalidName<SectionGroup>();
             Invoking(() =>
             {
-                var sectionGroup = OneNote.CreateSectionGroup(notebook, invalidName);
+                var sectionGroup = OneNote.CreateSectionGroup(Notebook, invalidName);
                 TrackCreatedItem(sectionGroup);
                 return sectionGroup;
             }).Should().Throw<ArgumentException>().WithMessage(ExpectedWildcardPattern);
