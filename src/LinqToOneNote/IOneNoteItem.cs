@@ -32,7 +32,8 @@ namespace LinqToOneNote
         IReadOnlyList<IOneNoteItem> Children { get; }
         /// <summary>
         /// The parent of the OneNote hierarchy item. <br/>
-        /// <see langword="null"/> if the item has no parent e.g. a <see cref="Notebook">notebook</see>.
+        /// Can be <see langword="null"/> if the item has no parent e.g. a <see cref="Notebook">notebook</see>, a section in <see cref="OpenSections"/>,
+        /// or an object retrieved from <see cref="OneNote.Partial"/>. 
         /// </summary>
         IOneNoteItem Parent { get; }
     }

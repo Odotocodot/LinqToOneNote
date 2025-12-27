@@ -32,7 +32,7 @@ namespace LinqToOneNote
         /// <summary>
         /// The mode defining how the <see cref="Application">OneNote COM object</see> is managed. See <see cref="ComObjectMode"/>.
         /// </summary>
-        /// <seealso cref="SetComObjectMode(ComObjectMode)"/>
+        /// <seealso cref="SetComObjectMode(LinqToOneNote.ComObjectMode)"/>
         /// <seealso cref="LinqToOneNote.ComObjectMode"/>
         public static ComObjectMode ComObjectMode { get; private set; } = ComObjectMode.Lazy;
 
@@ -609,7 +609,7 @@ namespace LinqToOneNote
         /// <summary>
         /// Contains methods that can query parts of the OneNote hierarchy.<br/>
         /// This can cause some properties like <see cref="IOneNoteItem.Children"/> and <see cref="IOneNoteItem.Parent"/> to be <see langword="null"/> or empty, even if they have values in OneNote.
-        /// The "Update" functions overwrite the existing data in the provided <see cref="IOneNoteItem">item</see> with the latest data from OneNote.
+        /// The <c>Update</c> functions overwrite the existing data in the provided <see cref="IOneNoteItem">item</see> with the latest data from OneNote.
         /// </summary>
         public static class Partial
         {

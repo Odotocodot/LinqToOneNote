@@ -129,7 +129,7 @@ namespace LinqToOneNote
         /// Returns the relative path of the specified <paramref name="item"/> within its <see cref="Notebook"/>.
         /// </summary>
         /// <param name="item">The item to get the relative path of.</param>
-        /// <param name="useNotebookDisplayName">Whether to use the notebook's <see cref="Notebook.DisplayName"/> or <see cref="Notebook.Name"/> when getting the path.</param>
+        /// <param name="useNotebookDisplayName">Whether to use the notebook's <see cref="Notebook.DisplayName"/> or <see cref="IOneNoteItem.Name"/> when getting the path.</param>
         /// <param name="separator">The separator to use between path components.</param>
         public static string GetRelativePath(this IOneNoteItem item, bool useNotebookDisplayName = true, string separator = DefaultRelativePathSeparator)
         {
