@@ -9,7 +9,7 @@
     <File Path="CHANGELOG.md" />
     <File Path="README.md" />
   </Folder>
-  <Project Path="src/Odotocodot.OneNote.Linq.Playground/Odotocodot.OneNote.Linq.Playground.csproj" />
-  <Project Path="src/Odotocodot.OneNote.Linq.Tests/Odotocodot.OneNote.Linq.Tests.csproj" />
-  <Project Path="src/Odotocodot.OneNote.Linq/Odotocodot.OneNote.Linq.csproj" />
+  <Project Path="src/LinqToOneNote.Playground/LinqToOneNote.Playground.csproj" />
+  <Project Path="src/LinqToOneNote.Tests/LinqToOneNote.Tests.csproj" />
+  <Project Path="src/LinqToOneNote/LinqToOneNote.csproj" />
 </Solution>

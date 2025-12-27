@@ -1,0 +1,40 @@
+using System.Drawing;
+
+namespace LinqToOneNote.Parsers
+{
+	internal static class Constants
+	{
+		internal static class Elements
+		{
+			internal const string Notebook = "Notebook";
+			internal const string SectionGroup = "SectionGroup";
+			internal const string Section = "Section";
+			internal const string Page = "Page";
+			internal const string OpenSections = "OpenSections";
+			internal const string UnfiledNotes = "UnfiledNotes";
+			internal const string Root = "Notebooks";
+		}
+
+		internal static class Attributes
+		{
+			internal const string ID = "ID";
+			internal const string Name = "name";
+			internal const string NickName = "nickname";
+			internal const string Path = "path";
+			internal const string Color = "color";
+			internal const string IsUnread = "isUnread";
+			internal const string LastModifiedTime = "lastModifiedTime";
+			internal const string DateTime = "dateTime";
+			internal const string PageLevel = "pageLevel";
+			internal const string IsInRecycleBin = "isInRecycleBin";
+			internal const string Encrypted = "encrypted";
+			internal const string Locked = "locked";
+			internal const string IsDeletedPages = "isDeletedPages";
+			internal const string IsRecycleBin = "isRecycleBin";
+		}
+
+		internal const string NamespaceUri = "http://schemas.microsoft.com/office/onenote/2013/onenote";
+
+		internal static Color? GetColor(string color) => color == "none"  ? null : ColorTranslator.FromHtml(color);
+	}
+}
