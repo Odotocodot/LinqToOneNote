@@ -17,22 +17,25 @@ They can also be found in the free and paid version of [LinqPad](https://www.lin
 
 [!code-csharp[](../../linqpad-samples/OpenSection.linq#L7-L17)]
 
-### Create Pages in Sections With Less Than 2 Pages
-
-> [!WARNING]
-> If you decide to run this code it will create pages (potentially hundreds :dizzy_face:) in your OneNote!
-
+### Create a Page in a Sections With More Than 2 Pages
 ```csharp
-//IF YOU RUN THIS IT WILL CREATE A PAGES IN YOUR ONENOTE!
-var newPageName = "Hopefully a very unique and specific title!";
-var sections = OneNoteApplication.GetNotebooks()
-    .Traverse(i => i is OneNoteSection)
-    .Cast<OneNoteSection>()
-    .Where(s => s.Pages.Count() <= 1);
-foreach (var section in sections)
+var root = OneNote.GetFullHierarchy();
+var section = root.Notebooks
+                  .Descendants(x => x is Section { Pages.Count: >= 2 }) //Search
+                  .Select(x => (Section)x)
+                  .FirstOrDefault();
+if(section == null)
 {
-    OneNoteApplication.CreatePage(section, newPageName, false);
+    Console.WriteLine("No section found");
+    return;
 }
+var newPage = OneNote.CreatePage(section, "New Page Name!", OpenMode.None); //or section.CreatePage
+
+foreach (var page in newPage.BeforeSelf())
+{
+    Console.WriteLine(page.Name);
+}
+OneNote.DeleteItem(newPage, deletePermanently: true); //or newPage.Delete
 ```
 
 
