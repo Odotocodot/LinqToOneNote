@@ -4,6 +4,7 @@ using LinqToOneNote.Abstractions;
 
 namespace LinqToOneNote.Internal
 {
+    /// <exclude/>
     /// <summary>
     /// Use <see cref="IOneNoteItem"/> instead.
     /// </summary>

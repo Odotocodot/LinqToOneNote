@@ -4,7 +4,7 @@ The library's original purpose was for the OneNote [Flow Launcher](https://www.f
 
 The examples below are not exactly best practices, but they should give you a good starting point!
 
-They can also be found in the free and paid version of [LinqPad](https://www.linqpad.net/) for easy viewing! (Though be weary of the [Create Page](#create-pages-in-sections-with-less-than-2-pages) example as it will create a pages in your OneNote!)
+They can also be found in the free and paid version of [LinqPad](https://www.linqpad.net/) for easy viewing!
 ### Get Recent Pages
 
 [!code-csharp[](../../linqpad-samples/RecentPages.linq#L7-L18)]

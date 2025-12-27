@@ -4,7 +4,7 @@
       "src": [
         {
           "files": [
-            "Odotocodot.OneNote.Linq/*.csproj"
+            "src/LinqToOneNote/*.csproj"
           ],
           "src": "../"
         }
