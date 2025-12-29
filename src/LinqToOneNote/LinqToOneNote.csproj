@@ -14,11 +14,10 @@
 		<PackageReadmeFile>NuGet.md</PackageReadmeFile>
 		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
 		<PackageProjectUrl>https://odotocodot.github.io/Linq2OneNote/</PackageProjectUrl>
-		<PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
 		<PackageId>LinqToOneNote</PackageId>
 		<RepositoryType>git</RepositoryType>
 		<Version>1.2.0</Version>
-		<!-- <PackageReleaseNotes>$([System.IO.File]::ReadAllText("$(MSBuildProjectDirectory)/../CHANGELOG.md"))</PackageReleaseNotes> -->
+		<PackageReleaseNotes>See https://github.com/Odotocodot/Linq2OneNote/releases/latest for release notes.</PackageReleaseNotes>
 
 	</PropertyGroup>
 
@@ -29,19 +28,14 @@
 	
 	<ItemGroup>
 		<None Include="..\$(AssemblyName)\NuGet.md" Pack="True" PackagePath="\" />
+		<None Include="..\..\docs\images\logo.png" Pack="True" PackagePath="\" />
+		<None Include="..\..\LICENSE.txt" Pack="True" PackagePath="\" />
+		<None Include="..\..\CHANGELOG.md" Pack="True" PackagePath="\" />
 	</ItemGroup>
-	<!-- 	
-	<ItemGroup>
-		<None Include="..\Documentation\images\logo.png" Pack="True" PackagePath="\" />
-		<None Include="..\LICENSE.txt" Pack="True" PackagePath="\" />
-		<None Include="..\Odotocodot.OneNote.Linq\NuGet.md" Pack="True" PackagePath="\" />
-		<None Include="..\CHANGELOG.md" Pack="True" PackagePath="\" />
-	</ItemGroup> -->
 
 	<ItemGroup>
 		<InternalsVisibleTo Include="$(AssemblyName).Playground" />
 		<InternalsVisibleTo Include="$(AssemblyName).Tests" />
-		<InternalsVisibleTo Include="LinqToOneNote.Sandbox" />
 	</ItemGroup>
 
 	<ItemGroup>
