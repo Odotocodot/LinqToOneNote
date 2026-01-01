@@ -11,7 +11,9 @@ namespace LinqToOneNote
     {
         internal readonly ReadOnlyList<Section> sections = [];
         internal readonly ReadOnlyList<SectionGroup> sectionGroups = [];
-        internal SectionGroup() { }
+        private readonly ChildrenCollection children;
+
+        internal SectionGroup() => children = new ChildrenCollection(sections, sectionGroups);
 
         /// <summary>
         /// An array containing the characters that are not allowed in a <see cref="SectionGroup">section group</see> name.<br/>
@@ -46,15 +48,7 @@ namespace LinqToOneNote
         /// <summary>
         /// The direct children of the section group, containing its <see cref="Sections">sections</see> and <see cref="SectionGroups">section groups</see>.
         /// </summary>
-        public IReadOnlyList<IOneNoteItem> Children
-        {
-            get
-            {
-                field ??= new ChildrenCollection(sections, sectionGroups);
-                return field;
-            }
-        }
-
+        public IReadOnlyList<IOneNoteItem> Children => children;
         /// <summary>
         /// The parent notebook or section group of the section group.
         /// </summary>
