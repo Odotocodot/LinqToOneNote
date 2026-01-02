@@ -19,4 +19,4 @@ Console.WriteLine(searchNotebook.Id == fullHierarchyNotebook.Id); //Prints "true
 Console.WriteLine(searchNotebook.Descendants().Count() ==
                   fullHierarchyNotebook.Descendants().Count()); //Prints "false"
 ```
-Therefore, to check if two objects represent the same item in OneNote compare their [Id](xref:LinqToOneNote.Abstractions.INavigable.Id) property.
+Therefore, to check if two objects represent the same item in OneNote compare their [Id](xref:LinqToOneNote.Abstractions.INavigable.Id) property or use [OneNoteItemEqualityComparer.Default](xref:LinqToOneNote.OneNoteItemEqualityComparer.Default).

@@ -193,9 +193,7 @@ namespace LinqToOneNote
         /// <param name="left">The first item to compare.</param>
         /// <param name="right">The second item to compare.</param>
         /// <returns><see langword="true"/> if the items represent the same item in OneNote; otherwise <see langword="false"/>.</returns>
-        public static bool ItemEquals<T>(this T left, T right) where T : IOneNoteItem
-        {
-            return OneNoteItem.IdComparer.Equals(left, right);
-        }
+        /// <seealso cref="OneNoteItemEqualityComparer"/>
+        public static bool ItemEquals(this IOneNoteItem left, IOneNoteItem right) => OneNoteItemEqualityComparer.Default.Equals(left, right);
     }
 }
