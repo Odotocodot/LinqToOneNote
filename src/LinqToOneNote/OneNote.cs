@@ -665,7 +665,6 @@ namespace LinqToOneNote
                     app.GetHierarchy(item.Id, depth.ToInterop(), out string xml, xmlSchema);
                     return xml;
                 });
-                //TODO: test HierarchyScope.Notebooks
                 if (depth is HierarchyScope.Children or HierarchyScope.Pages or HierarchyScope.Sections)
                 {
                     ((ReadOnlyList)item.Children).Clear();

@@ -24,7 +24,7 @@ namespace LinqToOneNote
 		/// The open sections in OneNote that are not contained in any notebook. <br/>
 		/// Can be <see langword="null"/> if there are no open sections.
 		/// </summary>
-		public OpenSections? OpenSections { get; internal set; } //TODO make empty rather than null
+		public OpenSections? OpenSections { get; internal set; } //Could make empty rather than null when no open sections.
 #nullable restore
 
 		IEnumerator<IOneNoteItem> IEnumerable<IOneNoteItem>.GetEnumerator() => new Enumerator(this);
