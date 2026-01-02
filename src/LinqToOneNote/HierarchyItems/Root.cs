@@ -6,7 +6,7 @@ namespace LinqToOneNote
 {
 	/// <summary>
 	/// The root of object containing the OneNote hierarchy.<br/>
-	/// Enumerating this will yield all the notebooks in the property <see cref="Notebooks"/> followed by all the sections in <see cref="OpenSections"/> (if not null).
+	/// Enumerating this will yield all the notebooks in the property <see cref="Notebooks"/> followed by all the sections in <see cref="Root.OpenSections"/> (if not <see langword="null"/>).
 	/// </summary>
 	public class Root : IEnumerable<IOneNoteItem>
 	{
@@ -27,25 +27,35 @@ namespace LinqToOneNote
 		public OpenSections? OpenSections { get; internal set; } //Could make empty rather than null when no open sections.
 #nullable restore
 
-		IEnumerator<IOneNoteItem> IEnumerable<IOneNoteItem>.GetEnumerator() => new Enumerator(this);
-		IEnumerator IEnumerable.GetEnumerator() => new Enumerator(this);
+		/// <summary>
+		/// Returns an enumerator that will iterate the notebooks in the property <see cref="Notebooks"/> followed by the sections in <see cref="Root.OpenSections"/> (if it is not <see langword="null"/>).
+		/// </summary>
+		/// <returns>An enumerator that will iterate the notebooks in the property <see cref="Notebooks"/> followed by the sections in <see cref="Root.OpenSections"/> (if it is not <see langword="null"/>).</returns>
+		public Enumerator GetEnumerator() => new Enumerator(this);
+		IEnumerator<IOneNoteItem> IEnumerable<IOneNoteItem>.GetEnumerator() => GetEnumerator();
+		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-		private struct Enumerator : IEnumerator<IOneNoteItem>
+		/// <exclude/>
+		/// <summary>
+		/// Enumerates the notebooks and open sections of a <see cref="Root"/>.
+		/// </summary>
+		public struct Enumerator : IEnumerator<IOneNoteItem>
 		{
 			private List<Notebook>.Enumerator notebookEnumerator;
 			private List<Section>.Enumerator openSectionsEnumerator;
 			private readonly bool hasOpenSections;
-			public Enumerator(Root root)
+			internal Enumerator(Root root)
 			{
 				notebookEnumerator = root.notebooks.GetEnumerator();
-				if(root.OpenSections != null)
-				{
-					openSectionsEnumerator = root.OpenSections.sections.GetEnumerator();
-					hasOpenSections = true;
-                }
+				if (root.OpenSections == null)
+					return;
+				openSectionsEnumerator = root.OpenSections.sections.GetEnumerator();
+				hasOpenSections = true;
 			}
+			///<inheritdoc/>
 			public IOneNoteItem Current { get; private set; }
 			readonly object IEnumerator.Current => Current;
+			///<inheritdoc/>
 			public bool MoveNext()
 			{
 				while (notebookEnumerator.MoveNext())
@@ -64,7 +74,9 @@ namespace LinqToOneNote
 				}
 				return false;
 			}
+			///<inheritdoc/>
 			public readonly void Reset() { }
+			///<inheritdoc/>
 			public readonly void Dispose() { }
 		}
 	}
