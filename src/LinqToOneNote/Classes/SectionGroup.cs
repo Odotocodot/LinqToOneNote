@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using LinqToOneNote.Abstractions;
 using LinqToOneNote.Internal;
 
@@ -15,6 +16,15 @@ namespace LinqToOneNote
 
         internal SectionGroup() => children = new ChildrenCollection(sections, sectionGroups);
 
+        /// <inheritdoc/>
+        public string Id => id;
+        /// <inheritdoc/>
+        public string Name => name;
+        /// <inheritdoc/>
+        public bool IsUnread => isUnread;
+        /// <inheritdoc/>
+        public DateTime LastModified => lastModified;
+        
         /// <summary>
         /// An array containing the characters that are not allowed in a <see cref="SectionGroup">section group</see> name.<br/>
         /// These are:&#009;<b>\ / * ? " | &lt; &gt; : % # &amp;</b>

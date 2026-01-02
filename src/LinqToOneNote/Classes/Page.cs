@@ -11,6 +11,15 @@ namespace LinqToOneNote
     public class Page : OneNoteItem, IOneNoteItem, IHasIsInRecycleBin, IDeletable
     {
         internal Page() { }
+        
+        /// <inheritdoc/>
+        public string Id => id;
+        /// <inheritdoc/>
+        public string Name => name;
+        /// <inheritdoc/>
+        public bool IsUnread => isUnread;
+        /// <inheritdoc/>
+        public DateTime LastModified => lastModified;
         /// <summary>
         /// The page level.
         /// </summary>

@@ -287,12 +287,12 @@ namespace LinqToOneNote
                         XDocument doc = XDocument.Parse(pageContentXml);
                         XElement xTitle = doc.Descendants(XName.Get("T", Constants.NamespaceUri)).First();
                         xTitle.Value = newName;
-                        page.Name = newName;
+                        page.name = newName;
                         app.UpdatePageContent(doc.ToString());
                         break;
                     default:
                         element.Attribute(Constants.Attributes.Name)!.SetValue(newName);
-                        ((OneNoteItem)item).Name = newName;
+                        ((OneNoteItem)item).name = newName;
                         break;
                 }
                 app.UpdateHierarchy(element.ToString(), xmlSchema);

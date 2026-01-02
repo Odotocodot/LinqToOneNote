@@ -127,16 +127,16 @@ namespace LinqToOneNote.Parsers
                 switch (attribute.Name.LocalName)
                 {
                     case Attributes.ID:
-                        item.Id = attribute.Value;
+                        item.id = attribute.Value;
                         break;
                     case Attributes.Name:
-                        item.Name = attribute.Value;
+                        item.name = attribute.Value;
                         break;
                     case Attributes.IsUnread:
-                        item.IsUnread = (bool)attribute;
+                        item.isUnread = (bool)attribute;
                         break;
                     case Attributes.LastModifiedTime:
-                        item.LastModified = (DateTime)attribute;
+                        item.lastModified = (DateTime)attribute;
                         break;
                     case Attributes.Path:
                         if (typeof(T) == typeof(Section))

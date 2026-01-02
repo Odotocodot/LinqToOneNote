@@ -17,7 +17,17 @@ namespace LinqToOneNote
         internal Root root;
 
         internal Notebook() => children = new ChildrenCollection(sections, sectionGroups);
-
+        
+        /// <inheritdoc/>
+        public string Id => id;
+        /// <summary>
+        /// The name of the notebook. This is the name of the folder in which the notebook contents are contained. 
+        /// </summary>
+        public string Name => name;
+        /// <inheritdoc/>
+        public bool IsUnread => isUnread;
+        /// <inheritdoc/>
+        public DateTime LastModified => lastModified;
         /// <summary>
         /// A collection containing the characters that are not allowed in a <see cref="Notebook">notebook</see> name.<br/>
         /// These are:&#009;<b>\ / * ? " | &lt; &gt; : % # .</b>
@@ -26,8 +36,8 @@ namespace LinqToOneNote
         public static IReadOnlyList<char> InvalidCharacters { get; } = Array.AsReadOnly(['\\', '/', '*', '?', '"', '|', '<', '>', ':', '%', '#', '.']);
 
         /// <summary>
-        /// The display name of the notebook. Differs from <see cref="IOneNoteItem.Name"/> as it may contain characters that are invalid for folder names. Furthermore,
-        /// <see cref="IOneNoteItem.Name"/> represents the folder name of the notebook on disk.
+        /// The display name of the notebook. Differs from <see cref="Notebook.Name"/> as it may contain characters that are invalid for folder names. Furthermore,
+        /// <see cref="Notebook.Name"/> represents the folder name of the notebook on disk.
         /// </summary>
         public string DisplayName { get; internal set; }
         /// <summary>

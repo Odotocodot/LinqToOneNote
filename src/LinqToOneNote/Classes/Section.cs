@@ -14,6 +14,15 @@ namespace LinqToOneNote
         internal ReadOnlyList<Page> pages = [];
         internal Section() { }
 
+        /// <inheritdoc/>
+        public string Id => id;
+        /// <inheritdoc/>
+        public string Name => name;
+        /// <inheritdoc/>
+        public bool IsUnread => isUnread;
+        /// <inheritdoc/>
+        public DateTime LastModified => lastModified;
+        
         /// <summary>
         /// An array containing the characters that are not allowed in a <see cref="Section">section</see> name.<br/>
         /// These are:&#009;<b>\ / * ? " | &lt; &gt; : % # &amp;</b>

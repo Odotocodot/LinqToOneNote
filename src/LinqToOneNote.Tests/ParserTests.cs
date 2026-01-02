@@ -43,13 +43,13 @@ namespace LinqToOneNote.Tests
 
 			var expectedNotebook = new Notebook
 			{
-				Name = "Its A Notebook",
-				Id = "{81B591F0-CB49-4F8C-BFB1-98DA213B93FC}{1}{B0}",
+				name = "Its A Notebook",
+				id = "{81B591F0-CB49-4F8C-BFB1-98DA213B93FC}{1}{B0}",
 				DisplayName = "It's A Notebook",
 				Path = @"C:\Users\User\Desktop\Its A Notebook",
-				LastModified = new DateTime(2023, 10, 04, 15, 15, 45),
+				lastModified = new DateTime(2023, 10, 04, 15, 15, 45),
 				Color = ColorTranslator.FromHtml("#EE9597"),
-				IsUnread = false
+				isUnread = false
 			};
 			notebook.Should().BeEquivalentTo(expectedNotebook, options => options.ExcludingMembersNamed(excludedMembers));
 		}
@@ -75,11 +75,11 @@ namespace LinqToOneNote.Tests
 
 			var expectedSectionGroup = new SectionGroup
 			{
-				Name = "Section Group 1",
-				Id = "{C55815E0-8F65-4790-8408-2E2C1EC74AB2}{1}{B0}",
+				name = "Section Group 1",
+				id = "{C55815E0-8F65-4790-8408-2E2C1EC74AB2}{1}{B0}",
 				Path = @"C:\Users\User\Documents\OneNote Notebooks\Test Notebook\Section Group 1",
-				LastModified = new DateTime(2023, 10, 04, 20, 48, 19),
-				IsUnread = false,
+				lastModified = new DateTime(2023, 10, 04, 20, 48, 19),
+				isUnread = false,
 				IsRecycleBin = false,
 			};
 			sectionGroup.Should().BeEquivalentTo(expectedSectionGroup, options => options.ExcludingMembersNamed(excludedMembers));
@@ -112,10 +112,10 @@ namespace LinqToOneNote.Tests
 			yield return new(root => root.Notebooks[3].Sections[3],
 			root => new Section
 			{
-				Name = "Locked Section",
-				Id = "{6BB816F6-D431-4430-B7A2-F9DEB7A28F67}{1}{B0}",
+				name = "Locked Section",
+				id = "{6BB816F6-D431-4430-B7A2-F9DEB7A28F67}{1}{B0}",
 				Path = @"C:\Users\User\Documents\OneNote Notebooks\Test Notebook\Locked Section.one",
-				LastModified = new DateTime(2023, 06, 17, 11, 00, 52),
+				lastModified = new DateTime(2023, 06, 17, 11, 00, 52),
 				Locked = true,
 				Encrypted = true,
 				Color = ColorTranslator.FromHtml("#BA7575"),
@@ -125,10 +125,10 @@ namespace LinqToOneNote.Tests
 			yield return new(root => root.OpenSections.Sections[1],
 			root => new Section
 			{
-				Name = "If a section is open in OneNote is it an OpenSection",
-				Id = "{5A75942A-9BA8-0C6B-01C5-E53DF7ED726F}{1}{B0}",
+				name = "If a section is open in OneNote is it an OpenSection",
+				id = "{5A75942A-9BA8-0C6B-01C5-E53DF7ED726F}{1}{B0}",
 				Path = @"C:\Users\User\Desktop\Another Folder\If a section is open in OneNote is it an OpenSection.one",
-				LastModified = new DateTime(2025, 11, 26, 17, 28, 35),
+				lastModified = new DateTime(2025, 11, 26, 17, 28, 35),
 				Color = ColorTranslator.FromHtml("#9BBBD2"),
 				IsInRecycleBin = false,
 				IsDeletedPages = false,
@@ -162,23 +162,23 @@ namespace LinqToOneNote.Tests
 			yield return new(root => root.Notebooks[3].SectionGroups[1].SectionGroups[0].SectionGroups[0].SectionGroups[0].Sections[0].Pages[0],
 			root => new Page
 			{
-				Name = "Very nested",
-				Id = "{748017F5-15E8-40D3-A1FF-2DCEF2D7A895}{1}{E19558058794535511298120172155500410846478691}",
-				LastModified = new DateTime(2023, 06, 06, 14, 24, 11),
+				name = "Very nested",
+				id = "{748017F5-15E8-40D3-A1FF-2DCEF2D7A895}{1}{E19558058794535511298120172155500410846478691}",
+				lastModified = new DateTime(2023, 06, 06, 14, 24, 11),
 				Created = new DateTime(2023, 06, 06, 14, 23, 56),
 				Level = 1,
-				IsUnread = false,
+				isUnread = false,
 				IsInRecycleBin = false,
 			});
 			yield return new(root => root.Notebooks[0].Sections[0].Pages[0],
 			root => new Page
 			{
-				Name = "Important Info",
-				Id = "{1B9CDD3C-6836-4DC6-9C44-0EDC06A9B8CB}{1}{E19481616267573963101920151005250203326127411}",
-				IsUnread = true,
+				name = "Important Info",
+				id = "{1B9CDD3C-6836-4DC6-9C44-0EDC06A9B8CB}{1}{E19481616267573963101920151005250203326127411}",
+				isUnread = true,
 				IsInRecycleBin = false,
 				Created = new DateTime(2022, 12, 01, 18, 10, 02),
-				LastModified = new DateTime(2022, 12, 01, 18, 10, 34),
+				lastModified = new DateTime(2022, 12, 01, 18, 10, 34),
 				Level = 1,
 			});
 		}
