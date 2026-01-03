@@ -1,0 +1,9 @@
+namespace LinqToOneNote.Parsers
+{
+    internal interface IXmlParser
+    {
+        Root ParseRoot(string xml);
+        IOneNoteItem Parse(string xml, IOneNoteItem parent);
+        void ParseExisting(string xml, IOneNoteItem item);
+    }
+}

@@ -1,26 +1,26 @@
 <Query Kind="Statements">
-  <NuGetReference>Odotocodot.OneNote.Linq</NuGetReference>
-  <Namespace>Odotocodot.OneNote.Linq</Namespace>
+  <NuGetReference>LinqToOneNote</NuGetReference>
+  <Namespace>LinqToOneNote</Namespace>
   <IncludeUncapsulator>false</IncludeUncapsulator>
 </Query>
 
-using Odotocodot.OneNote.Linq;
+using LinqToOneNote;
 
-var items = OneNoteApplication.GetNotebooks()
-    .Traverse(i => i.IsInRecycleBin()) // use an extension method to check if the item is in the recycle bin
-    .Where(i => i switch
-    {
-		// skip the special recycle bin section group
-        OneNoteSectionGroup sectionGroup when sectionGroup.IsRecycleBin => false,
-		// skip the special deleted pages section in a recycle bin
-        OneNoteSection section when section.IsDeletedPages => false, 
-        _ => true
-    })
-    .ToList();
+var items = OneNote.GetFullHierarchy()
+                   .Notebooks
+                   .Descendants(i => i.IsInRecycleBin()) // use an extension method to check if the item is in the recycle bin
+                   .Where(i => i switch
+                   {
+	                   // skip the special recycle bin section group
+	                   SectionGroup { IsRecycleBin: true } => false,
+	                   // skip the special deleted pages section in a recycle bin
+	                   Section { IsDeletedPages: true } => false, 
+	                   _ => true,
+                   })
+                   .ToArray();
 
-
-Console.WriteLine(items.Count);
+Console.WriteLine($"Number of items in recycle bins: {items.Length}");
 foreach (var item in items)
 {
-    Console.WriteLine(item.Name);
+	Console.WriteLine($"Name: {item.Name} | Parent Name: {item.Parent.Name}");
 }

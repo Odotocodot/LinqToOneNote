@@ -362,5 +362,6 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-# JetBrains
-.idea/
+# Tests
+src/LinqToOneNote.Tests/TempNotebook/OneNote_RecycleBin/
+

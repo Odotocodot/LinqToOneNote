@@ -1,0 +1,47 @@
+﻿using System;
+using System.Collections.Generic;
+using LinqToOneNote.Abstractions;
+using LinqToOneNote.Internal;
+
+namespace LinqToOneNote
+{
+    /// <summary>
+    /// Represents a page in OneNote.
+    /// </summary>
+    public class Page : OneNoteItem, IOneNoteItem, IHasIsInRecycleBin, IDeletable
+    {
+        internal Page() { }
+        
+        /// <inheritdoc/>
+        public string Id => id;
+        /// <inheritdoc/>
+        public string Name => name;
+        /// <inheritdoc/>
+        public bool IsUnread => isUnread;
+        /// <inheritdoc/>
+        public DateTime LastModified => lastModified;
+        /// <summary>
+        /// The page level.
+        /// </summary>
+        public int Level { get; internal set; }
+        /// <summary>
+        /// The time when the page was created.
+        /// </summary>
+        public DateTime Created { get; internal set; }
+        /// <summary>
+        /// Indicates whether the page is in the recycle bin.
+        /// </summary>
+        /// <seealso cref="SectionGroup.IsRecycleBin"/>
+        /// <seealso cref="Section.IsInRecycleBin"/>
+        /// <seealso cref="Section.IsDeletedPages"/>
+        public bool IsInRecycleBin { get; internal set; }
+
+        /// <summary>
+        /// The parent section of the page.
+        /// </summary>
+        public Section Parent { get; internal set; }
+
+        IOneNoteItem IOneNoteItem.Parent => Parent;
+        IReadOnlyList<IOneNoteItem> IOneNoteItem.Children { get; } = ReadOnlyList.Empty;
+    }
+}

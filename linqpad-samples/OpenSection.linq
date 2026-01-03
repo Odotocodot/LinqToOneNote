@@ -1,17 +1,17 @@
 <Query Kind="Statements">
-  <NuGetReference>Odotocodot.OneNote.Linq</NuGetReference>
-  <Namespace>Odotocodot.OneNote.Linq</Namespace>
+  <NuGetReference>LinqToOneNote</NuGetReference>
+  <Namespace>LinqToOneNote</Namespace>
   <IncludeUncapsulator>false</IncludeUncapsulator>
 </Query>
 
-using Odotocodot.OneNote.Linq;
+using LinqToOneNote;
 
-var page = OneNoteApplication.FindPages("This specific search").MaxBy(p => p.LastModified);
+var page = OneNote.FindPages("This specific search").MaxBy(p => p.LastModified);
 if(page == null)
 {
-	Console.WriteLine("No page found with that search, try changing it!");
+    Console.WriteLine("No page found with that search, try changing it!");
 }
 else
 {
-	OneNoteApplication.OpenInOneNote(page.Section);
+    OneNote.Open(page.Parent); //or page.Parent.Open()
 }
