@@ -6,9 +6,9 @@ First make sure you have a local installation of OneNote, such as [OneNote](http
 Create a console application, or open an existing one.
 
 #### Step 3
-Install the library from NuGet [here](https://www.nuget.org/packages/Odotocodot.OneNote.Linq/) or run the following command in your project directory:
+Install the library from NuGet [here](https://www.nuget.org/packages/LinqToOneNote/) or run the following command in your project directory:
 ```
-dotnet add package Odotocodot.OneNote.Linq
+dotnet add package LinqToOneNote
 ```
 
 #### Step 4
