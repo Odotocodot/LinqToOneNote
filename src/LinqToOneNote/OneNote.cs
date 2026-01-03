@@ -87,8 +87,11 @@ namespace LinqToOneNote
                             application = new Application();
                             return;
                         }
-                        catch (COMException) when (++attempts != limit) //&& ((uint)ex.HResult) == 0x800706BA) The RPC server is unavailable.
+                        catch (Exception ex) when (((uint)ex.HResult) is 0x800706BA or 0x800706BE && ++attempts != limit)
                         {
+                            // Retry on errors that can just happen:
+                            // The RPC server is unavailable. (0x800706BA)
+                            // The remote procedure call failed. (0x800706BE)
                             Thread.Sleep(125);
                         }
                     }
