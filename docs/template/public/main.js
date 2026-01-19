@@ -1,9 +1,9 @@
 export default {
     iconLinks: [
         {
-          icon: 'github',
-          href: 'https://github.com/Odotocodot/Linq2OneNote',
-          title: 'GitHub'
+            icon: 'github',
+            href: 'https://github.com/Odotocodot/LinqToOneNote',
+            title: 'GitHub'
         }
     ]
 }

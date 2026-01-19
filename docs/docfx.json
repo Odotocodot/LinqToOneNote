@@ -64,7 +64,7 @@
       "template"
     ],
     "sitemap": {
-      "baseUrl": "https://odotocodot.github.io/Linq2OneNote/",
+      "baseUrl": "https://odotocodot.github.io/LinqToOneNote/",
       "options": {
         "changefreq": "yearly",
         "priority": 0.8

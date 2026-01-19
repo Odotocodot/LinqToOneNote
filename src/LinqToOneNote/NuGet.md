@@ -3,8 +3,6 @@
 A helper library for dealing with the [OneNote Interop API](https://learn.microsoft.com/en-us/office/client-developer/onenote/application-interface-onenote).
 Originally made for [Flow.Launcher.Plugin.OneNote](https://github.com/Odotocodot/Flow.Launcher.Plugin.OneNote).
 
-[![LinqToOneNote](https://raw.githubusercontent.com/)](url) TODO 
-
 ```csharp
 //Search pages that have "hello there" in the title or content.
 var pages = OneNote.FindPages("hello there");
@@ -29,7 +27,7 @@ foreach(var item in items)
 }
 ```
 
-View the [documentation](https://odotocodot.github.io/Linq2OneNote/) for more information and examples or visit the the [API Reference](https://odotocodot.github.io/Linq2OneNote/api/LinqToOneNote.html) to see the full API.\
+View the [documentation](https://odotocodot.github.io/LinqToOneNote/) for more information and examples or visit the the [API Reference](https://odotocodot.github.io/LinqToOneNote/api/LinqToOneNote.html) to see the full API.\
 Most functions return an IEnumerable allowing for easy use with LINQ.
 
 ## Features
