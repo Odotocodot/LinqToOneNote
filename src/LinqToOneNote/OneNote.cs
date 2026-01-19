@@ -286,12 +286,8 @@ namespace LinqToOneNote
                         notebook.DisplayName = newName;
                         break;
                     case Page page:
-                        app.GetPageContent(item.Id, out string pageContentXml, PageInfo.piBasic, xmlSchema);
-                        XDocument doc = XDocument.Parse(pageContentXml);
-                        XElement xTitle = doc.Descendants(XName.Get("T", Constants.NamespaceUri)).First();
-                        xTitle.Value = newName;
+                        SetPageTitle(app, item.Id, newName);
                         page.name = newName;
-                        app.UpdatePageContent(doc.ToString());
                         break;
                     default:
                         element.Attribute(Constants.Attributes.Name)!.SetValue(newName);
@@ -319,12 +315,9 @@ namespace LinqToOneNote
             {
                 app.SyncHierarchy(section.Id);
                 app.CreateNewPage(section.Id, out string pageId, NewPageStyle.npsBlankPageWithTitle);
-                app.GetPageContent(pageId, out string pageContentXml, PageInfo.piBasic, xmlSchema);
 
-                XDocument doc = XDocument.Parse(pageContentXml);
-                XElement xTitle = doc.Descendants(XName.Get("T", Constants.NamespaceUri)).First();
-                xTitle.Value = name;
-                app.UpdatePageContent(doc.ToString());
+                SetPageTitle(app, pageId, name);
+
                 app.GetHierarchy(pageId, HierarchyScope.Self.ToInterop(), out var pageXml, xmlSchema);
                 var page = (Page)xmlParser.Parse(pageXml, section);
                 section.pages.Add(page);
@@ -344,6 +337,19 @@ namespace LinqToOneNote
                     application.NavigateTo(id, fNewWindow: true);
                     break;
             }
+        }
+
+        private static void SetPageTitle(Application application, string pageId, string name)
+        {
+            application.GetPageContent(pageId, out string pageContentXml, PageInfo.piBasic, xmlSchema);
+
+            XDocument doc = XDocument.Parse(pageContentXml);
+            XElement xTitle = doc.Descendants(XName.Get("T", Constants.NamespaceUri)).First();
+
+            xTitle.Parent.Attribute("style")?.Remove(); //remove the "Untitled" silver styling so it is not applied to the new title.
+            xTitle.ReplaceNodes(new XCData(name));
+
+            application.UpdatePageContent(doc.ToString());
         }
 
         /// <summary>
@@ -379,13 +385,8 @@ namespace LinqToOneNote
                 app.OpenHierarchy(path, null, out string sectionId, CreateFileType.cftNone);
                 app.SyncHierarchy(sectionId);
                 app.CreateNewPage(sectionId, out string pageId, NewPageStyle.npsBlankPageWithTitle);
-                app.GetPageContent(pageId, out string pageContentXml, PageInfo.piBasic, xmlSchema);
 
-                XDocument doc = XDocument.Parse(pageContentXml);
-                XElement xTitle = doc.Descendants(XName.Get("T", Constants.NamespaceUri)).First();
-                xTitle.Value = name;
-
-                app.UpdatePageContent(doc.ToString());
+                SetPageTitle(app, pageId, name);
                 UseOpenMode(app, openMode, pageId);
                 return pageId;
             });
