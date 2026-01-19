@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.1.0](https://github.com/Odotocodot/LinqToOneNote/compare/v2.0.0...v2.1.0) (2026-01-19)
+
+
+### Features
+
+* added `CreateQuickNote()` overloads which outputs a `Page` ([dc46076](https://github.com/Odotocodot/LinqToOneNote/commit/dc460769658a80bbb3eeb54dc5a3fa3742333efa))
+
+
+### Bug Fixes
+
+* fixed incorrect links in docs and readmes ([73d732b](https://github.com/Odotocodot/LinqToOneNote/commit/73d732b6fbd70b381315feff11ffdc3eac6295ff))
+* fixed incorrect styling when creating a new page with a title ([b826c7a](https://github.com/Odotocodot/LinqToOneNote/commit/b826c7ae2127ef85c7591e7900ccc6a156b081fd))
+
 ## [2.0.0](https://github.com/Odotocodot/Linq2OneNote/compare/v1.2.0...v2.0.0) (2026-01-03)
 
 ### ⚠ BREAKING CHANGES
