@@ -9,11 +9,12 @@
 * renamed:
   * namespace `Odotocodot.OneNote.Linq` to `LinqToOneNote`.
   * `OneNoteApplication` -> `OneNote`
-  * `Traverse` -> `Descendants`
-  * `GetPages` -> `GetAllPages`
+  * `GetNotebooks()` -> `GetFullHierarchy().Notebooks`
+  * `Traverse()` -> `Descendants()`
+  * `GetPages()` -> `GetAllPages()`
   * `Notebook.Nickname` -> `Notebook.DisplayName` to better illustrate what it represents.
-  * `GetUnfiledNotesSection` -> `GetDefaultNotesLocation` to better illustrate what the method does.
-  * `OpenInOneNote` to `Open`
+  * `GetUnfiledNotesSection()` -> `GetDefaultNotesLocation()` to better illustrate what the method does.
+  * `OpenInOneNote()` to `Open()`
   * `Page.Section` to `Page.Parent`
   * `OneNoteNotebook` -> `Notebook`
   * `OneNoteSectionGroup` -> `SectionGroup`
