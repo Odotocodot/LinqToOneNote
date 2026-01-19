@@ -286,12 +286,8 @@ namespace LinqToOneNote
                         notebook.DisplayName = newName;
                         break;
                     case Page page:
-                        app.GetPageContent(item.Id, out string pageContentXml, PageInfo.piBasic, xmlSchema);
-                        XDocument doc = XDocument.Parse(pageContentXml);
-                        XElement xTitle = doc.Descendants(XName.Get("T", Constants.NamespaceUri)).First();
-                        xTitle.Value = newName;
+                        SetPageTitle(app, item.Id, newName);
                         page.name = newName;
-                        app.UpdatePageContent(doc.ToString());
                         break;
                     default:
                         element.Attribute(Constants.Attributes.Name)!.SetValue(newName);
@@ -311,6 +307,8 @@ namespace LinqToOneNote
         /// <param name="name">The title of the page.</param>
         /// <param name="openMode">Specifies whether/how the newly created page should be opened.</param>
         /// <returns>The newly created <see cref="Page">page</see>.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if the parameter <paramref name="section"/> is <see langword="null"/></exception>
+        /// <exception cref="ArgumentException">Thrown if the <paramref name="section"/> is in a recycle bin</exception>
         public static Page CreatePage(Section section, string name = "", OpenMode openMode = OpenMode.None)
         {
             Throw.IfInvalidParent(section, $"Use {nameof(OneNote)}.{nameof(CreateQuickNote)} instead.");
@@ -319,12 +317,9 @@ namespace LinqToOneNote
             {
                 app.SyncHierarchy(section.Id);
                 app.CreateNewPage(section.Id, out string pageId, NewPageStyle.npsBlankPageWithTitle);
-                app.GetPageContent(pageId, out string pageContentXml, PageInfo.piBasic, xmlSchema);
 
-                XDocument doc = XDocument.Parse(pageContentXml);
-                XElement xTitle = doc.Descendants(XName.Get("T", Constants.NamespaceUri)).First();
-                xTitle.Value = name;
-                app.UpdatePageContent(doc.ToString());
+                SetPageTitle(app, pageId, name);
+
                 app.GetHierarchy(pageId, HierarchyScope.Self.ToInterop(), out var pageXml, xmlSchema);
                 var page = (Page)xmlParser.Parse(pageXml, section);
                 section.pages.Add(page);
@@ -346,6 +341,28 @@ namespace LinqToOneNote
             }
         }
 
+        private static void SetPageTitle(Application application, string pageId, string name)
+        {
+            application.GetPageContent(pageId, out string pageContentXml, PageInfo.piBasic, xmlSchema);
+
+            XDocument doc = XDocument.Parse(pageContentXml);
+            XElement xTitle = doc.Descendants(XName.Get("T", Constants.NamespaceUri)).First();
+
+            xTitle.Parent.Attribute("style")?.Remove(); //remove the "Untitled" silver styling so it is not applied to the new title.
+            xTitle.ReplaceNodes(new XCData(name));
+
+            application.UpdatePageContent(doc.ToString());
+        }
+
+        private static string InternalCreateQuickNote(Application application, NewPageStyle newPageStyle)
+        {
+            application.GetSpecialLocation(SpecialLocation.slUnfiledNotesSection, out string path);
+            application.OpenHierarchy(path, null, out string sectionId, CreateFileType.cftNone);
+            application.SyncHierarchy(sectionId);
+            application.CreateNewPage(sectionId, out string pageId, newPageStyle);
+            return pageId;
+        }
+
         /// <summary>
         /// Creates a quick note page located at the users quick/default notes location.
         /// </summary>
@@ -355,14 +372,27 @@ namespace LinqToOneNote
         {
             return Run(app =>
             {
-                app.GetSpecialLocation(SpecialLocation.slUnfiledNotesSection, out string path);
-                app.OpenHierarchy(path, null, out string sectionId, CreateFileType.cftNone);
-                app.SyncHierarchy(sectionId);
-                app.CreateNewPage(sectionId, out string pageId, NewPageStyle.npsDefault);
-
+                var pageId = InternalCreateQuickNote(app, NewPageStyle.npsDefault);
                 UseOpenMode(app, openMode, pageId);
                 return pageId;
             });
+        }
+
+        /// <summary>
+        /// Creates a quick note <see cref="Page"/> located at the users quick/default notes location and outputs its as the parameter <paramref name="page"/>.
+        /// </summary>
+        /// <param name="page">The newly created quick note page as a <see cref="Page"/> object.</param>
+        /// <param name="openMode"><inheritdoc cref="CreatePage(Section, string, OpenMode)" path="/param[@name='openMode']"/></param>
+        public static void CreateQuickNote(out Page page, OpenMode openMode = OpenMode.None)
+        {
+            var pageXml = Run(app =>
+            {
+                var pageId = InternalCreateQuickNote(app, NewPageStyle.npsDefault);
+                app.GetHierarchy(pageId, HierarchyScope.Self.ToInterop(), out var pageXml, xmlSchema);
+                UseOpenMode(app, openMode, pageId);
+                return pageXml;
+            });
+            page = (Page)xmlParser.Parse(pageXml, null);
         }
 
         /// <summary>
@@ -375,20 +405,32 @@ namespace LinqToOneNote
         {
             return Run(app =>
             {
-                app.GetSpecialLocation(SpecialLocation.slUnfiledNotesSection, out string path);
-                app.OpenHierarchy(path, null, out string sectionId, CreateFileType.cftNone);
-                app.SyncHierarchy(sectionId);
-                app.CreateNewPage(sectionId, out string pageId, NewPageStyle.npsBlankPageWithTitle);
-                app.GetPageContent(pageId, out string pageContentXml, PageInfo.piBasic, xmlSchema);
-
-                XDocument doc = XDocument.Parse(pageContentXml);
-                XElement xTitle = doc.Descendants(XName.Get("T", Constants.NamespaceUri)).First();
-                xTitle.Value = name;
-
-                app.UpdatePageContent(doc.ToString());
+                var pageId = InternalCreateQuickNote(app, NewPageStyle.npsBlankPageWithTitle);
+                SetPageTitle(app, pageId, name);
                 UseOpenMode(app, openMode, pageId);
                 return pageId;
             });
+        }
+
+
+        /// <summary>
+        /// Creates a quick note <see cref="Page"/> with the title specified by <paramref name="name"/>, located at the users quick/default notes
+        /// location and outputs its as the parameter <paramref name="page"/>.
+        /// </summary>
+        /// <param name="page">The newly created quick note page as a <see cref="Page"/> object.</param>
+        /// <param name="openMode"><inheritdoc cref="CreatePage(Section, string, OpenMode)" path="/param[@name='openMode']"/></param>
+        /// <param name="name"><inheritdoc cref="CreatePage(Section, string, OpenMode)" path="/param[@name='name']"/></param>
+        public static void CreateQuickNote(string name, out Page page, OpenMode openMode = OpenMode.None)
+        {
+            var pageXml = Run(app =>
+            {
+                var pageId = InternalCreateQuickNote(app, NewPageStyle.npsBlankPageWithTitle);
+                SetPageTitle(app, pageId, name);
+                app.GetHierarchy(pageId, HierarchyScope.Self.ToInterop(), out var pageXml, xmlSchema);
+                UseOpenMode(app, openMode, pageId);
+                return pageXml;
+            });
+            page = (Page)xmlParser.Parse(pageXml, null);
         }
 
         private static T CreateItem<T>(Application app, IOneNoteItem parent,

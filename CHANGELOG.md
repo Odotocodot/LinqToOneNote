@@ -9,11 +9,12 @@
 * renamed:
   * namespace `Odotocodot.OneNote.Linq` to `LinqToOneNote`.
   * `OneNoteApplication` -> `OneNote`
-  * `Traverse` -> `Descendants`
-  * `GetPages` -> `GetAllPages`
+  * `GetNotebooks()` -> `GetFullHierarchy().Notebooks`
+  * `Traverse()` -> `Descendants()`
+  * `GetPages()` -> `GetAllPages()`
   * `Notebook.Nickname` -> `Notebook.DisplayName` to better illustrate what it represents.
-  * `GetUnfiledNotesSection` -> `GetDefaultNotesLocation` to better illustrate what the method does.
-  * `OpenInOneNote` to `Open`
+  * `GetUnfiledNotesSection()` -> `GetDefaultNotesLocation()` to better illustrate what the method does.
+  * `OpenInOneNote()` to `Open()`
   * `Page.Section` to `Page.Parent`
   * `OneNoteNotebook` -> `Notebook`
   * `OneNoteSectionGroup` -> `SectionGroup`
@@ -24,7 +25,6 @@
 * removed `IOneNoteItem.Notebook` and `IOneNoteItem.RelativePath`
 * `CreatePage`, `CreateSection`, `CreateSectionGroup` and `CreateNotebook` now return their respective instance. Replaced the `open` parameter of type `bool` to become type `OpenMode`. `CreatePage` will now through if the `section` parameter is null.
 * combined `IsNotebookNameValid`, `IsSectionGroupNameValid`,`IsSectionNameValid` into `IsValidName<T>`. Moved `InvalidNotebookChars`, `InvalidSectionGroupChars` and `InvalidSectionChars` to their respecting class using `INameInvalidCharacters`
-
 * removed `UnfiledNotes` as they are actually the default notes section ([cbd745d](https://github.com/Odotocodot/Linq2OneNote/commit/cbd745d7f75d3ca5a2ac0685d662b3b35b199693))
 * removed `OneNote` from class names ([48bf76b](https://github.com/Odotocodot/Linq2OneNote/commit/48bf76b36e9b5d6028f0c94120c4bd486d437176))
 * removed obsolete code ([c15c26a](https://github.com/Odotocodot/Linq2OneNote/commit/c15c26a3347de3633aaacba90b8b954ea331e331))

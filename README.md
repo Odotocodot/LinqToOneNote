@@ -1,7 +1,7 @@
 <h1 align="center">
-    <img src="https://github.com/Odotocodot/Linq2OneNote/assets/48138990/4b6025ab-6aa7-4d5e-aac6-2328961daeb5" alt="logo" width=40 height=40>
+    <img src="https://github.com/Odotocodot/LinqToOneNote/assets/48138990/4b6025ab-6aa7-4d5e-aac6-2328961daeb5" alt="logo" width=40 height=40>
 LINQ to OneNote
-    <img src="https://github.com/Odotocodot/Linq2OneNote/assets/48138990/9f6b5f41-ed6a-4840-8766-fd5890c6bb7c" alt="logo mini" width=40 height=40>
+    <img src="https://github.com/Odotocodot/LinqToOneNote/assets/48138990/9f6b5f41-ed6a-4840-8766-fd5890c6bb7c" alt="logo mini" width=40 height=40>
 </h1>
 
 A helper library for dealing with the [OneNote Interop API](https://learn.microsoft.com/en-us/office/client-developer/onenote/application-interface-onenote).
@@ -32,12 +32,12 @@ dotnet add package LinqToOneNote
 
 ## Usage
 
-View the [documentation](https://odotocodot.github.io/Linq2OneNote/) for more information and examples or visit the the [API Reference](https://odotocodot.github.io/Linq2OneNote/api/LinqToOneNote.html) to see the full API.\
+View the [documentation](https://odotocodot.github.io/LinqToOneNote/) for more information and examples or visit the the [API Reference](https://odotocodot.github.io/LinqToOneNote/api/LinqToOneNote.html) to see the full API.\
 Most functions return an IEnumerable allowing for easy use with LINQ.
 
 ## Quick Start
 
-The main entry point of the library is the static class ``OneNote`` which has a collection of [methods](https://odotocodot.github.io/Linq2OneNote/api/LinqToOneNote.OneNote.html#methods) that interact with your OneNote installation.
+The main entry point of the library is the static class ``OneNote`` which has a collection of [methods](https://odotocodot.github.io/LinqToOneNote/api/LinqToOneNote.OneNote.html#methods) that interact with your OneNote installation.
 
 Below is quick example on using the library to search your OneNote pages.
 
