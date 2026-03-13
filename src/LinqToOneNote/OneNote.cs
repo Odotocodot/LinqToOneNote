@@ -349,7 +349,7 @@ namespace LinqToOneNote
             XElement xTitle = doc.Descendants(XName.Get("T", Constants.NamespaceUri)).First();
 
             xTitle.Parent.Attribute("style")?.Remove(); //remove the "Untitled" silver styling so it is not applied to the new title.
-            xTitle.ReplaceNodes(new XCData(name));
+            xTitle.ReplaceNodes(new XCData(name ?? string.Empty));
 
             application.UpdatePageContent(doc.ToString());
         }
