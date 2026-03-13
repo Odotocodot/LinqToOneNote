@@ -1,5 +1,14 @@
 # Changelog
 
+All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
+
+## [2.1.1](https://github.com/Odotocodot/LinqToOneNote/compare/v2.1.0...v2.1.1) (2026-03-13)
+
+
+### Bug Fixes
+
+* fixed null exception on creating a quick note ([7fd341a](https://github.com/Odotocodot/LinqToOneNote/commit/7fd341aa78b0b89e766203369715e006d7957e28))
+
 ## [2.1.0](https://github.com/Odotocodot/LinqToOneNote/compare/v2.0.0...v2.1.0) (2026-01-19)
 
 
